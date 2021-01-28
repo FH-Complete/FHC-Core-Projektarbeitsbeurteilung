@@ -1,0 +1,24 @@
+table {
+    width: 100%;
+}
+
+#beurteilungtbl ul {
+    list-style-type: square
+}
+
+.tableWidthHalf {
+    width: 50%;
+}
+
+.tableWidthFourty {
+    width: 40%;
+}
+
+.tableWidthTwenty {
+    width: 20%;
+}
+
+#technikumlogo {
+    width: 262px;
+    height: 140px;
+}
