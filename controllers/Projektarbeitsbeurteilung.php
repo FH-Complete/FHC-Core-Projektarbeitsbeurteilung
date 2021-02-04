@@ -38,9 +38,6 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 		$this->load->model('extensions/FHC-Core-Projektarbeitsbeurteilung/Projektarbeitsbeurteilung_model', 'ProjektarbeitsbeurteilungModel');
 		$this->load->model('education/Projektbetreuer_model', 'ProjektbetreuerModel');
 
-        //$this->load->library('PermissionLib');
-		//$this->load->library('AuthLib');
-
         // Load language phrases
         $this->loadPhrases(
             array(
@@ -51,10 +48,6 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 				'lehre'
             )
         );
-
-        //$this->_setAuthUID(); // sets property uid
-
-       // $this->setControllerId(); // sets the controller id
     }
 
     // -----------------------------------------------------------------------------------------------------------------
@@ -74,15 +67,9 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 		if (isset($authObj->person_id))
 		{
 			$betreuer_person_id = $authObj->person_id;
-			$student_uid = $this->input->get('uid');
-			$projektarbeit_id = $this->input->get('projektarbeit_id');
-
-			// if params not passed, check if retrieved by token
-			if (!isset($projektarbeit_id) && isset($authObj->projektarbeit_id))
-				$projektarbeit_id = $authObj->projektarbeit_id;
-
-			if (!isset($student_uid) && isset($authObj->uid))
-				$student_uid = $authObj->uid;
+			// params retrieved by token or get
+			$student_uid = isset($authObj->uid) ? $authObj->uid : $this->input->get('uid');
+			$projektarbeit_id = isset($authObj->projektarbeit_id) ? $authObj->projektarbeit_id : $this->input->get('projektarbeit_id');
 
 			if (!is_numeric($projektarbeit_id))
 				show_error('invalid Projektarbeitsbeurteilung');
@@ -158,7 +145,7 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 			elseif ($saveAndSend === 'false')
 				$saveAndSend = false;
 
-			$projektarbeit_id = $this->input->post('projektarbeit_id');
+			$projektarbeit_id = isset($authObj->projektarbeit_id) ? $authObj->projektarbeit_id : $this->input->post('projektarbeit_id');
 			$betreuerart = $this->input->post('betreuerart');
 			$bewertung = $this->input->post('bewertung');
 
@@ -350,7 +337,7 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 	}
 
 	/**
-	 * Prepares Abschlussprüfung for save in database, replaces '' with null, sets Freigabedatum
+	 * Prepares Beurteilungdata for save in database, replaces null strings, integer strings, bool strings
 	 * @param $data
 	 * @return array
 	 */
@@ -384,7 +371,6 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 					continue;
 
 				return error("$required_field " . $this->p->t('ui', 'fehlt'));
-
 			}
 
 			$valid = true;
