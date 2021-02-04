@@ -52,54 +52,45 @@ var Projektarbeitsbeurteilung = {
 
         var projektarbeit_id = $("#projektarbeit_id").val();
         var betreuerart = $("#betreuerart").val();
+        var authtoken = $("#authtoken").val();
 
-        //var checkFields = Pruefungsprotokoll.checkFields(data, freigebendata, $("#verfCheck").prop('checked'));
-        /*            if (checkFields.length > 0)
-					{
-						var errortext = '';
-						for (var i = 0; i < checkFields.length; i++)
-						{
-							var error = checkFields[i];
-							$.each(error, function(i, n)
-							{
-							   $("#"+i).closest('td').addClass('has-error');
-							   if (errortext !== '')
-								   errortext += '; ';
-							   errortext += n;
-							});
-						}
-
-						FHC_DialogLib.alertError(errortext);
-						return;
-					}*/
-
-        console.log(bewertung);
-
-        Projektarbeitsbeurteilung.saveProjektarbeitsbeurteilung(projektarbeit_id, betreuerart, bewertung, saveAndSend);
+        Projektarbeitsbeurteilung.saveProjektarbeitsbeurteilung(projektarbeit_id, betreuerart, bewertung, saveAndSend, authtoken);
     },
     // ajax calls
     // -----------------------------------------------------------------------------------------------------------------
-    saveProjektarbeitsbeurteilung: function(projektarbeit_id, betreuerart, bewertung, saveAndSend)
+    saveProjektarbeitsbeurteilung: function(projektarbeit_id, betreuerart, bewertung, saveAndSend, authtoken)
     {
+        var projektarbeitData = {
+            projektarbeit_id: projektarbeit_id,
+            betreuerart: betreuerart,
+            bewertung: bewertung,
+            saveAndSend: saveAndSend
+        }
+
+        if (authtoken !== 'null')
+            projektarbeitData.authtoken = authtoken;
+
         FHC_AjaxClient.ajaxCallPost(
             CALLED_PATH + '/saveProjektarbeitsbeurteilung',
-            {
-                projektarbeit_id: projektarbeit_id,
-                betreuerart: betreuerart,
-                bewertung: bewertung,
-                saveAndSend: saveAndSend
-            },
+            projektarbeitData,
             {
                 successCallback: function(data, textStatus, jqXHR) {
                     if (FHC_AjaxClient.hasData(data))
                     {
-                        console.log(data);
                         var dataresponse = FHC_AjaxClient.getData(data);
 
                         if (saveAndSend === true)
                         {// when saved and send, reload the form so it is read only
-                            $("#containerFluid").load(location.href + " #containerFluid");
-                            FHC_DialogLib.alertSuccess(FHC_PhrasesLib.t("projektarbeitsbeurteilung", "beurteilungGespeichertGesendet"));
+                            $.ajax({
+                                type: 'POST',
+                                url: $("#authtokenform").attr('action'),
+                                data: $("#authtokenform").serialize(),
+                                success: function(resp) {
+                                    var html = $(resp).find("#containerFluid").html();
+                                    $("#containerFluid").html(html);
+                                    FHC_DialogLib.alertSuccess(FHC_PhrasesLib.t("projektarbeitsbeurteilung", "beurteilungGespeichertGesendet"));
+                                }
+                            })
                         }
                         else
                             FHC_DialogLib.alertSuccess(FHC_PhrasesLib.t("projektarbeitsbeurteilung", "beurteilungGespeichert"));

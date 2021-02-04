@@ -56,8 +56,7 @@ $this->load->view(
 					</h3>
 				</div>
 			</div>
-			<input type="hidden" name="projektarbeit_id" id="projektarbeit_id" value="<?php echo $projektarbeit_id; ?>">
-			<input type="hidden" name="betreuerart" id="betreuerart" value="<?php echo $projektarbeitsbeurteilung->betreuerart; ?>">
+			<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/hiddenfields.php'); ?>
 			<form id="beurteilungform">
 			<div class="row">
 				<div class="col-lg-12">
@@ -244,12 +243,12 @@ $this->load->view(
 				<div class="col-lg-12">
 						<b><?php echo $this->p->t('lehre', 'note') ?></b>:
 						<?php if ($sent): ?>
-							<strong><?php echo $projektarbeit_bewertung->gesamtnote ?></strong>
+							<strong><?php echo isset($projektarbeitsbeurteilung->betreuernote) ? $projektarbeitsbeurteilung->betreuernote : '' ?></strong>
 						<?php else: ?>
-							<select name="gesamtnote">
+							<select name="betreuernote">
 								<option value="null">--&nbsp;<?php echo $this->p->t('projektarbeitsbeurteilung', 'bitteBeurteilen') ?>&nbsp;--</option>
 								<?php foreach ($notenArr as $notenwert => $phrasenname):
-									$selected = isset($projektarbeit_bewertung->gesamtnote) && $notenwert == $projektarbeit_bewertung->gesamtnote ? " selected" : ""?>
+									$selected = isset($projektarbeitsbeurteilung->betreuernote) && $notenwert == $projektarbeitsbeurteilung->betreuernote ? " selected" : ""?>
 									<option value="<?php echo $notenwert ?>"<?php echo $selected ?>><?php echo $notenwert.' '.$this->p->t('lehre', $phrasenname) ?></option>
 								<?php endforeach; ?>
 							</select>

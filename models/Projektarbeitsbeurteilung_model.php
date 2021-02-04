@@ -29,7 +29,7 @@ class Projektarbeitsbeurteilung_model extends DB_Model
 
 		$qry = "SELECT tbl_projektarbeitsbeurteilung.bewertung AS projektarbeit_bewertung, parbeit.titel AS projektarbeit_titel, parbeit.titel_english AS projektarbeit_titel_english, parbeit.projekttyp_kurzbz AS parbeit_typ,
        		studentpers.vorname AS vorname_student, studentpers.nachname AS nachname_student, studentpers.titelpre AS titelpre_student, studentpers.titelpost AS titelpost_student,
-       		tbl_student.matrikelnr AS personenkennzeichen_student, studentben.uid AS uid_student, betreuer.betreuerart_kurzbz AS betreuerart,
+       		tbl_student.matrikelnr AS personenkennzeichen_student, studentben.uid AS uid_student, betreuer.betreuerart_kurzbz AS betreuerart, betreuer.note AS betreuernote,
 			betreuerpers.vorname AS vorname_betreuer, betreuerpers.nachname AS nachname_betreuer, betreuerpers.titelpre AS titelpre_betreuer, betreuerpers.titelpost AS titelpost_betreuer,
        		tbl_projektarbeitsbeurteilung.abgeschicktamum, tbl_projektarbeitsbeurteilung.abgeschicktvon
 			FROM lehre.tbl_projektarbeit parbeit

@@ -8,10 +8,11 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 {
 	const CATEGORY_MAX_POINTS = 10;
 	const BETREUERART_ZWEITBEGUTACHTER = 'Zweitbegutachter';
+	const EXTERNER_BEURTEILERAME = 'externerBeurteiler';
 
     private $_uid;  // uid of the logged user
 	private $_requiredFields = array(
-			'gesamtnote' => 'grade',
+			'betreuernote' => 'grade',
 			'plagiatscheck_unauffaellig' => 'bool',
 			'bewertung_thema' => 'points',
 			'bewertung_loesungsansatz' => 'points',
@@ -32,21 +33,13 @@ class Projektarbeitsbeurteilung extends FHC_Controller
     public function __construct()
     {
 		parent::__construct();
-        // Set required permissions
-/*        parent::__construct(
-            array(
-                'index' => 'lehre/pruefungsbeurteilung:r',
-                'Protokoll' => 'lehre/pruefungsbeurteilung:r',
-                'saveProtokoll' => 'lehre/pruefungsbeurteilung:rw',
-            )
-        );*/
 
         // Load models
 		$this->load->model('extensions/FHC-Core-Projektarbeitsbeurteilung/Projektarbeitsbeurteilung_model', 'ProjektarbeitsbeurteilungModel');
+		$this->load->model('education/Projektbetreuer_model', 'ProjektbetreuerModel');
 
         //$this->load->library('PermissionLib');
 		//$this->load->library('AuthLib');
-        //;
 
         // Load language phrases
         $this->loadPhrases(
@@ -69,9 +62,6 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 	public function index()
 	{
 		$this->showProjektarbeitsbeurteilung();
-/*		$this->load->library('WidgetLib');
-
-		$this->load->view('lehre/pruefungsprotokollUebersicht.php', $data)*/;
 	}
 
 	/**
@@ -86,6 +76,13 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 			$betreuer_person_id = $authObj->person_id;
 			$student_uid = $this->input->get('uid');
 			$projektarbeit_id = $this->input->get('projektarbeit_id');
+
+			// if params not passed, check if retrieved by token
+			if (!isset($projektarbeit_id) && isset($authObj->projektarbeit_id))
+				$projektarbeit_id = $authObj->projektarbeit_id;
+
+			if (!isset($student_uid) && isset($authObj->uid))
+				$student_uid = $authObj->uid;
 
 			if (!is_numeric($projektarbeit_id))
 				show_error('invalid Projektarbeitsbeurteilung');
@@ -113,12 +110,10 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 					$projektarbeitsbeurteilung->bewertung_maxpunkte = $bewertung_punkte->maxpunkte;
 				}
 
-/*				print_r($projektarbeitsbeurteilung->projektarbeit_bewertung);
-				die();*/
-
 				$data = array(
 					'projektarbeit_id' => $projektarbeit_id,
 					'betreuer_person_id' => $betreuer_person_id,
+					'authtoken' => isset($authObj->authtoken) ? $authObj->authtoken : null,
 					'projektarbeitsbeurteilung' => $projektarbeitsbeurteilung,
 					'language' => $language
 				);
@@ -127,12 +122,19 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 			}
 			else
 			{
-				show_error('no Betreuer assigned for given Projektarbeit');
-				//var_dump($projektarbeitsbeurteilungResult);
+				show_error('Projektarbeit not found');
 			}
 		}
 		else
-			show_error('invalid authentication');
+		{
+			// not logged in - load token login form
+			$authtokenData = array(
+				'authtoken' => 	isset($authObj->authtoken) ? $authObj->authtoken : null
+			);
+
+			$this->load->view("extensions/FHC-Core-Projektarbeitsbeurteilung/tokenlogin.php", $authtokenData);
+		}
+
 	}
 
 	/**
@@ -140,17 +142,14 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 	 */
 	public function saveProjektarbeitsbeurteilung()
 	{
+		$result = null;
+
 		$abgeschicktamum = date('Y-m-d H:i:s');
 
 		$authObj = $this->_authenticate();
 
 		if (isset($authObj->person_id) && isset($authObj->username))
 		{
-			$this->load->model('education/Projektbetreuer_model', 'ProjektbetreuerModel');
-			$this->load->model('extensions/FHC-Core-Projektarbeitsbeurteilung/Projektarbeitsbeurteilung_model', 'ProjektarbeitsbeurteilungModel');
-
-			$result = null;
-
 			$betreuer_person_id = $authObj->person_id;
 
 			$saveAndSend = $this->input->post('saveAndSend');
@@ -162,11 +161,6 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 			$projektarbeit_id = $this->input->post('projektarbeit_id');
 			$betreuerart = $this->input->post('betreuerart');
 			$bewertung = $this->input->post('bewertung');
-
-/*			var_dump($saveAndSend);
-			var_dump($projektarbeit_id);
-			var_dump($betreuer_person_id);
-			var_dump($bewertung);*/
 
 			if (!is_numeric($projektarbeit_id))
 			{
@@ -186,11 +180,7 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 			}
 			else
 			{
-				//var_dump($bewertung);
 				$bewertung = $this->_prepareBeurteilungDataForSave($bewertung);
-
-/*				var_dump($saveAndSend);
-				die();*/
 
 				if ($betreuerart == self::BETREUERART_ZWEITBEGUTACHTER)
 				{
@@ -207,6 +197,8 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 					return;
 				}
 
+				$betreuernote = isset($bewertung['betreuernote']) ? $bewertung['betreuernote'] : null;
+				unset($bewertung['betreuernote']); // Grade is saved in Projektbeurteiler tbl, not Projektarbeitsbeurteilung
 				$bewertung['beurteilungsdatum'] = $abgeschicktamum;
 
 				$bewertungJson = json_encode($bewertung);
@@ -217,56 +209,84 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 				}
 				else
 				{
-					$projektarbeitsbeurteilungToSave = array(
-						'projektarbeit_id' => $projektarbeit_id,
-						'betreuer_person_id' => $betreuer_person_id,
-						'betreuerart_kurzbz' => $betreuerart,
-						'bewertung' => $bewertungJson
-					);
-
-					if ($saveAndSend === true)
-					{
-						$projektarbeitsbeurteilungToSave['abgeschicktvon'] = $authObj->username;
-						$projektarbeitsbeurteilungToSave['abgeschicktamum'] = $abgeschicktamum;
-					}
-
-					$projektarbeitsbeurteilungResult = $this->ProjektarbeitsbeurteilungModel->loadWhere(
+					$projektbetreuerResult = $this->ProjektbetreuerModel->loadWhere(
 						array(
 							'projektarbeit_id' => $projektarbeit_id,
-							'betreuer_person_id' => $betreuer_person_id,
+							'person_id' => $betreuer_person_id,
 							'betreuerart_kurzbz' => $betreuerart
 						)
 					);
 
-					if (isError($projektarbeitsbeurteilungResult))
-						$this->outputJsonError('Error when getting Beurteilung');
-					// update if existing Beurteilung
-					elseif (hasData($projektarbeitsbeurteilungResult))
+					if (hasData($projektbetreuerResult))
 					{
-						$projektarbeitsbeurteilung_id = getData($projektarbeitsbeurteilungResult)[0]->projektarbeitsbeurteilung_id;
+						$projektarbeitsbeurteilungToSave = array(
+							'projektarbeit_id' => $projektarbeit_id,
+							'betreuer_person_id' => $betreuer_person_id,
+							'betreuerart_kurzbz' => $betreuerart,
+							'bewertung' => $bewertungJson
+						);
 
-						$projektarbeitsbeurteilungToSave['updateamum'] = date('Y-m-d H:i:s', time());
+						if ($saveAndSend === true)
+						{
+							$projektarbeitsbeurteilungToSave['abgeschicktvon'] = $authObj->username;
+							$projektarbeitsbeurteilungToSave['abgeschicktamum'] = $abgeschicktamum;
+						}
 
-						$this->outputJsonSuccess($this->ProjektarbeitsbeurteilungModel->update($projektarbeitsbeurteilung_id, $projektarbeitsbeurteilungToSave));
-					}
-					else
-					{
-						// no existing Beurteilung -> insert if there is corresponding Projektbetreuer
-						$projektbetreuerResult = $this->ProjektbetreuerModel->loadWhere(
+						$projektarbeitsbeurteilungResult = $this->ProjektarbeitsbeurteilungModel->loadWhere(
 							array(
 								'projektarbeit_id' => $projektarbeit_id,
-								'person_id' => $betreuer_person_id,
+								'betreuer_person_id' => $betreuer_person_id,
 								'betreuerart_kurzbz' => $betreuerart
 							)
 						);
 
-						if (hasData($projektbetreuerResult))
+						if (isError($projektarbeitsbeurteilungResult))
+							$this->outputJsonError('Error when getting Beurteilung');
+						// update if existing Beurteilung
+						elseif (hasData($projektarbeitsbeurteilungResult))
 						{
+							$projektarbeitsbeurteilung_id = getData($projektarbeitsbeurteilungResult)[0]->projektarbeitsbeurteilung_id;
+
+							$projektarbeitsbeurteilungToSave['updateamum'] = date('Y-m-d H:i:s', time());
+
+							$result = $this->ProjektarbeitsbeurteilungModel->update($projektarbeitsbeurteilung_id, $projektarbeitsbeurteilungToSave);
+						}
+						else
+						{
+							// no existing Beurteilung -> insert if there is corresponding Projektbetreuer
 							$projektarbeitsbeurteilungToSave['insertvon'] = $authObj->username;
 
-							$this->outputJsonSuccess($this->ProjektarbeitsbeurteilungModel->insert($projektarbeitsbeurteilungToSave));
+							$result = $this->ProjektarbeitsbeurteilungModel->insert($projektarbeitsbeurteilungToSave);
+						}
+
+						if (isError($result))
+							$this->outputJsonError(getError($result));
+						else
+						{
+							// update grade in Projektbetreuer tbl
+							if (isset($betreuernote))
+							{
+								$noteUpdateResult = $this->ProjektbetreuerModel->update(
+									array(
+										'projektarbeit_id' => $projektarbeit_id,
+										'person_id' => $betreuer_person_id,
+										'betreuerart_kurzbz' => $betreuerart
+									),
+									array('note' => $betreuernote)
+								);
+
+								if (isError($noteUpdateResult))
+								{
+									$this->outputJsonError(getError($noteUpdateResult));
+									return;
+								}
+							}
+
+							$this->outputJsonSuccess(getData($result));
 						}
 					}
+					else
+						$this->outputJsonError('No Projektbetreuer found');
 				}
 			}
 		}
@@ -279,18 +299,43 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 
 	private function _authenticate()
 	{
+/*		$this->load->library('AuthLib', array(false));
+		$authObj = $this->authlib->getAuthObj();
+
+		$logged = isLogged();
+
+		var_dump($logged);
+		var_dump($authObj);
+		die();*/
+
 		$authData = null;
 
 		$token = $this->input->post('authtoken');
-		if (isset($token))
+		$projektarbeit_id = $this->input->get('projektarbeit_id');
+
+		if (!isset($projektarbeit_id)) // posted on save
+			$projektarbeit_id =  $this->input->post('projektarbeit_id');
+
+		if (!isEmptyString($token)) // if token passed, get projektarbeit from token
 		{
-			// TODO if token present, auth by token
+			$tokenResult = $this->ProjektbetreuerModel->getBetreuerByToken($token);
+			$authData = new stdClass();
+			$authData->authtoken = $token;
+
+			if (hasData($tokenResult))
+			{
+				$tokenData = getData($tokenResult)[0];
+
+				$authData->username = self::EXTERNER_BEURTEILERAME;
+				$authData->person_id = $tokenData->person_id;
+				$authData->projektarbeit_id = $tokenData->projektarbeit_id;
+				$authData->uid = $tokenData->student_uid;
+			}
 		}
-		else
+		elseif (isset($projektarbeit_id) && is_numeric($projektarbeit_id)) // when projektarbeit given - normal login, id cannot be derived from token
 		{
 			$this->load->library('AuthLib');
 			$authObj = $this->authlib->getAuthObj();
-			//var_dump($authObj);
 
 			// if already logged in (e.g. CIS)
 			if (isset($authObj->person_id) && isset($authObj->username))
@@ -328,17 +373,17 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 
 	private function _checkBewertung($bewertung, $saveAndSend = false)
 	{
-		$gesamtnote = isset ($bewertung['gesamtnote']) ? $bewertung['gesamtnote'] : null;
+		$betreuernote = isset ($bewertung['betreuernote']) ? $bewertung['betreuernote'] : null;
 
 		foreach ($this->_requiredFields as $required_field => $fieldtype)
 		{
 			if (!isset($bewertung[$required_field]) || (is_string($bewertung[$required_field]) && trim($bewertung[$required_field]) === ''))
 			{
 				// if only save and not send, null values are allowed. Begruedung is only necessary when grade is 5.
-				if ($saveAndSend == false || ($required_field == 'begruendung' && $gesamtnote != 5))
+				if ($saveAndSend == false || ($required_field == 'begruendung' && $betreuernote != 5))
 					continue;
 
-				return error("$required_field missing");
+				return error("$required_field " . $this->p->t('ui', 'fehlt'));
 
 			}
 
@@ -361,7 +406,7 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 			}
 
 			if (!$valid)
-				return error("$required_field invalid");
+				return error("$required_field" . $this->p->t('ui', 'ungueltig'));
 		}
 
 		return success('Bewertung check passed');

@@ -48,8 +48,7 @@ $this->load->view(
 					</h3>
 				</div>
 			</div>
-			<input type="hidden" name="projektarbeit_id" id="projektarbeit_id" value="<?php echo $projektarbeit_id; ?>">
-			<input type="hidden" name="betreuerart" id="betreuerart" value="<?php echo $projektarbeitsbeurteilung->betreuerart; ?>">
+			<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/hiddenfields.php'); ?>
 			<form id="beurteilungform">
 			<div class="row">
 				<div class="col-lg-12">
