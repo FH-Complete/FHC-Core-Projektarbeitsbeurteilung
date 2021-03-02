@@ -10,7 +10,6 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 	const BETREUERART_ZWEITBEGUTACHTER = 'Zweitbegutachter';
 	const EXTERNER_BEURTEILERAME = 'externerBeurteiler';
 
-    private $_uid;  // uid of the logged user
 	private $_requiredFields = array(
 			'betreuernote' => 'grade',
 			'plagiatscheck_unauffaellig' => 'bool',
@@ -77,6 +76,27 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 			if (isEmptyString($student_uid))
 				show_error('invalid student uid');
 
+			$zweitbetreuer_input_id = $this->input->get('zweitbetreuer_id');
+
+			// get person_id of Zweitbetreuer
+			$zweitbetreuerRes = $this->ProjektarbeitsbeurteilungModel->getZweitbegutachterFromErstbegutachter($projektarbeit_id, $betreuer_person_id, $student_uid);
+			$zweitbetreuer_person_id = null;
+
+			if (hasData($zweitbetreuerRes))
+			{
+				$zweitbetreuer_person_id = getData($zweitbetreuerRes)[0]->person_id;
+				if (isset($zweitbetreuer_input_id))
+				{
+					if ($zweitbetreuer_input_id === $zweitbetreuer_person_id)
+					{
+						// user person_id of Zweitbetreuer to display zweitbetreuer form
+						$betreuer_person_id = $zweitbetreuer_person_id;
+					}
+					else
+						show_error('Invalid Zweitbetreuer-Projektarbeit.');
+				}
+			}
+
 			$projektarbeitsbeurteilungResult = $this->ProjektarbeitsbeurteilungModel->getProjektarbeitsbeurteilung($projektarbeit_id, $betreuer_person_id, $student_uid);
 
 			if (hasData($projektarbeitsbeurteilungResult))
@@ -100,9 +120,11 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 				$data = array(
 					'projektarbeit_id' => $projektarbeit_id,
 					'betreuer_person_id' => $betreuer_person_id,
+					'student_uid' => $student_uid,
 					'authtoken' => isset($authObj->authtoken) ? $authObj->authtoken : null,
 					'projektarbeitsbeurteilung' => $projektarbeitsbeurteilung,
-					'language' => $language
+					'language' => $language,
+					'zweitbetreuer_person_id' => $zweitbetreuer_person_id
 				);
 
 				$this->load->view("extensions/FHC-Core-Projektarbeitsbeurteilung/$viewname.php", $data);
@@ -121,7 +143,6 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 
 			$this->load->view("extensions/FHC-Core-Projektarbeitsbeurteilung/tokenlogin.php", $authtokenData);
 		}
-
 	}
 
 	/**
@@ -250,7 +271,7 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 							$this->outputJsonError(getError($result));
 						else
 						{
-							// update grade in Projektbetreuer tbl
+							// update note in Projektbetreuer tbl
 							if (isset($betreuernote))
 							{
 								$noteUpdateResult = $this->ProjektbetreuerModel->update(
@@ -269,6 +290,10 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 								}
 							}
 
+							// send info mail to Erstbegutachter after Zweitbegutachter has finished assessment
+							if ($saveAndSend && $betreuerart === 'Zweitbegutachter')
+								$this->_sendInfoMailToErstbegutachter($projektarbeit_id, $betreuer_person_id);
+
 							$this->outputJsonSuccess(getData($result));
 						}
 					}
@@ -286,15 +311,6 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 
 	private function _authenticate()
 	{
-/*		$this->load->library('AuthLib', array(false));
-		$authObj = $this->authlib->getAuthObj();
-
-		$logged = isLogged();
-
-		var_dump($logged);
-		var_dump($authObj);
-		die();*/
-
 		$authData = null;
 
 		$token = $this->input->post('authtoken');
@@ -417,5 +433,49 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 		}
 
 		return $punkte;
+	}
+
+	/**
+	 * Sends sancho infomail to Erstbegutachter after Zweitbegutachter finished assessment.
+	 * @param $projektarbeit_id int
+	 * @param $zweitbetreuer_person_id int
+	 * @return object success or error
+	 */
+	private function _sendInfoMailToErstbegutachter($projektarbeit_id, $zweitbetreuer_person_id)
+	{
+		$this->load->model('person/Benutzer_model', 'BenutzerModel');
+
+		$erstbetreuerRes = $this->ProjektarbeitsbeurteilungModel->getErstbegutachterFromZweitbegutachter($projektarbeit_id, $zweitbetreuer_person_id);
+
+		if (!hasData($erstbetreuerRes))
+			return error("no Erstbetreuer found");
+
+		$erstbetreuerData = getData($erstbetreuerRes)[0];
+		$erstbegutachter_person_id = $erstbetreuerData->person_id;
+		$receiver_uid = $erstbetreuerData->uid;
+		$student_uid = $erstbetreuerData->student_uid;
+
+		$receiverMail = $receiver_uid.'@'.DOMAIN;
+
+		$this->load->helper('hlp_sancho_helper');
+
+		$mailcontent_data_arr = array(
+			'link' => site_url() . "/extensions/FHC-Core-Projektarbeitsbeurteilung/Projektarbeitsbeurteilung?projektarbeit_id=$projektarbeit_id&uid=$student_uid",
+			'anrede' => $erstbetreuerData->anrede,
+			'betreuer_voller_name' => $erstbetreuerData->fullname,
+			'student_voller_name' => $erstbetreuerData->student_fullname,
+			'geehrt' => "geehrte".($erstbetreuerData->anrede=="Herr"?"r":"")
+		);
+
+		sendSanchoMail(
+			'ParbeitsbeurteilungMoeglich',
+			$mailcontent_data_arr,
+			$receiverMail,
+			'Projektarbeitsbeurteilung möglich',
+			'sancho_header_min_bw.jpg',
+			'sancho_footer_min_bw.jpg'
+		);
+
+		return success($erstbegutachter_person_id);
 	}
 }

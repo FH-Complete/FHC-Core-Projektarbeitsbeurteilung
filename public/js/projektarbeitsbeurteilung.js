@@ -42,6 +42,7 @@ var Projektarbeitsbeurteilung = {
     },
     initSaveProjektarbeitsbeurteilung: function(saveAndSend)
     {
+        // get form data into object
         var bewertung = $('#beurteilungform').serializeArray().reduce(function(obj, item) {
             obj[item.name] = item.value;
             return obj;
@@ -77,8 +78,6 @@ var Projektarbeitsbeurteilung = {
                 successCallback: function(data, textStatus, jqXHR) {
                     if (FHC_AjaxClient.hasData(data))
                     {
-                        var dataresponse = FHC_AjaxClient.getData(data);
-
                         if (saveAndSend === true)
                         {// when saved and send, reload the form so it is read only
                             $.ajax({
@@ -102,8 +101,7 @@ var Projektarbeitsbeurteilung = {
                 },
                 errorCallback: function() {
                     FHC_DialogLib.alertError(FHC_PhrasesLib.t("projektarbeitsbeurteilung", "beurteilungFehler"));
-                },
-                veilTimeout: 0
+                }
             }
         );
     }

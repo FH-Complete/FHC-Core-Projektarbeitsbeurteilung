@@ -235,25 +235,30 @@ $this->load->view(
 				<div class="row">
 					<div class="col-lg-12">
 						<?php echo $this->p->t('projektarbeitsbeurteilung', 'gutachtenZweitBegutachtung') ?>
+						<?php if (isset($zweitbetreuer_person_id)): ?>
+							<br />
+							<a href="<?php echo site_url() . '/extensions/FHC-Core-Projektarbeitsbeurteilung/Projektarbeitsbeurteilung?projektarbeit_id=' . $projektarbeit_id . '&uid=' . $student_uid . '&zweitbetreuer_id=' . $zweitbetreuer_person_id ?>" target="_blank">
+								<i class="fa fa-external-link"></i>&nbsp;<?php echo $this->p->t('projektarbeitsbeurteilung', 'zurZweitbegutachterBewertung') ?>
+							</a>
+						<?php endif; ?>
 					</div>
 				</div>
 				<br />
 			<?php endif; ?>
 			<div class="row">
 				<div class="col-lg-12">
-						<b><?php echo $this->p->t('lehre', 'note') ?></b>:
-						<?php if ($sent): ?>
-							<strong><?php echo isset($projektarbeitsbeurteilung->betreuernote) ? $projektarbeitsbeurteilung->betreuernote : '' ?></strong>
-						<?php else: ?>
-							<select name="betreuernote">
-								<option value="null">--&nbsp;<?php echo $this->p->t('projektarbeitsbeurteilung', 'bitteBeurteilen') ?>&nbsp;--</option>
-								<?php foreach ($notenArr as $notenwert => $phrasenname):
-									$selected = isset($projektarbeitsbeurteilung->betreuernote) && $notenwert == $projektarbeitsbeurteilung->betreuernote ? " selected" : ""?>
-									<option value="<?php echo $notenwert ?>"<?php echo $selected ?>><?php echo $notenwert.' '.$this->p->t('lehre', $phrasenname) ?></option>
-								<?php endforeach; ?>
-							</select>
-						<?php endif; ?>
-					</strong>
+					<b><?php echo $this->p->t('lehre', 'note') ?></b>:
+					<?php if ($sent): ?>
+						<strong><?php echo isset($projektarbeitsbeurteilung->betreuernote) ? $projektarbeitsbeurteilung->betreuernote : '' ?></strong>
+					<?php else: ?>
+						<select name="betreuernote">
+							<option value="null">--&nbsp;<?php echo $this->p->t('projektarbeitsbeurteilung', 'bitteBeurteilen') ?>&nbsp;--</option>
+							<?php foreach ($notenArr as $notenwert => $phrasenname):
+								$selected = isset($projektarbeitsbeurteilung->betreuernote) && $notenwert == $projektarbeitsbeurteilung->betreuernote ? " selected" : ""?>
+								<option value="<?php echo $notenwert ?>"<?php echo $selected ?>><?php echo $notenwert.' '.$this->p->t('lehre', $phrasenname) ?></option>
+							<?php endforeach; ?>
+						</select>
+					<?php endif; ?>
 				</div>
 			</div>
 			<br />
