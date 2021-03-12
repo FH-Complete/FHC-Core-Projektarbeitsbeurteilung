@@ -229,7 +229,7 @@ $this->load->view(
 				</div>
 			</div>
 			<br />
-				<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/notenschluessel.php', array('notenArr' => $notenArr)); ?>
+				<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/notenschluessel.php', array('notenArr' => $notenArr, 'arbeittypName' => $arbeittypName)); ?>
 			<br />
 			<?php if ($paarbeittyp === 'm'): ?>
 				<div class="row">

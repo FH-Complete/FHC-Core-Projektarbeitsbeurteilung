@@ -21,7 +21,10 @@
 			</tr>
 			<tr>
 				<td colspan="5">
-					<?php echo $this->p->t('projektarbeitsbeurteilung', 'notenschluesselHinweis') ?>
+					<?php
+						$notenschluesselHinweis = $this->p->t('projektarbeitsbeurteilung', 'notenschluesselHinweis');
+						echo sprintf($notenschluesselHinweis, $arbeittypName);
+					?>
 				</td>
 			</tr>
 		</table>
