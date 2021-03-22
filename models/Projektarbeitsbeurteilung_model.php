@@ -137,6 +137,7 @@ class Projektarbeitsbeurteilung_model extends DB_Model
 
 	/**
 	 * Gets Zweitbegutachter of a Projektarbeit with a certain Erstbegutachter.
+	 * Gets only Zweitbegutachter if he already sent his assessment.
 	 * @param int $projektarbeit_id
 	 * @param int $erstbetreuer_person_id
 	 * @param string $student_uid

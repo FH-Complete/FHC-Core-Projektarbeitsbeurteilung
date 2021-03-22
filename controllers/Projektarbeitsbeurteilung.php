@@ -353,7 +353,7 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 	}
 
 	/**
-	 * Prepares Beurteilungdata for save in database, replaces null strings, integer strings, bool strings
+	 * Prepares Beurteilungdata for save in database, replaces null strings, integer strings, bool strings.
 	 * @param $data
 	 * @return array
 	 */
@@ -386,7 +386,7 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 				if ($saveAndSend == false || ($required_field == 'begruendung' && $betreuernote != 5))
 					continue;
 
-				return error("$required_field " . $this->p->t('ui', 'fehlt'));
+				return error(ucfirst($required_field) . ' ' . $this->p->t('ui', 'fehlt'));
 			}
 
 			$valid = true;

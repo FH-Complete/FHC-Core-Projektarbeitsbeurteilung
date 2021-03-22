@@ -4,19 +4,19 @@
 		<table class="table-condensed table-bordered table-responsive">
 			<tr>
 				<td>
-					<50%&nbsp;<b><?php echo $this->p->t('lehre', $notenArr['5']) ?></b>
+					<50%&nbsp;<b><?php echo $this->p->t('lehre', 'nichtGenuegend') ?></b>
 				</td>
 				<td>
-					>=50% <?php echo $this->p->t('global', 'und') ?> <63%&nbsp;<b><?php echo $this->p->t('lehre', $notenArr['4']) ?></b>
+					>=50% <?php echo $this->p->t('global', 'und') ?> <63%&nbsp;<b><?php echo $this->p->t('lehre', 'genuegend') ?></b>
 				</td>
 				<td>
-					>=63% <?php echo $this->p->t('global', 'und') ?> <75%&nbsp;<b><?php echo $this->p->t('lehre', $notenArr['3']) ?></b>
+					>=63% <?php echo $this->p->t('global', 'und') ?> <75%&nbsp;<b><?php echo $this->p->t('lehre', 'befriedigend') ?></b>
 				</td>
 				<td>
-					>=75% <?php echo $this->p->t('global', 'und') ?> <88%&nbsp;<b><?php echo $this->p->t('lehre', $notenArr['2']) ?></b>
+					>=75% <?php echo $this->p->t('global', 'und') ?> <88%&nbsp;<b><?php echo $this->p->t('lehre', 'gut') ?></b>
 				</td>
 				<td>
-					>=88%&nbsp;<b><?php echo $this->p->t('lehre', $notenArr['1']) ?></b>
+					>=88%&nbsp;<b><?php echo $this->p->t('lehre', 'sehrGut') ?></b>
 				</td>
 			</tr>
 			<tr>

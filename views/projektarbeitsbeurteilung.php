@@ -11,7 +11,8 @@ $this->load->view(
 		'ajaxlib' => true,
 		'sbadmintemplate' => true,
 		'phrases' => array(
-			'projektarbeitsbeurteilung'
+			'projektarbeitsbeurteilung',
+			'lehre'
 		),
 		'customCSSs' => array(
 			'public/css/sbadmin2/admintemplate_contentonly.css',
@@ -37,13 +38,6 @@ $this->load->view(
 				$titel = isset($projektarbeitsbeurteilung->projektarbeit_titel) ? $projektarbeitsbeurteilung->projektarbeit_titel : $projektarbeitsbeurteilung->projektarbeit_titel_english;
 				$projektarbeit_bewertung = $projektarbeitsbeurteilung->projektarbeit_bewertung;
 				$plagiatscheck_unauffaellig = isset($projektarbeit_bewertung->plagiatscheck_unauffaellig) && $projektarbeit_bewertung->plagiatscheck_unauffaellig === true ? $projektarbeit_bewertung->plagiatscheck_unauffaellig : false;
-				$notenArr = array( // notenwert => phrasename
-					'1' => 'sehrGut',
-					'2' => 'gut',
-					'3' => 'befriedigend',
-					'4' => 'genuegend',
-					'5' => 'nichtGenuegend'
-				);
 				?>
 			<br />
 			<br />
@@ -229,17 +223,19 @@ $this->load->view(
 				</div>
 			</div>
 			<br />
-				<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/notenschluessel.php', array('notenArr' => $notenArr, 'arbeittypName' => $arbeittypName)); ?>
+				<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/notenschluessel.php', array('arbeittypName' => $arbeittypName)); ?>
 			<br />
 			<?php if ($paarbeittyp === 'm'): ?>
 				<div class="row">
 					<div class="col-lg-12">
-						<?php echo $this->p->t('projektarbeitsbeurteilung', 'gutachtenZweitBegutachtung') ?>
 						<?php if (isset($zweitbetreuer_person_id)): ?>
+							<?php echo $this->p->t('projektarbeitsbeurteilung', 'gutachtenZweitBegutachtung') ?>
 							<br />
 							<a href="<?php echo site_url() . '/extensions/FHC-Core-Projektarbeitsbeurteilung/Projektarbeitsbeurteilung?projektarbeit_id=' . $projektarbeit_id . '&uid=' . $student_uid . '&zweitbetreuer_id=' . $zweitbetreuer_person_id ?>" target="_blank">
 								<i class="fa fa-external-link"></i>&nbsp;<?php echo $this->p->t('projektarbeitsbeurteilung', 'zurZweitbegutachterBewertung') ?>
 							</a>
+						<?php else: ?>
+							<span class="text-warning"><?php echo $this->p->t('projektarbeitsbeurteilung', 'zweitbegutachterFehltWarnung') ?></span>
 						<?php endif; ?>
 					</div>
 				</div>
@@ -248,17 +244,7 @@ $this->load->view(
 			<div class="row">
 				<div class="col-lg-12">
 					<b><?php echo $this->p->t('lehre', 'note') ?></b>:
-					<?php if ($sent): ?>
-						<strong><?php echo isset($projektarbeitsbeurteilung->betreuernote) ? $projektarbeitsbeurteilung->betreuernote : '' ?></strong>
-					<?php else: ?>
-						<select name="betreuernote">
-							<option value="null">--&nbsp;<?php echo $this->p->t('projektarbeitsbeurteilung', 'bitteBeurteilen') ?>&nbsp;--</option>
-							<?php foreach ($notenArr as $notenwert => $phrasenname):
-								$selected = isset($projektarbeitsbeurteilung->betreuernote) && $notenwert == $projektarbeitsbeurteilung->betreuernote ? " selected" : ""?>
-								<option value="<?php echo $notenwert ?>"<?php echo $selected ?>><?php echo $notenwert.' '.$this->p->t('lehre', $phrasenname) ?></option>
-							<?php endforeach; ?>
-						</select>
-					<?php endif; ?>
+						<h4 id="betreuernote"></h4>
 				</div>
 			</div>
 			<br />
