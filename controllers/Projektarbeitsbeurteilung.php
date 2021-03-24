@@ -272,9 +272,9 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 							$this->outputJsonError(getError($result));
 						else
 						{
-							// update note in Projektbetreuer tbl
 							if (isset($betreuernote))
 							{
+								// update note in Projektbetreuer tbl
 								$noteUpdateResult = $this->ProjektbetreuerModel->update(
 									array(
 										'projektarbeit_id' => $projektarbeit_id,
@@ -288,6 +288,23 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 								{
 									$this->outputJsonError(getError($noteUpdateResult));
 									return;
+								}
+
+								if ($saveAndSend === true)
+								{
+									$this->load->model('education/Projektarbeit_model', 'ProjektarbeitModel');
+
+									// update note in Projektarbbeit tbl (final Note)
+									$finalNoteUpdateResult = $this->ProjektarbeitModel->update(
+										array('projektarbeit_id' => $projektarbeit_id),
+										array('note' => $betreuernote)
+									);
+
+									if (isError($finalNoteUpdateResult))
+									{
+										$this->outputJsonError(getError($finalNoteUpdateResult));
+										return;
+									}
 								}
 							}
 

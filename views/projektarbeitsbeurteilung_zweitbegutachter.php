@@ -32,7 +32,7 @@ $this->load->view(
             else:
             	$sent = isset($projektarbeitsbeurteilung->abgeschicktamum);
             	$paarbeittyp = $projektarbeitsbeurteilung->parbeit_typ === 'Bachelor' ? 'b' : 'm';
-            	$arbeittypName = $paarbeittyp === 'b' ? $this->p->t('abschlusspruefung', 'arbeitBachelor') : $this->p->t('abschlusspruefung', 'arbeitMaster');
+            	$arbeittypName = $paarbeittyp === 'b' ? $this->p->t('projektarbeitsbeurteilung', 'arbeitBachelor') : $this->p->t('abschlusspruefung', 'arbeitMaster');
 
 				$titel = isset($projektarbeitsbeurteilung->projektarbeit_titel) ? $projektarbeitsbeurteilung->projektarbeit_titel : $projektarbeitsbeurteilung->projektarbeit_titel_english;
 				$projektarbeit_bewertung = $projektarbeitsbeurteilung->projektarbeit_bewertung;

@@ -33,7 +33,7 @@ $this->load->view(
             else:
             	$sent = isset($projektarbeitsbeurteilung->abgeschicktamum);
             	$paarbeittyp = $projektarbeitsbeurteilung->parbeit_typ === 'Bachelor' ? 'b' : 'm';
-            	$arbeittypName = $paarbeittyp === 'b' ? $this->p->t('abschlusspruefung', 'arbeitBachelor') : $this->p->t('abschlusspruefung', 'arbeitMaster');
+            	$arbeittypName = $paarbeittyp === 'b' ? $this->p->t('projektarbeitsbeurteilung', 'arbeitBachelor') : $this->p->t('abschlusspruefung', 'arbeitMaster');
 
 				$titel = isset($projektarbeitsbeurteilung->projektarbeit_titel) ? $projektarbeitsbeurteilung->projektarbeit_titel : $projektarbeitsbeurteilung->projektarbeit_titel_english;
 				$projektarbeit_bewertung = $projektarbeitsbeurteilung->projektarbeit_bewertung;
@@ -45,7 +45,7 @@ $this->load->view(
 			<div class="row">
 				<div class="col-lg-12">
 					<h3 class="page-header">
-						<?php echo $this->p->t('projektarbeitsbeurteilung', 'beurteilung') ?>&nbsp;
+						<?php echo $this->p->t('projektarbeitsbeurteilung', 'beurteilung') ?>
 						<?php echo $arbeittypName . ($paarbeittyp === 'm' ? '&nbsp' . $this->p->t('projektarbeitsbeurteilung', 'erstBegutachter') : '') ?>
 					</h3>
 				</div>
@@ -56,7 +56,7 @@ $this->load->view(
 				<div class="col-lg-12">
 					<table class="table-condensed table-bordered table-responsive">
 						<tr>
-							<td><b><?php echo ucfirst($this->p->t('global', 'titel')) ?></b></td>
+							<td><b><?php echo ucfirst($this->p->t('global', 'titel')) . ' ' . $arbeittypName ?></b></td>
 							<td colspan="3"><?php echo $titel ?></td>
 						</tr>
 						<tr>
@@ -102,7 +102,8 @@ $this->load->view(
 									</b>
 								</td>
 								<td>
-									<?php echo $this->p->t('projektarbeitsbeurteilung', 'themaText') ?>
+									<?php echo $paarbeittyp === 'm' ? $this->p->t('projektarbeitsbeurteilung', 'themaTextMaster')
+										: $this->p->t('projektarbeitsbeurteilung', 'themaText') ?>
 								</td>
 									<?php //projektarbeit_bewertung needs to be passed only first time
 										$this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/beurteilungspunkte.php',
@@ -137,7 +138,8 @@ $this->load->view(
 									</b>
 								</td>
 								<td>
-									<?php echo $paarbeittyp === 'm' ? $this->p->t('projektarbeitsbeurteilung', 'ereignisseDiskussionTextMaster') : $this->p->t('projektarbeitsbeurteilung', 'ereignisseDiskussionText') ?>
+									<?php echo $paarbeittyp === 'm' ? $this->p->t('projektarbeitsbeurteilung', 'ereignisseDiskussionTextMaster')
+										: $this->p->t('projektarbeitsbeurteilung', 'ereignisseDiskussionText') ?>
 								</td>
 									<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/beurteilungspunkte.php', array('name' => 'ereignissediskussion')); ?>
 							</tr>
@@ -211,7 +213,7 @@ $this->load->view(
 								<td colspan="2" class="text-right">
 									<b><?php echo $this->p->t('projektarbeitsbeurteilung', 'gesamtpunkte') ?></b>
 								</td>
-								<td>
+								<td class="text-center">
 									<b>
 									<span id="gesamtpunkte">
 										<?php echo isset($projektarbeitsbeurteilung->bewertung_gesamtpunkte) && is_numeric($projektarbeitsbeurteilung->bewertung_gesamtpunkte) ? $projektarbeitsbeurteilung->bewertung_gesamtpunkte : 0 ?></span><?php echo isset($projektarbeitsbeurteilung->bewertung_maxpunkte) && is_numeric($projektarbeitsbeurteilung->bewertung_maxpunkte) ? '/' . $projektarbeitsbeurteilung->bewertung_maxpunkte : '' ?>

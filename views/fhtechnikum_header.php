@@ -13,11 +13,11 @@
 	<div class="col-lg-12">
 		<table class="table-condensed table-bordered table-responsive">
 			<tr>
-				<td><b><?php echo ucfirst($this->p->t('lehre', 'studiengang')) ?></b></td>
+				<td><b><?php echo ucfirst($this->p->t('projektarbeitsbeurteilung', 'studiengang')) ?></b></td>
 				<td><?php echo $studiengang ?></td>
 			</tr>
 			<tr>
-				<td><b><?php echo ucfirst($this->p->t('lehre', 'organisationsform')) ?></b></td>
+				<td><b><?php echo ucfirst($this->p->t('projektarbeitsbeurteilung', 'organisationsform')) ?></b></td>
 				<td><?php echo $orgform_bezeichnung . ' (' . $projektarbeitsbeurteilung->orgform_kurzbz . ')' ?></td>
 			</tr>
 		</table>
