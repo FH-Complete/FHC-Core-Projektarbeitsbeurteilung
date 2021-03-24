@@ -7,8 +7,9 @@ if (! defined('BASEPATH')) exit('No direct script access allowed');
 class Projektarbeitsbeurteilung extends FHC_Controller
 {
 	const CATEGORY_MAX_POINTS = 10;
+	const BETREUERART_ERSTBEGUTACHTER = 'Erstbegutachter';
 	const BETREUERART_ZWEITBEGUTACHTER = 'Zweitbegutachter';
-	const EXTERNER_BEURTEILERAME = 'externerBeurteiler';
+	const EXTERNER_BEURTEILER_NAME = 'externerBeurteiler';
 
 	private $_requiredFields = array(
 			'betreuernote' => 'grade',
@@ -290,9 +291,15 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 								}
 							}
 
-							// send info mail to Erstbegutachter after Zweitbegutachter has finished assessment
-							if ($saveAndSend && $betreuerart === 'Zweitbegutachter')
-								$this->_sendInfoMailToErstbegutachter($projektarbeit_id, $betreuer_person_id);
+							if ($saveAndSend)
+							{
+								// send info mail to Erstbegutachter after Zweitbegutachter has finished assessment
+								if ($betreuerart === self::BETREUERART_ZWEITBEGUTACHTER)
+									$this->_sendInfoMailToErstbegutachter($projektarbeit_id, $betreuer_person_id);
+								// send info mail to Studiengang after Erstbegutachter has finished assessment
+								elseif ($betreuerart === self::BETREUERART_ERSTBEGUTACHTER)
+									$this->_sendInfoMailToStudiengang($projektarbeit_id, $betreuer_person_id);
+							}
 
 							$this->outputJsonSuccess(getData($result));
 						}
@@ -309,6 +316,10 @@ class Projektarbeitsbeurteilung extends FHC_Controller
     // -----------------------------------------------------------------------------------------------------------------
     // Private methods
 
+	/**
+	 * Performs authentification, either normally or via authtoken.
+	 * @return object|null object with authentification data or null on authentification failure
+	 */
 	private function _authenticate()
 	{
 		$authData = null;
@@ -329,13 +340,14 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 			{
 				$tokenData = getData($tokenResult)[0];
 
-				$authData->username = self::EXTERNER_BEURTEILERAME;
+				$authData->username = self::EXTERNER_BEURTEILER_NAME;
 				$authData->person_id = $tokenData->person_id;
 				$authData->projektarbeit_id = $tokenData->projektarbeit_id;
 				$authData->uid = $tokenData->student_uid;
 			}
 		}
-		elseif (isset($projektarbeit_id) && is_numeric($projektarbeit_id)) // when projektarbeit given - normal login, id cannot be derived from token
+		// when projektarbeit given - normal login
+		elseif (isset($projektarbeit_id) && is_numeric($projektarbeit_id))
 		{
 			$this->load->library('AuthLib');
 			$authObj = $this->authlib->getAuthObj();
@@ -477,5 +489,55 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 		);
 
 		return success($erstbegutachter_person_id);
+	}
+
+	/**
+	 * Sends sancho infomail to Erstbegutachter after Zweitbegutachter finished assessment.
+	 * @param $projektarbeit_id int
+	 * @param $zweitbetreuer_person_id int
+	 * @return object success or error
+	 */
+	private function _sendInfoMailToStudiengang($projektarbeit_id, $betreuer_person_id)
+	{
+		$this->load->model('organisation/Studiengang_model', 'StudiengangModel');
+
+		$projektarbeitsbeurteilungres = $this->ProjektarbeitsbeurteilungModel->getProjektarbeitsbeurteilung($projektarbeit_id, $betreuer_person_id);
+
+		if (!hasData($projektarbeitsbeurteilungres))
+			return error('Projektarbeitsbeurteilung not found');
+
+		$projektarbeitsbeurteilung = getData($projektarbeitsbeurteilungres);
+
+		$studiengang_kz = $projektarbeitsbeurteilung->studiengang_kz;
+
+		$this->StudiengangModel->addSelect('email');
+		$studiengangres = $this->StudiengangModel->load($studiengang_kz);
+
+		if (!hasData($studiengangres))
+			return error('Studiengang not found');
+
+		$studiengang_email = getData($studiengangres)[0]->email;
+		$betreuer_fullname = $projektarbeitsbeurteilung->titelpre_betreuer . ' ' . $projektarbeitsbeurteilung->vorname_betreuer . ' ' .
+			$projektarbeitsbeurteilung->nachname_betreuer . ' ' . $projektarbeitsbeurteilung->titelpost_betreuer;
+		$student_fullname = $projektarbeitsbeurteilung->titelpre_student . ' ' . $projektarbeitsbeurteilung->vorname_student . ' ' .
+			$projektarbeitsbeurteilung->nachname_student . ' ' . $projektarbeitsbeurteilung->titelpost_student;
+
+		$this->load->helper('hlp_sancho_helper');
+
+		$mailcontent_data_arr = array(
+			'betreuer_voller_name' => $betreuer_fullname,
+			'student_voller_name' => $student_fullname,
+		);
+
+		sendSanchoMail(
+			'ParbeitsbeurteilungInfoAnStg',
+			$mailcontent_data_arr,
+			$studiengang_email,
+			'Projektarbeitsbeurteilung abgeschlossen',
+			'sancho_header_min_bw.jpg',
+			'sancho_footer_min_bw.jpg'
+		);
+
+		return success($studiengang_email);
 	}
 }

@@ -19,13 +19,14 @@ class Projektarbeitsbeurteilung_model extends DB_Model
 	 * @param $student_uid
 	 * @return object
 	 */
-	public function getProjektarbeitsbeurteilung($projektarbeit_id, $projektbetreuer_person_id, $student_uid)
+	public function getProjektarbeitsbeurteilung($projektarbeit_id, $projektbetreuer_person_id, $student_uid = null)
 	{
 		$this->load->model('crm/Student_model', 'StudentModel');
 		$this->load->model('crm/Prestudentstatus_model', 'PrestudentstatusModel');
 		$this->load->model('codex/Orgform_model', 'OrgformModel');
 
 		$projektarbeitsbeurteilungdata = array();
+		$params = array($projektarbeit_id, $projektbetreuer_person_id);
 
 		$qry = "SELECT tbl_projektarbeitsbeurteilung.bewertung AS projektarbeit_bewertung, parbeit.titel AS projektarbeit_titel, parbeit.titel_english AS projektarbeit_titel_english, parbeit.projekttyp_kurzbz AS parbeit_typ,
        		studentpers.vorname AS vorname_student, studentpers.nachname AS nachname_student, studentpers.titelpre AS titelpre_student, studentpers.titelpost AS titelpost_student,
@@ -42,18 +43,22 @@ class Projektarbeitsbeurteilung_model extends DB_Model
 			                                                     AND betreuer.person_id = tbl_projektarbeitsbeurteilung.betreuer_person_id 
 			WHERE parbeit.projektarbeit_id = ?
 			AND betreuer.person_id = ?
-			AND tbl_student.student_uid = ?
 			AND parbeit.projekttyp_kurzbz IN ('Bachelor', 'Diplom')
-			AND betreuer.betreuerart_kurzbz IN ('Begutachter', 'Erstbegutachter', 'Zweitbegutachter')
-			ORDER BY CASE WHEN betreuer.betreuerart_kurzbz = 'Begutachter' THEN 1 
-			    			WHEN betreuer.betreuerart_kurzbz = 'Erstbegutachter' THEN 2
-			    			WHEN betreuer.betreuerart_kurzbz = 'Zweitbegutachter' THEN 4
-							ELSE 5
-						END
-			LIMIT 1
-		";
+			AND betreuer.betreuerart_kurzbz IN ('Begutachter', 'Erstbegutachter', 'Zweitbegutachter')";
 
-		$params = array($projektarbeit_id, $projektbetreuer_person_id, $student_uid);
+		if (isset($student_uid))
+		{
+			$qry .= " AND tbl_student.student_uid = ?";
+			$params[] = $student_uid;
+
+		}
+
+		$qry .= "ORDER BY CASE WHEN betreuer.betreuerart_kurzbz = 'Begutachter' THEN 1 
+						WHEN betreuer.betreuerart_kurzbz = 'Erstbegutachter' THEN 2
+						WHEN betreuer.betreuerart_kurzbz = 'Zweitbegutachter' THEN 4
+						ELSE 5
+					END
+			LIMIT 1";
 
 		$projektarbeitsbeurteilung = $this->execQuery($qry, $params);
 		
@@ -107,7 +112,7 @@ class Projektarbeitsbeurteilung_model extends DB_Model
 					}
 				}
 
-				//get last statusfor orgform
+				//get last status for orgform
 				$lastStatus = $this->PrestudentstatusModel->getLastStatus(getData($prestudent_id)[0]->prestudent_id);
 
 				if (isError($lastStatus))

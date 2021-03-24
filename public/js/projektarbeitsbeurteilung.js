@@ -58,7 +58,6 @@ var Projektarbeitsbeurteilung = {
     refreshBewertungPointsAndNote: function()
     {
         var oldBetreuernote = $("#oldbetreuernote").val();
-        console.log(oldBetreuernote);
         Projektarbeitsbeurteilung.setFinalNote(oldBetreuernote);
 
         var pointsEl = $("#beurteilungtbl td.beurteilungpoints select");
