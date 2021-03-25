@@ -43,7 +43,7 @@ $this->load->view(
 			<div class="row">
 				<div class="col-lg-12">
 					<h3 class="page-header">
-						<?php echo $this->p->t('projektarbeitsbeurteilung', 'beurteilung') ?>&nbsp;
+						<?php echo $this->p->t('projektarbeitsbeurteilung', 'beurteilung') ?>
 						<?php echo $arbeittypName . ($paarbeittyp === 'm' ? '&nbsp' . $this->p->t('projektarbeitsbeurteilung', 'zweitBegutachter') : '') ?>
 					</h3>
 				</div>
