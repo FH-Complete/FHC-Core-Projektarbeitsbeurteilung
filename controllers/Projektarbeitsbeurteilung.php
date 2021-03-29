@@ -281,7 +281,10 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 										'person_id' => $betreuer_person_id,
 										'betreuerart_kurzbz' => $betreuerart
 									),
-									array('note' => $betreuernote)
+									array(
+										'note' => $betreuernote,
+										'updateamum' => 'NOW()'
+									)
 								);
 
 								if (isError($noteUpdateResult))
@@ -297,7 +300,7 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 									// update note in Projektarbbeit tbl (final Note)
 									$finalNoteUpdateResult = $this->ProjektarbeitModel->update(
 										array('projektarbeit_id' => $projektarbeit_id),
-										array('note' => $betreuernote)
+										array('note' => $betreuernote, 'updateamum' => 'NOW()')
 									);
 
 									if (isError($finalNoteUpdateResult))
