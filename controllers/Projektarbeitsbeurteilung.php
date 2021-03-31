@@ -12,7 +12,6 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 	const EXTERNER_BEURTEILER_NAME = 'externerBeurteiler';
 
 	private $_requiredFields = array(
-			'betreuernote' => 'grade',
 			'plagiatscheck_unauffaellig' => 'bool',
 			'bewertung_thema' => 'points',
 			'bewertung_loesungsansatz' => 'points',
@@ -24,7 +23,8 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 			'bewertung_form' => 'points',
 			'bewertung_literatur' => 'points',
 			'bewertung_zitierregeln' => 'points',
-			'begruendung' => 'text'
+			'begruendung' => 'text',
+			'betreuernote' => 'grade'
 	);
 
     /**
@@ -272,42 +272,39 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 							$this->outputJsonError(getError($result));
 						else
 						{
-							if (isset($betreuernote))
+							// update note in Projektbetreuer tbl
+							$noteUpdateResult = $this->ProjektbetreuerModel->update(
+								array(
+									'projektarbeit_id' => $projektarbeit_id,
+									'person_id' => $betreuer_person_id,
+									'betreuerart_kurzbz' => $betreuerart
+								),
+								array(
+									'note' => $betreuernote,
+									'updateamum' => 'NOW()'
+								)
+							);
+
+							if (isError($noteUpdateResult))
 							{
-								// update note in Projektbetreuer tbl
-								$noteUpdateResult = $this->ProjektbetreuerModel->update(
-									array(
-										'projektarbeit_id' => $projektarbeit_id,
-										'person_id' => $betreuer_person_id,
-										'betreuerart_kurzbz' => $betreuerart
-									),
-									array(
-										'note' => $betreuernote,
-										'updateamum' => 'NOW()'
-									)
+								$this->outputJsonError(getError($noteUpdateResult));
+								return;
+							}
+
+							if ($saveAndSend === true && isset($betreuernote))
+							{
+								$this->load->model('education/Projektarbeit_model', 'ProjektarbeitModel');
+
+								// update note in Projektarbbeit tbl (final Note)
+								$finalNoteUpdateResult = $this->ProjektarbeitModel->update(
+									array('projektarbeit_id' => $projektarbeit_id),
+									array('note' => $betreuernote, 'updateamum' => 'NOW()')
 								);
 
-								if (isError($noteUpdateResult))
+								if (isError($finalNoteUpdateResult))
 								{
-									$this->outputJsonError(getError($noteUpdateResult));
+									$this->outputJsonError(getError($finalNoteUpdateResult));
 									return;
-								}
-
-								if ($saveAndSend === true)
-								{
-									$this->load->model('education/Projektarbeit_model', 'ProjektarbeitModel');
-
-									// update note in Projektarbbeit tbl (final Note)
-									$finalNoteUpdateResult = $this->ProjektarbeitModel->update(
-										array('projektarbeit_id' => $projektarbeit_id),
-										array('note' => $betreuernote, 'updateamum' => 'NOW()')
-									);
-
-									if (isError($finalNoteUpdateResult))
-									{
-										$this->outputJsonError(getError($finalNoteUpdateResult));
-										return;
-									}
 								}
 							}
 
@@ -406,6 +403,12 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 		return $data;
 	}
 
+	/**
+	 * Checks Bewertungdata before saving.
+	 * @param $bewertung
+	 * @param bool $saveAndSend wether Bewertung is only saved or saved and finally send
+	 * @return object success if valid, error otherwise
+	 */
 	private function _checkBewertung($bewertung, $saveAndSend = false)
 	{
 		$betreuernote = isset ($bewertung['betreuernote']) ? $bewertung['betreuernote'] : null;
@@ -446,6 +449,11 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 		return success('Bewertung check passed');
 	}
 
+	/**
+	 * Calculates Bewertungpunkte before passing to view.
+	 * @param object $bewertung contains bewertungdata including points
+	 * @return object containing gesamtpunkte (reached) and maxpunkte (max. reachable)
+	 */
 	private function _calculateBewertungPunkte($bewertung)
 	{
 		$punkte = new stdClass();

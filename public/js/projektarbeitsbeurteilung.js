@@ -67,6 +67,7 @@ var Projektarbeitsbeurteilung = {
             var sumPoints = 0;
             var finalNote = null;
             var categoryPoints = {};
+            var finished = true;
 
             pointsEl.each(
                 function()
@@ -76,7 +77,10 @@ var Projektarbeitsbeurteilung = {
                     var categoryNumber = Projektarbeitsbeurteilung.punkteCategories[categoryName];
 
                     if (points == 'null')
+                    {
                         points = 0;
+                        finished = false;
+                    }
 
                     // calculate points and maxpoints for each category
                     if (jQuery.isNumeric(points))
@@ -97,35 +101,40 @@ var Projektarbeitsbeurteilung = {
                 }
             )
 
-            var ctgNegative = false;
-            for (var catNr in categoryPoints)
+            $("#gesamtpunkte").text(sumPoints);
+
+            // if points filled out, calculate and display note
+            if (finished)
             {
-                var ctgPercent = categoryPoints[catNr].points / categoryPoints[catNr].maxpoints * 100;
-
-                if (ctgPercent <= Projektarbeitsbeurteilung.notenschluessel[5][1])
+                var ctgNegative = false;
+                for (var catNr in categoryPoints)
                 {
-                    finalNote = 5
-                    ctgNegative = true;
-                    break;
-                }
-            }
+                    var ctgPercent = categoryPoints[catNr].points / categoryPoints[catNr].maxpoints * 100;
 
-            if (!ctgNegative)
-            {
-                for (var note in Projektarbeitsbeurteilung.notenschluessel)
-                {
-                    var lower = Projektarbeitsbeurteilung.notenschluessel[note][0];
-                    var upper = Projektarbeitsbeurteilung.notenschluessel[note][1];
-
-                    if (sumPoints >= lower && sumPoints <= upper)
+                    if (ctgPercent <= Projektarbeitsbeurteilung.notenschluessel[5][1])
                     {
-                        finalNote = note;
+                        finalNote = 5
+                        ctgNegative = true;
                         break;
                     }
                 }
-            }
 
-            $("#gesamtpunkte").text(sumPoints);
+                if (!ctgNegative)
+                {
+                    for (var note in Projektarbeitsbeurteilung.notenschluessel)
+                    {
+                        var lower = Projektarbeitsbeurteilung.notenschluessel[note][0];
+                        var upper = Projektarbeitsbeurteilung.notenschluessel[note][1];
+
+                        if (sumPoints >= lower && sumPoints <= upper)
+                        {
+                            finalNote = note;
+                            break;
+                        }
+                    }
+                }
+
+            }
             Projektarbeitsbeurteilung.setFinalNote(finalNote);
         }
     },
@@ -135,6 +144,11 @@ var Projektarbeitsbeurteilung = {
             Projektarbeitsbeurteilung.finalNote = finalNote;
             var finalNotePhrase = FHC_PhrasesLib.t("lehre", Projektarbeitsbeurteilung.notenphrasen[finalNote]);
             $("#betreuernote").text(finalNotePhrase + " (" + finalNote + ")");
+        }
+        else
+        {
+            Projektarbeitsbeurteilung.finalNote = null;
+            $("#betreuernote").text('');
         }
     },
     initSaveProjektarbeitsbeurteilung: function(saveAndSend)

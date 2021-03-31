@@ -246,7 +246,7 @@ $this->load->view(
 			<div class="row">
 				<div class="col-lg-12">
 					<b><?php echo $this->p->t('lehre', 'note') ?></b>:
-						<h4 id="betreuernote"></h4>
+						<h4 id="betreuernote"><?php echo isset($projektarbeitsbeurteilung->betreuernote) ? $projektarbeitsbeurteilung->betreuernote : '' ?></h4>
 				</div>
 			</div>
 			<br />
