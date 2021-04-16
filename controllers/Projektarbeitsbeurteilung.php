@@ -151,7 +151,7 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 	 */
 	public function saveProjektarbeitsbeurteilung()
 	{
-		$result = null;
+		$saveProjektarbeitsbeurteilungResult = null;
 
 		$abgeschicktamum = date('Y-m-d H:i:s');
 
@@ -215,6 +215,7 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 				if (!$bewertungJson)
 				{
 					$this->outputJsonError('Invalid JSON Format');
+					exit;
 				}
 				else
 				{
@@ -250,7 +251,10 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 						);
 
 						if (isError($projektarbeitsbeurteilungResult))
+						{
 							$this->outputJsonError('Error when getting Beurteilung');
+							exit;
+						}
 						// update if existing Beurteilung
 						elseif (hasData($projektarbeitsbeurteilungResult))
 						{
@@ -258,67 +262,86 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 
 							$projektarbeitsbeurteilungToSave['updateamum'] = date('Y-m-d H:i:s', time());
 
-							$result = $this->ProjektarbeitsbeurteilungModel->update($projektarbeitsbeurteilung_id, $projektarbeitsbeurteilungToSave);
+							$saveProjektarbeitsbeurteilungResult = $this->ProjektarbeitsbeurteilungModel->update($projektarbeitsbeurteilung_id, $projektarbeitsbeurteilungToSave);
 						}
 						else
 						{
-							// no existing Beurteilung -> insert if there is corresponding Projektbetreuer
+							// no existing Beurteilung -> insert new
 							$projektarbeitsbeurteilungToSave['insertvon'] = $authObj->username;
 
-							$result = $this->ProjektarbeitsbeurteilungModel->insert($projektarbeitsbeurteilungToSave);
+							$saveProjektarbeitsbeurteilungResult = $this->ProjektarbeitsbeurteilungModel->insert($projektarbeitsbeurteilungToSave);
 						}
 
-						if (isError($result))
-							$this->outputJsonError(getError($result));
+						if (isError($saveProjektarbeitsbeurteilungResult))
+						{
+							$this->outputJsonError(getError($saveProjektarbeitsbeurteilungResult));
+							exit;
+						}
 						else
 						{
-							// update note in Projektbetreuer tbl
-							$noteUpdateResult = $this->ProjektbetreuerModel->update(
-								array(
-									'projektarbeit_id' => $projektarbeit_id,
-									'person_id' => $betreuer_person_id,
-									'betreuerart_kurzbz' => $betreuerart
-								),
-								array(
-									'note' => $betreuernote,
-									'updateamum' => 'NOW()'
-								)
-							);
-
-							if (isError($noteUpdateResult))
+							if ($betreuerart != self::BETREUERART_ZWEITBEGUTACHTER)
 							{
-								$this->outputJsonError(getError($noteUpdateResult));
-								return;
-							}
-
-							if ($saveAndSend === true && isset($betreuernote))
-							{
-								$this->load->model('education/Projektarbeit_model', 'ProjektarbeitModel');
-
-								// update note in Projektarbbeit tbl (final Note)
-								$finalNoteUpdateResult = $this->ProjektarbeitModel->update(
-									array('projektarbeit_id' => $projektarbeit_id),
-									array('note' => $betreuernote, 'updateamum' => 'NOW()')
+								// update note in Projektbetreuer tbl
+								$noteUpdateResult = $this->ProjektbetreuerModel->update(
+									array(
+										'projektarbeit_id' => $projektarbeit_id,
+										'person_id' => $betreuer_person_id,
+										'betreuerart_kurzbz' => $betreuerart
+									),
+									array(
+										'note' => $betreuernote,
+										'updateamum' => 'NOW()'
+									)
 								);
 
-								if (isError($finalNoteUpdateResult))
+								if (isError($noteUpdateResult))
 								{
-									$this->outputJsonError(getError($finalNoteUpdateResult));
-									return;
+									$this->outputJsonError(getError($noteUpdateResult));
+									exit;
 								}
 							}
 
-							if ($saveAndSend)
+							if ($saveAndSend === true)
 							{
 								// send info mail to Erstbegutachter after Zweitbegutachter has finished assessment
 								if ($betreuerart === self::BETREUERART_ZWEITBEGUTACHTER)
 									$this->_sendInfoMailToErstbegutachter($projektarbeit_id, $betreuer_person_id);
-								// send info mail to Studiengang after Erstbegutachter has finished assessment
-								elseif ($betreuerart === self::BETREUERART_ERSTBEGUTACHTER)
-									$this->_sendInfoMailToStudiengang($projektarbeit_id, $betreuer_person_id);
+								else // if primary Begutachter, set Note and send Studiengangmail
+								{
+									if (isset($betreuernote))
+									{
+										$this->load->model('education/Projektarbeit_model', 'ProjektarbeitModel');
+
+										// update note in Projektarbbeit tbl (final Note)
+										$finalNoteUpdateResult = $this->ProjektarbeitModel->update(
+											array('projektarbeit_id' => $projektarbeit_id),
+											array('note' => $betreuernote, 'updateamum' => 'NOW()')
+										);
+
+										if (isError($finalNoteUpdateResult))
+										{
+											$this->outputJsonError(getError($finalNoteUpdateResult));
+											return;
+										}
+									}
+									else
+									{
+										$this->outputJsonError('Final Note not set.');
+										exit;
+									}
+
+									// send info mail to Studiengang after Begutachter has finished assessment
+									$mailResult = $this->_sendInfoMailToStudiengang($projektarbeit_id, $betreuer_person_id);
+
+									if (isError($mailResult))
+									{
+										$this->outputJsonError(getError($finalNoteUpdateResult));
+										exit;
+									}
+								}
 							}
 
-							$this->outputJsonSuccess(getData($result));
+							$this->outputJsonSuccess(getData($saveProjektarbeitsbeurteilungResult));
 						}
 					}
 					else
