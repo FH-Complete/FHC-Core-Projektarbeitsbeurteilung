@@ -263,6 +263,17 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 							$projektarbeitsbeurteilungToSave['updateamum'] = date('Y-m-d H:i:s', time());
 
 							$saveProjektarbeitsbeurteilungResult = $this->ProjektarbeitsbeurteilungModel->update($projektarbeitsbeurteilung_id, $projektarbeitsbeurteilungToSave);
+
+							if (isSuccess($saveProjektarbeitsbeurteilungResult) && $saveAndSend === true)
+							{
+								$mailResult = $this->_sendInfoMailToStudiengangUpdated($projektarbeit_id, $betreuer_person_id);
+
+								if (isError($mailResult))
+								{
+									$this->outputJsonError(getError($mailResult));
+									exit;
+								}
+							}
 						}
 						else
 						{
@@ -305,7 +316,16 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 							{
 								// send info mail to Erstbegutachter after Zweitbegutachter has finished assessment
 								if ($betreuerart === self::BETREUERART_ZWEITBEGUTACHTER)
+								{
 									$this->_sendInfoMailToErstbegutachter($projektarbeit_id, $betreuer_person_id);
+									$mailResult = $this->_sendInfoMailToStudiengang($projektarbeit_id, $betreuer_person_id);
+
+									if (isError($mailResult))
+									{
+										$this->outputJsonError(getError($mailResult));
+										exit;
+									}
+								}
 								else // if primary Begutachter, set Note and send Studiengangmail
 								{
 									if (isset($betreuernote))
@@ -578,6 +598,7 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 		$mailcontent_data_arr = array(
 			'betreuer_voller_name' => $betreuer_fullname,
 			'student_voller_name' => $student_fullname,
+			'betreuer_art' => $projektarbeitsbeurteilung->betreuerart
 		);
 
 		sendSanchoMail(
@@ -585,6 +606,57 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 			$mailcontent_data_arr,
 			$studiengang_email,
 			'Projektarbeitsbeurteilung abgeschlossen',
+			'sancho_header_min_bw.jpg',
+			'sancho_footer_min_bw.jpg'
+		);
+
+		return success($studiengang_email);
+	}
+
+	/**
+	 * Sends sancho infomail to Studiengang after updated assessment.
+	 * @param $projektarbeit_id int
+	 * @param $betreuer_person_id int
+	 * @return object success or error
+	 */
+	private function _sendInfoMailToStudiengangUpdated($projektarbeit_id, $betreuer_person_id)
+	{
+		$this->load->model('organisation/Studiengang_model', 'StudiengangModel');
+
+		$projektarbeitsbeurteilungres = $this->ProjektarbeitsbeurteilungModel->getProjektarbeitsbeurteilung($projektarbeit_id, $betreuer_person_id);
+
+		if (!hasData($projektarbeitsbeurteilungres))
+			return error('Projektarbeitsbeurteilung not found');
+
+		$projektarbeitsbeurteilung = getData($projektarbeitsbeurteilungres);
+
+		$studiengang_kz = $projektarbeitsbeurteilung->studiengang_kz;
+
+		$this->StudiengangModel->addSelect('email');
+		$studiengangres = $this->StudiengangModel->load($studiengang_kz);
+
+		if (!hasData($studiengangres))
+			return error('Studiengang not found');
+
+		$studiengang_email = getData($studiengangres)[0]->email;
+		$betreuer_fullname = $projektarbeitsbeurteilung->titelpre_betreuer . ' ' . $projektarbeitsbeurteilung->vorname_betreuer . ' ' .
+			$projektarbeitsbeurteilung->nachname_betreuer . ' ' . $projektarbeitsbeurteilung->titelpost_betreuer;
+		$student_fullname = $projektarbeitsbeurteilung->titelpre_student . ' ' . $projektarbeitsbeurteilung->vorname_student . ' ' .
+			$projektarbeitsbeurteilung->nachname_student . ' ' . $projektarbeitsbeurteilung->titelpost_student;
+
+		$this->load->helper('hlp_sancho_helper');
+
+		$mailcontent_data_arr = array(
+			'betreuer_voller_name' => $betreuer_fullname,
+			'student_voller_name' => $student_fullname,
+			'betreuer_art' => $projektarbeitsbeurteilung->betreuerart
+		);
+
+		sendSanchoMail(
+			'ParbeitsbeurteilungUPInfoAnStg',
+			$mailcontent_data_arr,
+			$studiengang_email,
+			'Projektarbeitsbeurteilung geändert',
 			'sancho_header_min_bw.jpg',
 			'sancho_footer_min_bw.jpg'
 		);
