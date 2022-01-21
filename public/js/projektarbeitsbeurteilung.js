@@ -2,28 +2,47 @@ const CALLED_PATH = FHC_JS_DATA_STORAGE_OBJECT.called_path;
 
 $("document").ready(function() {
 
-
     Projektarbeitsbeurteilung.refreshBewertungPointsAndNote();
 
-    $("#beurteilungtbl select").change(
-        function()
-        {
-            Projektarbeitsbeurteilung.refreshBewertungPointsAndNote();
-        }
-    );
+    if ($("#beurteilungtbl select").length)
+    {
+        $("#beurteilungtbl select").change(
+            function()
+            {
+                Projektarbeitsbeurteilung.refreshBewertungPointsAndNote();
+            }
+        );
+    }
 
-    $("#saveBeurteilungBtn").click(
-        function() {
-            Projektarbeitsbeurteilung.initSaveProjektarbeitsbeurteilung(false);
-        }
-    )
+    if ($("#saveBeurteilungBtn").length)
+    {
+        $("#saveBeurteilungBtn").click(
+            function()
+            {
+                Projektarbeitsbeurteilung.initSaveProjektarbeitsbeurteilung(false);
+            }
+        )
+    }
 
-    $("#saveSendBeurteilungBtn").click(
-        function() {
-            Projektarbeitsbeurteilung.initSaveProjektarbeitsbeurteilung(true);
-        }
-    )
+    if ($("#saveSendBeurteilungBtn").length)
+    {
+        $("#saveSendBeurteilungBtn").click(
+            function()
+            {
+                Projektarbeitsbeurteilung.initSaveProjektarbeitsbeurteilung(true);
+            }
+        )
+    }
 
+    if ($("#sendKommissionMail").length)
+    {
+        $("#sendKommissionMail").click(
+            function()
+            {
+                Projektarbeitsbeurteilung.sendInfoMailToKommission($("#projektarbeit_id").val());
+            }
+        )
+    }
 })
 
 var Projektarbeitsbeurteilung = {
@@ -43,7 +62,7 @@ var Projektarbeitsbeurteilung = {
         4: [50, 62],
         5: [0, 49]
     },
-    punkteCategories: { // if points of any category are below 50%, assessment is negative
+    punkteCategories: { // if points of any compound category are below 50%, assessment is negative
         'thema': 1,
         'loesungsansatz': 1,
         'methode': 1,
@@ -74,7 +93,7 @@ var Projektarbeitsbeurteilung = {
                 {
                     var points = $(this).val();
                     var categoryName = $(this).prop('name').replace('bewertung_', '');
-                    var categoryNumber = Projektarbeitsbeurteilung.punkteCategories[categoryName];
+                    var compoundCategoryNumber = Projektarbeitsbeurteilung.punkteCategories[categoryName];
 
                     if (points == 'null')
                     {
@@ -82,20 +101,22 @@ var Projektarbeitsbeurteilung = {
                         finished = false;
                     }
 
-                    // calculate points and maxpoints for each category
+                    // calculate points and maxpoints for each compound category
                     if (jQuery.isNumeric(points))
                     {
                         var intPoints = parseInt(points);
                         sumPoints += intPoints;
-                        if (!categoryPoints[categoryNumber])
-                            categoryPoints[categoryNumber] = {
+                        if (!categoryPoints[compoundCategoryNumber])
+                        {
+                            categoryPoints[compoundCategoryNumber] = {
                                 points: intPoints,
                                 maxpoints: Projektarbeitsbeurteilung.categoryMaxPoints
                             };
+                        }
                         else
                         {
-                            categoryPoints[categoryNumber].points += intPoints;
-                            categoryPoints[categoryNumber].maxpoints += Projektarbeitsbeurteilung.categoryMaxPoints;
+                            categoryPoints[compoundCategoryNumber].points += intPoints;
+                            categoryPoints[compoundCategoryNumber].maxpoints += Projektarbeitsbeurteilung.categoryMaxPoints;
                         }
                     }
                 }
@@ -195,7 +216,7 @@ var Projektarbeitsbeurteilung = {
                     if (FHC_AjaxClient.hasData(data))
                     {
                         if (saveAndSend === true)
-                        {// when saved and send, reload the form so it is read only
+                        {// when saved and sent, reload the form so it is read only
                             $.ajax({
                                 type: 'POST',
                                 url: $("#authtokenform").attr('action'),
@@ -220,6 +241,28 @@ var Projektarbeitsbeurteilung = {
                 },
                 errorCallback: function() {
                     FHC_DialogLib.alertError(FHC_PhrasesLib.t("projektarbeitsbeurteilung", "beurteilungFehler"));
+                }
+            }
+        );
+    },
+    sendInfoMailToKommission: function(projektarbeit_id)
+    {
+        FHC_AjaxClient.ajaxCallPost(
+            CALLED_PATH + '/sendInfoMailToKommission',
+            {projektarbeit_id: projektarbeit_id},
+            {
+                successCallback: function(data, textStatus, jqXHR) {
+                    if (FHC_AjaxClient.hasData(data))
+                    {
+                        FHC_DialogLib.alertSuccess(FHC_PhrasesLib.t("projektarbeitsbeurteilung", "kommissionMailGesendet"));
+                    }
+                    else if(FHC_AjaxClient.isError(data))
+                    {
+                        FHC_DialogLib.alertError(FHC_AjaxClient.getError(data));
+                    }
+                },
+                errorCallback: function() {
+                    FHC_DialogLib.alertError(FHC_PhrasesLib.t("projektarbeitsbeurteilung", "kommissionMailFehler"));
                 }
             }
         );

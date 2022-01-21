@@ -44,7 +44,7 @@ class Projektarbeitsbeurteilung_model extends DB_Model
 			WHERE parbeit.projektarbeit_id = ?
 			AND betreuer.person_id = ?
 			AND parbeit.projekttyp_kurzbz IN ('Bachelor', 'Diplom')
-			AND betreuer.betreuerart_kurzbz IN ('Begutachter', 'Erstbegutachter', 'Zweitbegutachter')";
+			AND betreuer.betreuerart_kurzbz IN ('Begutachter', 'Erstbegutachter', 'Zweitbegutachter', 'Kommission')";
 
 		if (isset($student_uid))
 		{
@@ -181,7 +181,7 @@ class Projektarbeitsbeurteilung_model extends DB_Model
 	public function getErstbegutachterFromZweitbegutachter($projektarbeit_id, $zweitbegutachter_person_id)
 	{
 		$zweitbetrQry = "
-			SELECT betr.person_id, ben.uid, parb.student_uid, pers.anrede, stud_pers.anrede AS student_anrede,
+			SELECT betr.person_id, ben.uid, parb.student_uid, pers.anrede, pers.geschlecht, stud_pers.anrede AS student_anrede,
 			       trim(COALESCE(pers.titelpre,'')||' '||COALESCE(pers.vorname,'')||' '||COALESCE(pers.nachname,'')||' '||COALESCE(pers.titelpost,'')) AS fullname,
 			       trim(COALESCE(stud_pers.titelpre,'')||' '||COALESCE(stud_pers.vorname,'')||' '||COALESCE(stud_pers.nachname,'')||' '||COALESCE(stud_pers.titelpost,'')) AS student_fullname
 			FROM lehre.tbl_projektbetreuer betr

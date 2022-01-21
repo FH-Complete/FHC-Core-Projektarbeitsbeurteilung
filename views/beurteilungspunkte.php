@@ -6,9 +6,10 @@
 );
 ?>
 <td class="beurteilungpoints text-center">
-	<?php if (isset($projektarbeitsbeurteilung->abgeschicktamum)): ?>
-		<?php echo $projektarbeit_bewertung->{'bewertung_'.$name} ?>
-	<?php else: ?>
+	<?php
+		if ($readOnlyAccess):
+			echo isset($projektarbeit_bewertung) ? $projektarbeit_bewertung->{'bewertung_'.$name} : '';
+		else: ?>
 		<select name="<?php echo 'bewertung_'.$name ?>">
 			<option value="null">--&nbsp;<?php echo $this->p->t('projektarbeitsbeurteilung', 'bitteBeurteilen'); ?>&nbsp;--</option>
 			<?php foreach ($punkteArr as $punktewert => $phrasenname):

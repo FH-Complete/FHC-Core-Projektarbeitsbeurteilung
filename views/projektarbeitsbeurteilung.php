@@ -28,10 +28,10 @@ $this->load->view(
 <div id="wrapper">
 	<div id="page-wrapper">
 		<div class="container-fluid" id="containerFluid">
-            <?php if (!isset($projektarbeitsbeurteilung)):
+            <?php
+			if (!isset($projektarbeitsbeurteilung)):
 					echo "Keine Projektarbeit eingetragen.";
             else:
-            	$sent = isset($projektarbeitsbeurteilung->abgeschicktamum);
             	$paarbeittyp = $projektarbeitsbeurteilung->parbeit_typ === 'Bachelor' ? 'b' : 'm';
             	$arbeittypName = $paarbeittyp === 'b' ? $this->p->t('projektarbeitsbeurteilung', 'arbeitBachelor') : $this->p->t('abschlusspruefung', 'arbeitMaster');
 
@@ -62,7 +62,7 @@ $this->load->view(
 						<tr>
 							<td><b><?php echo $this->p->t('projektarbeitsbeurteilung', 'plagiatscheckUnauffaellig') ?></b></td>
 							<td colspan="3">
-								<?php if ($sent): ?>
+								<?php if ($readOnlyAccess): ?>
 									<?php echo $plagiatscheck_unauffaellig ? ucfirst($this->p->t('ui', 'ja')) : ucfirst($this->p->t('ui', 'nein')) ?>
 								<?php else: ?>
 									<input type="checkbox" name="plagiatscheck_unauffaellig" id="plagiatscheck_unauffaellig" value="true"<?php echo $plagiatscheck_unauffaellig === true ? ' checked="checked"' : ''?>>
@@ -254,13 +254,20 @@ $this->load->view(
 				<div class="col-lg-12">
 					<div class="form-group">
 						<?php echo $this->p->t('projektarbeitsbeurteilung', 'begruendungText') ?>:
-						<?php $readonly = (isset($projektarbeit_bewertung->begruendung) && $sent) ? ' readonly' : '' ?>
+						<?php $readonly = $readOnlyAccess ? ' readonly' : '' ?>
 						<textarea class="form-control" rows="5" name="begruendung"<?php echo $readonly ?>><?php echo isset($projektarbeit_bewertung->begruendung) ? $projektarbeit_bewertung->begruendung : '' ?></textarea>
 					</div>
 				</div>
 			</div>
+			<?php if ($isKommission): ?>
+				<div class="row">
+					<div class="col-lg-12">
+						<span class="text-warning"><?php echo $this->p->t('projektarbeitsbeurteilung', 'kommissionellePruefungHinweis') ?></span>
+					</div>
+				</div>
+			<?php endif; ?>
 			</form>
-				<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/savebuttons.php', array('sent' => $sent)); ?>
+				<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/savebuttons.php'); ?>
 			<br />
 			<?php endif; ?>
 		</div>
