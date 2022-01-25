@@ -47,6 +47,7 @@ $("document").ready(function() {
 
 var Projektarbeitsbeurteilung = {
     finalNote: null,
+    negativeNoteValue: 5,
     categoryMaxPoints: 10,
     notenphrasen: { // notenwert: phrasenname
         1: 'sehrGut',
@@ -62,7 +63,7 @@ var Projektarbeitsbeurteilung = {
         4: [50, 62],
         5: [0, 49]
     },
-    punkteCategories: { // if points of any compound category are below 50%, assessment is negative
+    punkteCompoundCategories: { // if points of any compound category are below 50%, assessment is negative
         'thema': 1,
         'loesungsansatz': 1,
         'methode': 1,
@@ -76,6 +77,7 @@ var Projektarbeitsbeurteilung = {
     },
     refreshBewertungPointsAndNote: function()
     {
+        // set existing Betreuernote if there is one
         var oldBetreuernote = $("#oldbetreuernote").val();
         Projektarbeitsbeurteilung.setFinalNote(oldBetreuernote);
 
@@ -85,77 +87,99 @@ var Projektarbeitsbeurteilung = {
         {
             var sumPoints = 0;
             var finalNote = null;
-            var categoryPoints = {};
+            var compoundCategoryPoints = {};
             var finished = true;
+            var ctgNegative = false;
 
             pointsEl.each(
                 function()
                 {
                     var points = $(this).val();
                     var categoryName = $(this).prop('name').replace('bewertung_', '');
-                    var compoundCategoryNumber = Projektarbeitsbeurteilung.punkteCategories[categoryName];
+                    var compoundCategoryNumber = Projektarbeitsbeurteilung.punkteCompoundCategories[categoryName];
 
+                    // null if score not entered => not finished, do not display grade yet
                     if (points == 'null')
                     {
                         points = 0;
                         finished = false;
                     }
+                    else if(points === '0') // if only one category has 0 points => final grade is negative
+                    {
+                        ctgNegative = true;
+                    }
 
                     // calculate points and maxpoints for each compound category
                     if (jQuery.isNumeric(points))
                     {
-                        var intPoints = parseInt(points);
-                        sumPoints += intPoints;
-                        if (!categoryPoints[compoundCategoryNumber])
+                        var floatPoints = parseFloat(points);
+
+                        // add points to total sum
+                        sumPoints += floatPoints;
+                        console.log(floatPoints);
+
+                        // add the points to compound category
+                        if (!compoundCategoryPoints[compoundCategoryNumber])
                         {
-                            categoryPoints[compoundCategoryNumber] = {
-                                points: intPoints,
+                            compoundCategoryPoints[compoundCategoryNumber] = {
+                                points: floatPoints,
                                 maxpoints: Projektarbeitsbeurteilung.categoryMaxPoints
                             };
                         }
                         else
                         {
-                            categoryPoints[compoundCategoryNumber].points += intPoints;
-                            categoryPoints[compoundCategoryNumber].maxpoints += Projektarbeitsbeurteilung.categoryMaxPoints;
+                            compoundCategoryPoints[compoundCategoryNumber].points += floatPoints;
+                            compoundCategoryPoints[compoundCategoryNumber].maxpoints += Projektarbeitsbeurteilung.categoryMaxPoints;
                         }
                     }
                 }
             )
 
-            $("#gesamtpunkte").text(sumPoints);
+            var sumPointsDisplay = $("#language").val() === 'German' ? Projektarbeitsbeurteilung._formatDecimalGerman(sumPoints) : sumPoints;
+            $("#gesamtpunkte").text(sumPointsDisplay);
 
             // if points filled out, calculate and display note
             if (finished)
             {
-                var ctgNegative = false;
-                for (var catNr in categoryPoints)
+                if (ctgNegative) // if one category negative
+                    finalNote = Projektarbeitsbeurteilung.negativeNoteValue; // set finalNote to negative
+                else
                 {
-                    var ctgPercent = categoryPoints[catNr].points / categoryPoints[catNr].maxpoints * 100;
 
-                    if (ctgPercent <= Projektarbeitsbeurteilung.notenschluessel[5][1])
+                    var compoundCtgNegative = false;
+
+                    // check: if any of the compound categories is negative, finalNote is negative
+                    for (var catNr in compoundCategoryPoints)
                     {
-                        finalNote = 5
-                        ctgNegative = true;
-                        break;
-                    }
-                }
+                        var compoundCtgPercent = compoundCategoryPoints[catNr].points / compoundCategoryPoints[catNr].maxpoints * 100;
 
-                if (!ctgNegative)
-                {
-                    for (var note in Projektarbeitsbeurteilung.notenschluessel)
-                    {
-                        var lower = Projektarbeitsbeurteilung.notenschluessel[note][0];
-                        var upper = Projektarbeitsbeurteilung.notenschluessel[note][1];
-
-                        if (sumPoints >= lower && sumPoints <= upper)
+                        if (compoundCtgPercent <= Projektarbeitsbeurteilung.notenschluessel[5][1]) // if compound category negative
                         {
-                            finalNote = note;
+                            finalNote = Projektarbeitsbeurteilung.negativeNoteValue; // set finalNote to negative
+                            compoundCtgNegative = true;
                             break;
                         }
                     }
-                }
 
+                    // if compound category not negative, get appropriate grade according to Notenschlüssel
+                    if (!compoundCtgNegative)
+                    {
+                        for (var note in Projektarbeitsbeurteilung.notenschluessel)
+                        {
+                            var lower = Projektarbeitsbeurteilung.notenschluessel[note][0];
+                            var upper = Projektarbeitsbeurteilung.notenschluessel[note][1];
+
+                            // get correct grade depending on upper/lower boundaries
+                            if (sumPoints >= lower && sumPoints <= upper)
+                            {
+                                finalNote = note;
+                                break;
+                            }
+                        }
+                    }
+                }
             }
+
             Projektarbeitsbeurteilung.setFinalNote(finalNote);
         }
     },
@@ -266,5 +290,35 @@ var Projektarbeitsbeurteilung = {
                 }
             }
         );
+    },
+    // helper functions
+    // -----------------------------------------------------------------------------------------------------------------
+    /**
+     * Formats a numeric value as a float with coma and two decimals
+     */
+    _formatDecimalGerman: function(sum)
+    {
+        var dec = null;
+
+        if(sum === null)
+            dec = parseFloat(0).toFixed(2).replace(".", ",");
+        else if(sum === '')
+        {
+            dec = ''
+        }
+        else
+        {
+            dec = parseFloat(sum).toFixed(2);
+
+            dec = dec.split('.');
+            var dec1 = dec[0];
+            var dec2 = ',' + dec[1];
+            var rgx = /(\d+)(\d{3})/;
+            while (rgx.test(dec1)) {
+                dec1 = dec1.replace(rgx, '$1' + '.' + '$2');
+            }
+            dec = dec1 + dec2;
+        }
+        return dec;
     }
 }

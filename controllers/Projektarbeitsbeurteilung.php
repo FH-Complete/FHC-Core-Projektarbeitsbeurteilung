@@ -44,6 +44,9 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 		// Load libraries
 		$this->load->library('extensions/FHC-Core-Projektarbeitsbeurteilung/ProjektarbeitsbeurteilungMailLib');
 
+		// Load helpers
+		$this->load->helper('extensions/FHC-Core-Projektarbeitsbeurteilung/projektarbeitsbeurteilung_helper');
+
         // Load language phrases
         $this->loadPhrases(
             array(
@@ -70,6 +73,7 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 	{
 		$authObj = $this->_authenticate();
 
+		// if authentication valid
 		if (isset($authObj->person_id))
 		{
 			$betreuer_person_id = $authObj->person_id;
@@ -88,15 +92,23 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 			// get person_id of Zweitbetreuer
 			$zweitbetreuerRes = $this->ProjektarbeitsbeurteilungModel->getZweitbegutachterFromErstbegutachter($projektarbeit_id, $betreuer_person_id, $student_uid);
 			$zweitbetreuer_person_id = null;
+			$zweitbetreuer_abgeschicktamum = null;
 
 			if (hasData($zweitbetreuerRes))
 			{
-				$zweitbetreuer_person_id = getData($zweitbetreuerRes)[0]->person_id;
+				$zweitbetreuer = getData($zweitbetreuerRes)[0];
+
+				$zweitbetreuer_person_id = $zweitbetreuer->person_id;
+
+				// information wether Zweitbetreuer has finished assessment -> different display
+				$zweitbetreuer_abgeschicktamum = $zweitbetreuer->abgeschicktamum;
+
 				if (isset($zweitbetreuer_input_id))
 				{
+					// if zweitbetreuer id passed is same as zweitbetreuer id from Projektarbeit
 					if ($zweitbetreuer_input_id === $zweitbetreuer_person_id)
 					{
-						// user person_id of Zweitbetreuer to display zweitbetreuer form
+						// save person_id of Zweitbetreuer to display Beurteilung from Zweitbegutachter
 						$betreuer_person_id = $zweitbetreuer_person_id;
 					}
 					else
@@ -114,12 +126,26 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 				$projektarbeitsbeurteilung = getData($projektarbeitsbeurteilungResult);
 
 				// check if Projektarbeit is kommissionell - for displaying additional info/functionality
-				$isKommissionRes = $this->ProjektbetreuerModel->getBetreuerOfProjektarbeit($projektarbeit_id, self::BETREUERART_KOMMISSION);
+				$kommissionBetreuer = array();
+				$isKommission = false;
+				$kommissionBetreuerRes = $this->ProjektbetreuerModel->getBetreuerOfProjektarbeit($projektarbeit_id, self::BETREUERART_KOMMISSION);
 
-				if (isError($isKommissionRes))
-					show_error(getError($isKommissionRes));
+				if (isError($kommissionBetreuerRes))
+					show_error(getError($kommissionBetreuerRes));
 
-				$isKommission = hasData($isKommissionRes);
+				if (hasData($kommissionBetreuerRes))
+				{
+					$kommissionBetreuer = getData($kommissionBetreuerRes);
+
+					// set the university mail for kommission Betreuer
+					foreach ($kommissionBetreuer as $kb)
+					{
+						$kb->univEmail = isset($kb->uid) ? $kb->uid.'@'.DOMAIN : '';
+					}
+
+					// set flag that it is kommissionell
+					$isKommission = true;
+				}
 
 				// read only if Projektarbeit is already sent, or logged in Betreuer is member of Kommission
 				$readOnlyAccess = isset($projektarbeitsbeurteilung->abgeschicktamum) || $projektarbeitsbeurteilung->betreuerart === self::BETREUERART_KOMMISSION;
@@ -146,6 +172,8 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 					'projektarbeitsbeurteilung' => $projektarbeitsbeurteilung,
 					'language' => $language,
 					'zweitbetreuer_person_id' => $zweitbetreuer_person_id,
+					'zweitbetreuer_abgeschicktamum' => $zweitbetreuer_abgeschicktamum,
+					'kommission_betreuer' => $kommissionBetreuer,
 					'isKommission' => $isKommission,
 					'readOnlyAccess' => $readOnlyAccess
 				);
@@ -492,7 +520,7 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 			if ($item === 'null')
 				$data[$idx] = null;
 			elseif (is_numeric($item))
-				$data[$idx] = (int) $item;
+				$data[$idx] = (float) $item;
 			elseif ($item === 'true')
 				$data[$idx] = true;
 			elseif ($item === 'false')
@@ -534,7 +562,7 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 					$valid = is_bool($bewertung[$required_field]);
 					break;
 				case 'points':
-					$valid = in_array($bewertung[$required_field], array('0', '5', '8', '10'));
+					$valid = is_numeric($bewertung[$required_field]);
 					break;
 				case 'grade':
 					$valid = in_array($bewertung[$required_field], array('1', '2', '3', '4', '5'));
@@ -565,7 +593,7 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 			{
 				if (isset($bewertung->{$required_field}) && is_numeric($bewertung->{$required_field}))
 				{
-					$punkte->gesamtpunkte += (int)$bewertung->{$required_field};
+					$punkte->gesamtpunkte += (float)$bewertung->{$required_field};
 				}
 				$punkte->maxpunkte += self::CATEGORY_MAX_POINTS;
 			}

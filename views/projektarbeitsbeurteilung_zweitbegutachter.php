@@ -105,7 +105,7 @@ $this->load->view(
 			</div>
 			<br />
 			</form>
-				<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/savebuttons.php', array('sent' => $sent)); ?>
+				<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/footer.php', array('sent' => $sent)); ?>
 			<br />
 			<?php endif; ?>
 		</div>

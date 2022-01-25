@@ -172,31 +172,27 @@ class ProjektarbeitsbeurteilungMailLib
 
 		$kommissionsMitglieder = getData($kommissionsMitgliederRes);
 
-		$erstbetreuerRes = $this->_ci->ProjektbetreuerModel->getBetreuerOfProjektarbeit($projektarbeit_id, Projektarbeitsbeurteilung::BETREUERART_BACHELOR_BEGUTACHTER);
+		$betreuerart = $kommissionsMitglieder[0]->projekttyp_kurzbz == 'Diplom' ? Projektarbeitsbeurteilung::BETREUERART_ERSTBEGUTACHTER : Projektarbeitsbeurteilung::BETREUERART_BACHELOR_BEGUTACHTER;
+
+		$erstbetreuerRes = $this->_ci->ProjektbetreuerModel->getBetreuerOfProjektarbeit($projektarbeit_id, $betreuerart);
 
 		if (!hasData($erstbetreuerRes))
 			return error('Erstbetreuer not found');
 
 		$erstbetreuer = getData($erstbetreuerRes)[0];
 
-		$erstbetreuer_fullname = implode(' ', array_filter(array($erstbetreuer->titelpre, $erstbetreuer->vorname,
-			$erstbetreuer->nachname, $erstbetreuer->titelpost)));
-
 		foreach ($kommissionsMitglieder as $kommissionsMitglied)
 		{
-			$betreuer_fullname = implode(' ', array_filter(array($kommissionsMitglied->titelpre, $kommissionsMitglied->vorname,
-				$kommissionsMitglied->nachname, $kommissionsMitglied->titelpost)));
-			
 			$receiverMail = $kommissionsMitglied->uid.'@'.DOMAIN;
 			$erstbetreuerMail = $erstbetreuer->uid.'@'.DOMAIN;
 
 			$mailcontent_data_arr = array(
 				'geehrt' => "geehrte".($kommissionsMitglied->geschlecht=="m"?"r":""),
 				'anrede' => $kommissionsMitglied->anrede,
-				'betreuer_voller_name' => $betreuer_fullname,
+				'kommissionsmitglied_voller_name' => $kommissionsMitglied->voller_name,
 				'erstbetreuer_bezeichnung' => 'Erstbetreuer'.($erstbetreuer->geschlecht=="w"?"in":""),
 				'erstbetreuer_anrede' => $erstbetreuer->anrede,
-				'erstbetreuer_voller_name' => $erstbetreuer_fullname,
+				'erstbetreuer_voller_name' => $erstbetreuer->voller_name,
 				'erstbetreuer_email' => $erstbetreuerMail,
 				'link' => site_url() . "/extensions/FHC-Core-Projektarbeitsbeurteilung/Projektarbeitsbeurteilung?projektarbeit_id=$projektarbeit_id&uid=".$erstbetreuer->student_uid
 			);

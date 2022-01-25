@@ -28,3 +28,7 @@ table {
     margin-left: 1.5%;
     text-transform: capitalize;
 }
+
+#sendKommissionMail {
+    margin-top: 1em;
+}

@@ -216,7 +216,18 @@ $this->load->view(
 								<td class="text-center">
 									<b>
 									<span id="gesamtpunkte">
-										<?php echo isset($projektarbeitsbeurteilung->bewertung_gesamtpunkte) && is_numeric($projektarbeitsbeurteilung->bewertung_gesamtpunkte) ? $projektarbeitsbeurteilung->bewertung_gesamtpunkte : 0 ?></span><?php echo isset($projektarbeitsbeurteilung->bewertung_maxpunkte) && is_numeric($projektarbeitsbeurteilung->bewertung_maxpunkte) ? '/' . $projektarbeitsbeurteilung->bewertung_maxpunkte : '' ?>
+										<?php
+											$gesamtpunkte = 0;
+											if (isset($projektarbeitsbeurteilung->bewertung_gesamtpunkte) && is_numeric($projektarbeitsbeurteilung->bewertung_gesamtpunkte))
+											{
+												if ($language == 'German')
+													$gesamtpunkte = formatDecimalGerman($projektarbeitsbeurteilung->bewertung_gesamtpunkte);
+												else
+													$gesamtpunkte = $projektarbeitsbeurteilung->bewertung_gesamtpunkte;
+											}
+										?>
+
+										<?php echo $gesamtpunkte ?></span><?php echo isset($projektarbeitsbeurteilung->bewertung_maxpunkte) && is_numeric($projektarbeitsbeurteilung->bewertung_maxpunkte) ? '/' . $projektarbeitsbeurteilung->bewertung_maxpunkte : '' ?>
 									</b>
 								</td>
 							</tr>
@@ -231,13 +242,15 @@ $this->load->view(
 				<div class="row">
 					<div class="col-lg-12">
 						<?php if (isset($zweitbetreuer_person_id)): ?>
-							<?php echo $this->p->t('projektarbeitsbeurteilung', 'gutachtenZweitBegutachtung') ?>
-							<br />
-							<a href="<?php echo site_url() . '/extensions/FHC-Core-Projektarbeitsbeurteilung/Projektarbeitsbeurteilung?projektarbeit_id=' . $projektarbeit_id . '&uid=' . $student_uid . '&zweitbetreuer_id=' . $zweitbetreuer_person_id ?>" target="_blank">
-								<i class="fa fa-external-link"></i>&nbsp;<?php echo $this->p->t('projektarbeitsbeurteilung', 'zurZweitbegutachterBewertung') ?>
-							</a>
-						<?php else: ?>
-							<span class="text-warning"><?php echo $this->p->t('projektarbeitsbeurteilung', 'zweitbegutachterFehltWarnung') ?></span>
+							<?php if (isset($zweitbetreuer_abgeschicktamum)): ?>
+								<?php echo $this->p->t('projektarbeitsbeurteilung', 'gutachtenZweitBegutachtung') ?>
+								<br />
+								<a href="<?php echo site_url() . '/extensions/FHC-Core-Projektarbeitsbeurteilung/Projektarbeitsbeurteilung?projektarbeit_id=' . $projektarbeit_id . '&uid=' . $student_uid . '&zweitbetreuer_id=' . $zweitbetreuer_person_id ?>" target="_blank">
+									<i class="fa fa-external-link"></i>&nbsp;<?php echo $this->p->t('projektarbeitsbeurteilung', 'zurZweitbegutachterBewertung') ?>
+								</a>
+							<?php else: ?>
+								<span class="text-warning"><?php echo $this->p->t('projektarbeitsbeurteilung', 'zweitbegutachterFehltWarnung') ?></span>
+							<?php endif; ?>
 						<?php endif; ?>
 					</div>
 				</div>
@@ -259,15 +272,40 @@ $this->load->view(
 					</div>
 				</div>
 			</div>
+			</form>
 			<?php if ($isKommission): ?>
-				<div class="row">
-					<div class="col-lg-12">
-						<span class="text-warning"><?php echo $this->p->t('projektarbeitsbeurteilung', 'kommissionellePruefungHinweis') ?></span>
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="alert alert-warning">
+						<?php echo $this->p->t('projektarbeitsbeurteilung', 'kommissionellePruefungHinweis') ?>
+						<br>
+						<?php echo $this->p->t('projektarbeitsbeurteilung', 'kommissionsmitglieder') ?>:
+						<?php
+							$kbStr = '';
+							$first = true;
+							foreach ($kommission_betreuer as $kb)
+							{
+								if (!$first)
+									$kbStr .= ', ';
+								$kbStr .= $kb->voller_name;
+								$kbStr .= '&nbsp;<a href="mailto:'.$kb->univEmail.'" title="'.$kb->univEmail.'"><i class="fa fa-envelope text-warning"></i></a>';
+								$first = false;
+							}
+							echo $kbStr;
+						?>
+						<?php if (!$readOnlyAccess): ?>
+						<br>
+						<div class="text-center">
+							<button id="sendKommissionMail" class="btn btn-warning text-center">
+								<?php echo $this->p->t('projektarbeitsbeurteilung', 'kommissionMailSenden') ?>
+							</button>
+						</div>
+						<?php endif; ?>
 					</div>
 				</div>
+			</div>
 			<?php endif; ?>
-			</form>
-				<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/savebuttons.php'); ?>
+				<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/footer.php'); ?>
 			<br />
 			<?php endif; ?>
 		</div>
