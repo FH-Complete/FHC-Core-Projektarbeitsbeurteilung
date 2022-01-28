@@ -13,7 +13,8 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 	const BETREUERART_KOMMISSION = 'Kommission';
 	const EXTERNER_BEURTEILER_NAME = 'externerBeurteiler';
 
-	private $_requiredFields = array(
+	// fields required to be filled out by Erstbetreuer
+	private $_requiredFieldsErstbegutachter = array(
 			'plagiatscheck_unauffaellig' => 'bool',
 			'bewertung_thema' => 'points',
 			'bewertung_loesungsansatz' => 'points',
@@ -28,6 +29,14 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 			'begruendung' => 'text',
 			'betreuernote' => 'grade'
 	);
+
+	// fields required to be filled out by Zweitbetreuer
+	private $_requiredFieldsZweitbegutachter = array(
+		'beurteilung_zweitbegutachter' => 'text'
+	);
+
+	// fields required to be filled out by Betreuer, filled depending on Betreuer type
+	private $_requiredFields = array();
 
     /**
      * Constructor
@@ -57,6 +66,8 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 				'lehre'
             )
         );
+
+		$this->_requiredFields = $this->_requiredFieldsErstbegutachter;
     }
 
     // -----------------------------------------------------------------------------------------------------------------
@@ -251,9 +262,7 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 				// only check text field if Zweitbegutachter
 				if ($betreuerart == self::BETREUERART_ZWEITBEGUTACHTER)
 				{
-					$this->_requiredFields = array(
-						'beurteilung_zweitbegutachter' => 'text'
-					);
+					$this->_requiredFields = $this->_requiredFieldsZweitbegutachter;
 				}
 
 				// check entered Bewertung for validity
