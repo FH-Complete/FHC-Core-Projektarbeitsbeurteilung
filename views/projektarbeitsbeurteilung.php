@@ -56,11 +56,19 @@ $this->load->view(
 				<div class="col-lg-12">
 					<table class="table-condensed table-bordered table-responsive">
 						<tr>
-							<td><b><?php echo ucfirst($this->p->t('global', 'titel')) . ' ' . $arbeittypName ?></b></td>
-							<td colspan="3"><?php echo $titel ?></td>
+							<td class="tableWidthThirty"><b><?php echo ucfirst($this->p->t('global', 'titel')) . ' ' . $arbeittypName ?></b></td>
+							<td colspan="3">
+								<?php if ($readOnlyAccess): ?>
+									<?php echo $titel ?>
+								<?php else: ?>
+									<span id="titleField"> <!-- filled by js -->
+										<?php echo $titel ?>
+									</span>
+								<?php endif; ?>
+							</td>
 						</tr>
 						<tr>
-							<td><b><?php echo $this->p->t('projektarbeitsbeurteilung', 'plagiatscheckUnauffaellig') ?></b></td>
+							<td class="tableWidthThirty"><b><?php echo $this->p->t('projektarbeitsbeurteilung', 'plagiatscheckUnauffaellig') ?></b></td>
 							<td colspan="3">
 								<?php if ($readOnlyAccess): ?>
 									<?php echo $plagiatscheck_unauffaellig ? ucfirst($this->p->t('ui', 'ja')) : ucfirst($this->p->t('ui', 'nein')) ?>

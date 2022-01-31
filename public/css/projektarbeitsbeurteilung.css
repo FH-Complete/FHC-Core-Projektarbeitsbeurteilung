@@ -15,12 +15,8 @@ table {
     width: 50%;
 }
 
-.tableWidthFourty {
-    width: 40%;
-}
-
-.tableWidthTwenty {
-    width: 20%;
+.tableWidthThirty {
+    width: 30%;
 }
 
 #betreuernote {
@@ -31,4 +27,19 @@ table {
 
 #sendKommissionMail {
     margin-top: 1em;
+}
+
+#editTitle {
+    cursor: pointer;
+    font-size: 1.2em;
+}
+
+.inline-inputfield {
+    width: 90%;
+    display: inline;
+}
+
+#confirmTitleEdit {
+    cursor: pointer;
+    font-size: 1.4em;
 }

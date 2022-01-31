@@ -59,8 +59,6 @@ var Projektarbeitsbeurteilung = {
 				successCallback: function(data, textStatus, jqXHR) {
 					if (FHC_AjaxClient.hasData(data))
 					{
-						console.log($("#authtokenform").attr('action'));
-						console.log($("#authtokenform").serialize());
 						if (saveAndSend === true)
 						{// when saved and sent, reload the form so it is read only
 							$.ajax({

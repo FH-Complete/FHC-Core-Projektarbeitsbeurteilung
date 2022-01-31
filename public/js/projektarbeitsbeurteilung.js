@@ -6,22 +6,25 @@ $("document").ready(function() {
 	if ($("#plagiatscheck_unauffaellig").prop('checked') === true)
 		Projektarbeitsbeurteilung.bewertungData = Projektarbeitsbeurteilung.getBewertungFormData();
 
+	// refresh plagiatscheck after page load
 	Projektarbeitsbeurteilung.refreshPlagiatscheck();
+	// refresh grade and points after page load
+	Projektarbeitsbeurteilung.refreshBewertungPointsAndNote();
 
+	// refresh plagiatscheck after checkbox change
 	if ($("#plagiatscheck_unauffaellig").length)
 	{
 		$("#plagiatscheck_unauffaellig").change(
 			function()
 			{
-				// refresh
 				Projektarbeitsbeurteilung.refreshPlagiatscheck();
 				Projektarbeitsbeurteilung.refreshBewertungPointsAndNote();
 			}
 		);
 	}
 
-	// refresh grade and points after page load
-	Projektarbeitsbeurteilung.refreshBewertungPointsAndNote();
+	// make title editable
+	Projektarbeitsbeurteilung.setTitleEditEvent($("#titleField").text());
 
 	// refresh grade and points after changing Bewertung
 	if ($("#beurteilungtbl select").length)
@@ -125,7 +128,7 @@ var Projektarbeitsbeurteilung = {
 				{
 					inputDropdowns.prop("disabled", true);
 					inputDropdowns.val(0); // all criteria 0, grade negative if plagiatscheck false
-					inputDropdowns.prop("title", FHC_PhrasesLib.t("projektarbeitsbeurteilung", "plagiatscheckNichtAusgewaehlt"));
+					inputDropdowns.prop("title", FHC_PhrasesLib.t("projektarbeitsbeurteilung", "plagiatscheckNichtGesetzt"));
 				}
 			}
 		}
@@ -239,6 +242,35 @@ var Projektarbeitsbeurteilung = {
 			Projektarbeitsbeurteilung.setFinalNote(finalNote);
 		}
 	},
+	setTitleEditEvent: function(titel)
+	{
+		$("#titleField").html(
+			'<span id="titleFieldValue">' +
+			titel +
+			'</span>&nbsp;' +
+			'<i class="fa fa-edit" id="editTitle" title="'+FHC_PhrasesLib.t("projektarbeitsbeurteilung", "titelBearbeiten")+'"></i>'
+		)
+
+		// edit and save title
+		$("#editTitle").click(
+			function()
+			{
+				var title = jQuery.trim($("#titleFieldValue").text());
+
+				$("#titleField").html(
+					'<input type="text" class="form-control inline-inputfield" id="titleInputField" value="'+title+'">' +
+					'&nbsp;<i class="fa fa-check text-success" id="confirmTitleEdit">'
+				);
+
+				$("#confirmTitleEdit").click(
+					function()
+					{
+						Projektarbeitsbeurteilung.saveTitle($("#projektarbeit_id").val(), $("#titleInputField").val());
+					}
+				)
+			}
+		);
+	},
 	// print final grade
 	setFinalNote: function(finalNote) {
 		if (jQuery.isNumeric(finalNote))
@@ -323,8 +355,6 @@ var Projektarbeitsbeurteilung = {
 		if (authtoken !== 'null')
 			projektarbeitData.authtoken = authtoken;
 
-		console.log(projektarbeitData);
-
 		FHC_AjaxClient.ajaxCallPost(
 			CALLED_PATH + '/saveProjektarbeitsbeurteilung',
 			projektarbeitData,
@@ -332,8 +362,6 @@ var Projektarbeitsbeurteilung = {
 				successCallback: function(data, textStatus, jqXHR) {
 					if (FHC_AjaxClient.hasData(data))
 					{
-						console.log($("#authtokenform").attr('action'));
-						console.log($("#authtokenform").serialize());
 						if (saveAndSend === true)
 						{// when saved and sent, reload the form so it is read only
 							$.ajax({
@@ -360,6 +388,33 @@ var Projektarbeitsbeurteilung = {
 				},
 				errorCallback: function() {
 					FHC_DialogLib.alertError(FHC_PhrasesLib.t("projektarbeitsbeurteilung", "beurteilungFehler"));
+				}
+			}
+		);
+	},
+	saveTitle: function(projektarbeit_id, titel)
+	{
+		FHC_AjaxClient.ajaxCallPost(
+			CALLED_PATH + '/saveTitel',
+			{
+				projektarbeit_id: projektarbeit_id,
+				titel: titel
+			},
+			{
+				successCallback: function(data, textStatus, jqXHR) {
+					if (FHC_AjaxClient.hasData(data))
+					{
+						Projektarbeitsbeurteilung.setTitleEditEvent(titel);
+
+						FHC_DialogLib.alertSuccess(FHC_PhrasesLib.t("projektarbeitsbeurteilung", "titelGespeichert"));
+					}
+					else if(FHC_AjaxClient.isError(data))
+					{
+						FHC_DialogLib.alertError(FHC_AjaxClient.getError(data));
+					}
+				},
+				errorCallback: function() {
+					FHC_DialogLib.alertError(FHC_PhrasesLib.t("projektarbeitsbeurteilung", "titelSpeichernFehler"));
 				}
 			}
 		);
@@ -404,15 +459,11 @@ var Projektarbeitsbeurteilung = {
 		}
 		else
 		{
-			dec = parseFloat(sum).toFixed(2);
+			dec = parseFloat(sum).toFixed(1);
 
 			dec = dec.split('.');
 			var dec1 = dec[0];
-			var dec2 = ',' + dec[1];
-			var rgx = /(\d+)(\d{3})/;
-			while (rgx.test(dec1)) {
-				dec1 = dec1.replace(rgx, '$1' + '.' + '$2');
-			}
+			var dec2 = dec[1] === '0' ? '' : ',' + dec[1];
 			dec = dec1 + dec2;
 		}
 		return dec;

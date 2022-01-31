@@ -449,6 +449,40 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 			$this->outputJsonError('invalid authentication');
 	}
 
+	public function saveTitel()
+	{
+		$authObj = $this->_authenticate();
+
+		// if successfully authenticated
+		if (isset($authObj->person_id) && isset($authObj->username))
+		{
+			$projektarbeit_id = $this->input->post('projektarbeit_id');
+			$titel = $this->input->post('titel');
+
+			// check input params
+			if (!is_numeric($projektarbeit_id))
+			{
+				$this->outputJsonError('Invalid Projektarbeit Id');
+			}
+			elseif (isEmptystring($titel))
+			{
+				$this->outputJsonError('Invalid titel');
+			}
+			else
+			{
+				// save titel of Projektarbeitsbeurteilung
+				$titelSaveRes = $this->ProjektarbeitModel->update(
+					array('projektarbeit_id' => $projektarbeit_id),
+					array('titel' => $titel)
+				);
+
+				$this->outputJson($titelSaveRes);
+			}
+		}
+		else
+			$this->outputJsonError('invalid authentication');
+	}
+
 	/**
 	 * Send info mail to commitee members when Erstbetreuer requests their consultation.
 	 */
