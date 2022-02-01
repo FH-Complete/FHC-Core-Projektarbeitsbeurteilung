@@ -26,7 +26,7 @@ $this->load->view(
 			),
 			'person' => array('vorname', 'nachname', 'uid'),
 			'global' => array('titel', 'abgeschickt', 'uploaddatum'),
-			'lehre' => array('note'),
+			'lehre' => array('note', 'studiengang'),
 			'ui' => array('bitteEintragWaehlen', 'projektarbeit', 'senden')
 
 		),

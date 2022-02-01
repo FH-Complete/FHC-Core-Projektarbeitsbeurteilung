@@ -3,6 +3,8 @@ $STUDIENSEMESTER = '\''.$this->variablelib->getVar('projektuebersicht_studiensem
 $ERSTBEGUTACHTER = '\'Erstbegutachter\'';
 $ZWEITBEGUTACHTER = '\'Zweitbegutachter\'';
 
+$oeKurz = '\''. implode('\',\'', $oeKurz) . '\'';
+
 $query = '
 		SELECT DISTINCT(beurteilung.projektarbeit_id) AS "ProjectWorkID",
 			arbeit.titel AS "Titel",
@@ -19,7 +21,8 @@ $query = '
 			stuperson.vorname as "StudentVorname",
 			stuperson.nachname as "StudentNachname",
 			arbeit.note AS "Note",
-			arbeit.abgabedatum AS "Abgabedatum"
+			arbeit.abgabedatum AS "Abgabedatum",
+			sg.kurzbzlang AS "Studiengang"
 		FROM extension.tbl_projektarbeitsbeurteilung beurteilung
 		JOIN lehre.tbl_projektarbeit arbeit ON beurteilung.projektarbeit_id = arbeit.projektarbeit_id
 		JOIN lehre.tbl_projekttyp USING (projekttyp_kurzbz)
@@ -27,6 +30,7 @@ $query = '
 		JOIN public.tbl_student student ON arbeit.student_uid = student.student_uid
 		JOIN public.tbl_benutzer stubenutzer ON student.student_uid = stubenutzer.uid
 		JOIN public.tbl_person stuperson ON stubenutzer.person_id = stuperson.person_id
+		JOIN public.tbl_studiengang sg USING(studiengang_kz)
 		FULL JOIN
 			(
 				(
@@ -56,7 +60,7 @@ $query = '
 					AND tbl_benutzer.aktiv OR tbl_benutzer.aktiv IS NULL
 				 )
 			 ) Zweitbegutachter ON (beurteilung.projektarbeit_id = Zweitbegutachter.projektarbeit_id)
-		WHERE studiensemester_kurzbz = '. $STUDIENSEMESTER .'
+		WHERE studiensemester_kurzbz = '. $STUDIENSEMESTER .' AND oe_kurzbz IN ('. $oeKurz .')
 		ORDER BY beurteilung.projektarbeit_id DESC;';
 
 $filterWidgetArray = array(
@@ -64,7 +68,7 @@ $filterWidgetArray = array(
 	'app' => 'projektarbeitsbeurteilung',
 	'datasetName' => 'projektuebersicht',
 	'filter_id' => $this->input->get('filter_id'),
-	'requiredPermissions' => 'admin',
+	'requiredPermissions' => 'assistenz',
 	'datasetRepresentation' => 'tablesorter',
 	'tableUniqueId' => 'projectWorkAssessment',
 	'hideOptions' => false,
@@ -89,11 +93,12 @@ $filterWidgetArray = array(
 		ucfirst($this->p->t('person', 'student')) . ' ' . $this->p->t('person', 'vorname'),
 		ucfirst($this->p->t('person', 'student')) . ' ' .$this->p->t('person', 'nachname'),
 		ucfirst($this->p->t('ui', 'projektarbeit')) . ' ' . $this->p->t('lehre', 'note'),
-		ucfirst($this->p->t('ui', 'projektarbeit')) . ' ' . $this->p->t('global', 'uploaddatum')
+		ucfirst($this->p->t('ui', 'projektarbeit')) . ' ' . $this->p->t('global', 'uploaddatum'),
+		ucfirst($this->p->t('lehre', 'studiengang'))
 	),
 	'formatRow' => function($datasetRaw) {
 
-		if ($datasetRaw->{'ZweitPersonID'} !== null && $datasetRaw->{'ErstPersonID'} !== null && $datasetRaw->{'ZweitUID'} === null)
+		if ($datasetRaw->{'ZweitPersonID'} !== null && $datasetRaw->{'ErstPersonID'} !== null && $datasetRaw->{'ZweitUID'} === null && $datasetRaw->{'Note'} === null)
 		{
 			$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'resendToken')))} = sprintf(
 				'<button class="resend" data-personid="%s" data-projektid="%s"  data-studentid="%s">' . ucfirst($this->p->t('ui', 'senden')) . '</button>',
@@ -135,23 +140,13 @@ $filterWidgetArray = array(
 					$datasetRaw->{'ZweitPersonID'}
 				);
 			}
+
+			$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'erstBegutachter')) . ' ' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischaltung')))} = '-';
+			$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'zweitBegutachter')) . ' ' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischaltung')))} = '-';
 		}
 		else
 		{
 			$datasetRaw->{'Note'} = '-';
-		}
-		$datasetRaw->{'Download'} = $download;
-
-		if ($datasetRaw->{'Abgabedatum'} !== null)
-		{
-			$datasetRaw->{'Abgabedatum'} = date_format(date_create($datasetRaw->{'Abgabedatum'}), 'Y-m-d');
-		}
-		else
-			$datasetRaw->{'Abgabedatum'} = '-';
-
-		if ($datasetRaw->{'ErstAbgeschickt'} !== null)
-		{
-			$datasetRaw->{'ErstAbgeschickt'} = date_format(date_create($datasetRaw->{'ErstAbgeschickt'}), 'Y-m-d H:i');
 
 			$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'erstBegutachter')) . ' ' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischaltung')))} = sprintf(
 				'<button class="freischalten" data-projektid="%s" data-personid="%s" data-abgeschickt="%s">' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischalten')) . '</button>',
@@ -159,16 +154,6 @@ $filterWidgetArray = array(
 				$datasetRaw->{'ErstPersonID'},
 				$datasetRaw->{'ErstAbgeschickt'}
 			);
-		}
-		else
-		{
-			$datasetRaw->{'ErstAbgeschickt'} = '-';
-			$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'erstBegutachter')) . ' ' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischaltung')))} = '-';
-		}
-
-		if ($datasetRaw->{'ZweitAbgeschickt'} !== null)
-		{
-			$datasetRaw->{'ZweitAbgeschickt'} = date_format(date_create($datasetRaw->{'ZweitAbgeschickt'}), 'Y-m-d H:i');;
 
 			$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'zweitBegutachter')) . ' ' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischaltung')))} = sprintf(
 				'<button class="freischalten" data-projektid="%s" data-personid="%s" data-abgeschickt="%s">' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischalten')) . '</button>',
@@ -176,11 +161,33 @@ $filterWidgetArray = array(
 				$datasetRaw->{'ZweitPersonID'},
 				$datasetRaw->{'ZweitAbgeschickt'}
 			);
+
+		}
+		$datasetRaw->{'Download'} = $download;
+
+		if ($datasetRaw->{'Abgabedatum'} !== null)
+		{
+			$datasetRaw->{'Abgabedatum'} = date_format(date_create($datasetRaw->{'Abgabedatum'}), 'd.m.Y');
+		}
+		else
+			$datasetRaw->{'Abgabedatum'} = '-';
+
+		if ($datasetRaw->{'ErstAbgeschickt'} !== null)
+		{
+			$datasetRaw->{'ErstAbgeschickt'} = date_format(date_create($datasetRaw->{'ErstAbgeschickt'}), 'd.m.Y H:i');
+		}
+		else
+		{
+			$datasetRaw->{'ErstAbgeschickt'} = '-';
+		}
+
+		if ($datasetRaw->{'ZweitAbgeschickt'} !== null)
+		{
+			$datasetRaw->{'ZweitAbgeschickt'} = date_format(date_create($datasetRaw->{'ZweitAbgeschickt'}), 'd.m.Y H:i');;
 		}
 		else
 		{
 			$datasetRaw->{'ZweitAbgeschickt'} = '-';
-			$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'zweitBegutachter')) . ' ' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischaltung')))} = '-';
 		}
 
 		if ($datasetRaw->{'Titel'} === null)

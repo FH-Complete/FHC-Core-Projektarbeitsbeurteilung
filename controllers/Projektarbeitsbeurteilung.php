@@ -328,18 +328,6 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 							$projektarbeitsbeurteilungToSave['updateamum'] = date('Y-m-d H:i:s', time());
 
 							$saveProjektarbeitsbeurteilungResult = $this->ProjektarbeitsbeurteilungModel->update($projektarbeitsbeurteilung_id, $projektarbeitsbeurteilungToSave);
-
-							if (isSuccess($saveProjektarbeitsbeurteilungResult) && $saveAndSend === true)
-							{
-								// send info mail to Studiengang on update
-								$mailResult = $this->projektarbeitsbeurteilungmaillib->sendInfoMailToStudiengangUpdated($projektarbeit_id, $betreuer_person_id);
-
-								if (isError($mailResult))
-								{
-									$this->outputJsonError(getError($mailResult));
-									exit;
-								}
-							}
 						}
 						else
 						{

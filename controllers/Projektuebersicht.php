@@ -10,6 +10,7 @@ class Projektuebersicht extends Auth_Controller
 
 	const FILTER_ID = 'filter_id';
 	const PREV_FILTER_ID = 'prev_filter_id';
+	const BERECHTIGUNG_KURZBZ = 'assistenz';
 
 	/**
 	 * Constructor
@@ -27,6 +28,8 @@ class Projektuebersicht extends Auth_Controller
 		$this->_setAuthUID(); // sets property uid
 		$this->_ci->load->library('WidgetLib');
 		$this->_ci->load->library('VariableLib', array('uid' => $this->_uid));
+		$this->_ci->load->library('PermissionLib');
+
 		$this->_ci->load->model('person/Person_model', 'PersonModel');
 		$this->_ci->load->model('extensions/FHC-Core-Projektarbeitsbeurteilung/Projektarbeitsbeurteilung_model', 'ProjektarbeitsbeurteilungModel');
 		$this->_ci->load->model('education/Projektarbeit_model', 'ProjektarbeitModel');
@@ -64,8 +67,9 @@ class Projektuebersicht extends Auth_Controller
 	{
 		$data[self::FHC_CONTROLLER_ID] = $this->getControllerId();
 		$data[self::PREV_FILTER_ID] = $this->_ci->input->get(self::PREV_FILTER_ID);
+		$data['oeKurz'] = $this->_ci->permissionlib->getOE_isEntitledFor(self::BERECHTIGUNG_KURZBZ);
 
-		$this->_ci->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/projektuebersicht/projektUebersicht', $data);
+		$this->_ci->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/projektuebersicht/projektUebersicht.php', $data);
 	}
 
 

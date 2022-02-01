@@ -112,53 +112,6 @@ class ProjektarbeitsbeurteilungMailLib
 	}
 
 	/**
-	 * Sends sancho infomail to Studiengang after updated assessment.
-	 * @param $projektarbeit_id int
-	 * @param $betreuer_person_id int
-	 * @return object success or error
-	 */
-	public function sendInfoMailToStudiengangUpdated($projektarbeit_id, $betreuer_person_id)
-	{
-		$projektarbeitsbeurteilungres = $this->_ci->ProjektarbeitsbeurteilungModel->getProjektarbeitsbeurteilung($projektarbeit_id, $betreuer_person_id);
-
-		if (!hasData($projektarbeitsbeurteilungres))
-			return error('Projektarbeitsbeurteilung not found');
-
-		$projektarbeitsbeurteilung = getData($projektarbeitsbeurteilungres);
-
-		$studiengang_kz = $projektarbeitsbeurteilung->studiengang_kz;
-
-		$this->_ci->StudiengangModel->addSelect('email');
-		$studiengangres = $this->_ci->StudiengangModel->load($studiengang_kz);
-
-		if (!hasData($studiengangres))
-			return error('Studiengang not found');
-
-		$studiengang_email = getData($studiengangres)[0]->email;
-		$betreuer_fullname = implode(' ', array_filter(array($projektarbeitsbeurteilung->titelpre_betreuer, $projektarbeitsbeurteilung->vorname_betreuer,
-			$projektarbeitsbeurteilung->nachname_betreuer, $projektarbeitsbeurteilung->titelpost_betreuer)));
-		$student_fullname =  implode(' ', array_filter(array($projektarbeitsbeurteilung->titelpre_student, $projektarbeitsbeurteilung->vorname_student,
-			$projektarbeitsbeurteilung->nachname_student, $projektarbeitsbeurteilung->titelpost_student)));
-
-		$mailcontent_data_arr = array(
-			'betreuer_voller_name' => $betreuer_fullname,
-			'student_voller_name' => $student_fullname,
-			'betreuer_art' => $projektarbeitsbeurteilung->betreuerart
-		);
-
-		sendSanchoMail(
-			'ParbeitsbeurteilungUPInfoAnStg',
-			$mailcontent_data_arr,
-			$studiengang_email,
-			'Projektarbeitsbeurteilung geändert',
-			'sancho_header_min_bw.jpg',
-			'sancho_footer_min_bw.jpg'
-		);
-
-		return success($studiengang_email);
-	}
-
-	/**
 	 * Sends info mail to commitee when requested by Erstbetreuer.
 	 * @param int $projektarbeit_id
 	 * @return object success or error
