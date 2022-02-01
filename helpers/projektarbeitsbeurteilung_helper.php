@@ -7,5 +7,8 @@
  */
 function formatDecimalGerman($number)
 {
+	if (!isset($number))
+		return '';
+
 	return str_replace(",0", "", number_format((float) $number, 1, ',', '.'));
 }

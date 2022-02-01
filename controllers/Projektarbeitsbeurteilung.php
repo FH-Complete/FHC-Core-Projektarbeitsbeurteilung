@@ -13,7 +13,8 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 	const BETREUERART_KOMMISSION = 'Kommission';
 	const EXTERNER_BEURTEILER_NAME = 'externerBeurteiler';
 
-	private $_requiredFields = array(
+	// fields required to be filled out by Erstbetreuer
+	private $_requiredFieldsErstbegutachter = array(
 			'plagiatscheck_unauffaellig' => 'bool',
 			'bewertung_thema' => 'points',
 			'bewertung_loesungsansatz' => 'points',
@@ -28,6 +29,14 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 			'begruendung' => 'text',
 			'betreuernote' => 'grade'
 	);
+
+	// fields required to be filled out by Zweitbetreuer
+	private $_requiredFieldsZweitbegutachter = array(
+		'beurteilung_zweitbegutachter' => 'text'
+	);
+
+	// fields required to be filled out by Betreuer, filled depending on Betreuer type
+	private $_requiredFields = array();
 
     /**
      * Constructor
@@ -57,6 +66,8 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 				'lehre'
             )
         );
+
+		$this->_requiredFields = $this->_requiredFieldsErstbegutachter;
     }
 
     // -----------------------------------------------------------------------------------------------------------------
@@ -251,9 +262,7 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 				// only check text field if Zweitbegutachter
 				if ($betreuerart == self::BETREUERART_ZWEITBEGUTACHTER)
 				{
-					$this->_requiredFields = array(
-						'beurteilung_zweitbegutachter' => 'text'
-					);
+					$this->_requiredFields = $this->_requiredFieldsZweitbegutachter;
 				}
 
 				// check entered Bewertung for validity
@@ -422,6 +431,40 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 					else
 						$this->outputJsonError('No Projektbetreuer found');
 				}
+			}
+		}
+		else
+			$this->outputJsonError('invalid authentication');
+	}
+
+	public function saveTitel()
+	{
+		$authObj = $this->_authenticate();
+
+		// if successfully authenticated
+		if (isset($authObj->person_id) && isset($authObj->username))
+		{
+			$projektarbeit_id = $this->input->post('projektarbeit_id');
+			$titel = $this->input->post('titel');
+
+			// check input params
+			if (!is_numeric($projektarbeit_id))
+			{
+				$this->outputJsonError('Invalid Projektarbeit Id');
+			}
+			elseif (isEmptystring($titel))
+			{
+				$this->outputJsonError('Invalid titel');
+			}
+			else
+			{
+				// save titel of Projektarbeitsbeurteilung
+				$titelSaveRes = $this->ProjektarbeitModel->update(
+					array('projektarbeit_id' => $projektarbeit_id),
+					array('titel' => $titel)
+				);
+
+				$this->outputJson($titelSaveRes);
 			}
 		}
 		else

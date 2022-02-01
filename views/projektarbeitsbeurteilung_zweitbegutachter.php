@@ -18,7 +18,7 @@ $this->load->view(
 			'public/extensions/FHC-Core-Projektarbeitsbeurteilung/css/projektarbeitsbeurteilung.css'
 		),
 		'customJSs' => array(
-			'public/extensions/FHC-Core-Projektarbeitsbeurteilung/js/projektarbeitsbeurteilung.js'
+			'public/extensions/FHC-Core-Projektarbeitsbeurteilung/js/projektarbeitsbeurteilung_zweitbegutachter.js'
 		)
 	)
 );
