@@ -68,12 +68,13 @@ $this->load->view(
 							</td>
 						</tr>
 						<tr>
-							<td class="tableWidthThirty"><b><?php echo $this->p->t('projektarbeitsbeurteilung', 'plagiatscheckUnauffaellig') ?></b></td>
+							<td class="tableWidthThirty"><b><?php echo $this->p->t('projektarbeitsbeurteilung', 'plagiatscheckBeschreibung') ?></b></td>
 							<td colspan="3">
 								<?php if ($readOnlyAccess): ?>
 									<?php echo $plagiatscheck_unauffaellig ? ucfirst($this->p->t('ui', 'ja')) : ucfirst($this->p->t('ui', 'nein')) ?>
 								<?php else: ?>
 									<input type="checkbox" name="plagiatscheck_unauffaellig" id="plagiatscheck_unauffaellig" value="true"<?php echo $plagiatscheck_unauffaellig === true ? ' checked="checked"' : ''?>>
+									&nbsp;<span class="text-warning" id="plagiatscheckHinweisNegativ"><?php echo $this->p->t('projektarbeitsbeurteilung', 'plagiatscheckHinweisNegativeBeurteilung') ?></span>
 								<?php endif; ?>
 							</td>
 						</tr>

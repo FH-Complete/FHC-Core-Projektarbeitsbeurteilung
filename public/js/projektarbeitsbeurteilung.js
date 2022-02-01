@@ -69,6 +69,9 @@ $("document").ready(function() {
 			}
 		)
 	}
+
+	// enable tooltips
+	$('[data-toggle="tooltip"]').tooltip();
 })
 
 var Projektarbeitsbeurteilung = {
@@ -113,22 +116,30 @@ var Projektarbeitsbeurteilung = {
 			if ($("#beurteilungtbl select").length)
 			{
 				var inputDropdowns = $("#beurteilungtbl select");
+				// span for selects for displaying tooltip
+				var tooltipElements = $("#beurteilungtbl .selectTooltip");
 
 				// if plagiatcheck checkbox is ticked
 				if (plagiatcheck_unauffaellig.prop('checked') === true)
 				{
-					// enable input dropdowns and remove quickinfo
+					// enable input dropdowns and remove tooltip
 					inputDropdowns.prop("disabled", null);
-					inputDropdowns.prop("title", "");
+
+					tooltipElements.attr("data-original-title", "")/*.attr("title", "")*/;
+					$("#plagiatscheckHinweisNegativ").hide();
 
 					// set the values in html form
 					Projektarbeitsbeurteilung.fillBewertungFormWithData();
 				}
-				else // if not ticked, disable input dropdowns and add quickinfo
+				else // if not ticked, disable input dropdowns and add tooltip
 				{
 					inputDropdowns.prop("disabled", true);
 					inputDropdowns.val(0); // all criteria 0, grade negative if plagiatscheck false
-					inputDropdowns.prop("title", FHC_PhrasesLib.t("projektarbeitsbeurteilung", "plagiatscheckNichtGesetzt"));
+
+					// changing of bootstrap tooltip only works with attr function and setting data-original-title
+					var title = FHC_PhrasesLib.t("projektarbeitsbeurteilung", "plagiatscheckNichtGesetzt");
+					tooltipElements.attr("data-original-title", title)/*.attr("title", title)*/;
+					$("#plagiatscheckHinweisNegativ").show();
 				}
 			}
 		}
@@ -212,7 +223,7 @@ var Projektarbeitsbeurteilung = {
 					{
 						var compoundCtgPercent = compoundCategoryPoints[catNr].points / compoundCategoryPoints[catNr].maxpoints * 100;
 
-						if (compoundCtgPercent <= Projektarbeitsbeurteilung.notenschluessel[5][1]) // if compound category negative
+						if (compoundCtgPercent < Projektarbeitsbeurteilung.notenschluessel[5][1]) // if compound category negative
 						{
 							finalNote = Projektarbeitsbeurteilung.negativeNoteValue; // set finalNote to negative
 							compoundCtgNegative = true;

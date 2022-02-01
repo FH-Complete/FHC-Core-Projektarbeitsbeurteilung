@@ -17,13 +17,15 @@
 			else
 				echo '';
 		else: ?>
-		<select name="<?php echo 'bewertung_'.$name ?>">
-			<option value="null">--&nbsp;<?php echo $this->p->t('projektarbeitsbeurteilung', 'bitteBeurteilen'); ?>&nbsp;--</option>
-			<?php foreach ($punkteArr as $punktewert => $phrasenname):
-				$punktewertDisplay = $language === 'German' ? formatDecimalGerman($punktewert) : $punktewert;
-				$selected = isset($projektarbeit_bewertung->{'bewertung_'.$name}) && $punktewert == $projektarbeit_bewertung->{'bewertung_'.$name} ? " selected" : ""?>
-				<option value="<?php echo $punktewert ?>"<?php echo $selected ?>><?php echo $punktewertDisplay . ' ' . $this->p->t('projektarbeitsbeurteilung', $phrasenname) ?></option>
-			<?php endforeach; ?>
-		</select>
+		<span class="selectTooltip" tabindex="0" data-toggle="tooltip">
+			<select name="<?php echo 'bewertung_'.$name ?>">
+				<option value="null">--&nbsp;<?php echo $this->p->t('projektarbeitsbeurteilung', 'bitteBeurteilen'); ?>&nbsp;--</option>
+				<?php foreach ($punkteArr as $punktewert => $phrasenname):
+					$punktewertDisplay = $language === 'German' ? formatDecimalGerman($punktewert) : $punktewert;
+					$selected = isset($projektarbeit_bewertung->{'bewertung_'.$name}) && $punktewert == $projektarbeit_bewertung->{'bewertung_'.$name} ? " selected" : ""?>
+					<option value="<?php echo $punktewert ?>"<?php echo $selected ?>><?php echo $punktewertDisplay . ' ' . $this->p->t('projektarbeitsbeurteilung', $phrasenname) ?></option>
+				<?php endforeach; ?>
+			</select>
+		</span>
 	<?php endif; ?>
 </td>
