@@ -1,67 +1,88 @@
 <?php
 $STUDIENSEMESTER = '\''.$this->variablelib->getVar('projektuebersicht_studiensemester').'\'';
 $ERSTBEGUTACHTER = '\'Erstbegutachter\'';
+$BEGUTACHTER = '\'Begutachter\'';
 $ZWEITBEGUTACHTER = '\'Zweitbegutachter\'';
+$KOMISSION = '\'Kommission\'';
 
 $oeKurz = '\''. implode('\',\'', $oeKurz) . '\'';
 
 $query = '
-		SELECT DISTINCT(beurteilung.projektarbeit_id) AS "ProjectWorkID",
-			arbeit.titel AS "Titel",
+		SELECT DISTINCT(pbeurteilung.projektarbeit_id) AS "ProjectWorkID",
+			parbeit.titel AS "Titel",
 			Erstbegutachter.vorname AS "ErstVorname",
 			Erstbegutachter.nachname AS "ErstNachname",
-			Erstbegutachter.betreuer_person_id AS "ErstPersonID",
-			Erstbegutachter.abgeschicktamum AS "ErstAbgeschickt",
+			Erstbegutachter.person_id AS "ErstPersonID",
+			Erstbegutachter.abgeschickt AS "ErstAbgeschickt",
 			Zweitbegutachter.vorname AS "ZweitVorname",
 			Zweitbegutachter.nachname AS "ZweitNachname",
-			Zweitbegutachter.betreuer_person_id AS "ZweitPersonID",
+			Zweitbegutachter.person_id AS "ZweitPersonID",
 			Zweitbegutachter.uid as "ZweitUID",
-			Zweitbegutachter.abgeschicktamum AS "ZweitAbgeschickt",
+			Zweitbegutachter.abgeschickt AS "ZweitAbgeschickt",
 			student.student_uid as "StudentID",
 			stuperson.vorname as "StudentVorname",
 			stuperson.nachname as "StudentNachname",
-			arbeit.note AS "Note",
-			arbeit.abgabedatum AS "Abgabedatum",
-			sg.kurzbzlang AS "Studiengang"
-		FROM extension.tbl_projektarbeitsbeurteilung beurteilung
-		JOIN lehre.tbl_projektarbeit arbeit ON beurteilung.projektarbeit_id = arbeit.projektarbeit_id
+			parbeit.note AS "Note",
+			parbeit.abgabedatum AS "Abgabedatum",
+			sg.kurzbzlang AS "Studiengang",
+			Kommission.Mitglieder AS "Kommissionsmitglieder"
+		FROM extension.tbl_projektarbeitsbeurteilung pbeurteilung
+		JOIN lehre.tbl_projektarbeit parbeit USING(projektarbeit_id)
+		JOIN lehre.tbl_projektbetreuer pbetreuer ON parbeit.projektarbeit_id = pbetreuer.projektarbeit_id
 		JOIN lehre.tbl_projekttyp USING (projekttyp_kurzbz)
 		JOIN lehre.tbl_lehreinheit USING (lehreinheit_id)
-		JOIN public.tbl_student student ON arbeit.student_uid = student.student_uid
+		JOIN public.tbl_student student ON parbeit.student_uid = student.student_uid
 		JOIN public.tbl_benutzer stubenutzer ON student.student_uid = stubenutzer.uid
 		JOIN public.tbl_person stuperson ON stubenutzer.person_id = stuperson.person_id
 		JOIN public.tbl_studiengang sg USING(studiengang_kz)
-		FULL JOIN
+		FULL JOIN 
+		(
 			(
-				(
-					SELECT sbeurteilung.betreuer_person_id,
-							sbeurteilung.projektarbeit_id,
-							p.vorname,
-							p.nachname,
-							sbeurteilung.abgeschicktamum
-					FROM extension.tbl_projektarbeitsbeurteilung sbeurteilung
-					JOIN public.tbl_person p ON sbeurteilung.betreuer_person_id = p.person_id
-					WHERE sbeurteilung.betreuerart_kurzbz = '. $ERSTBEGUTACHTER .'
-				)
-			) Erstbegutachter ON (beurteilung.projektarbeit_id = Erstbegutachter.projektarbeit_id)
+				SELECT beurteilung.abgeschicktamum as abgeschickt,
+						p.vorname,
+						p.nachname,
+						betreuer.person_id,
+						arbeit.projektarbeit_id as ProjektID
+				FROM lehre.tbl_projektbetreuer betreuer
+				JOIN lehre.tbl_projektarbeit arbeit USING(projektarbeit_id)
+				LEFT JOIN extension.tbl_projektarbeitsbeurteilung beurteilung ON arbeit.projektarbeit_id = beurteilung.projektarbeit_id AND betreuer.person_id = beurteilung.betreuer_person_id
+				LEFT JOIN public.tbl_person p ON betreuer.person_id = p.person_id
+				WHERE betreuer.betreuerart_kurzbz = '.$ERSTBEGUTACHTER.' OR betreuer.betreuerart_kurzbz = '. $BEGUTACHTER .'
+			)
+		) Erstbegutachter ON parbeit.projektarbeit_id = Erstbegutachter.ProjektID
 		FULL JOIN
-			 (
-				 (
-					SELECT sbeurteilung.betreuer_person_id,
-							sbeurteilung.projektarbeit_id,
-							p.vorname,
-							p.nachname,
-							sbeurteilung.abgeschicktamum,
-							tbl_benutzer.uid
-					FROM extension.tbl_projektarbeitsbeurteilung sbeurteilung
-					JOIN public.tbl_person p ON sbeurteilung.betreuer_person_id = p.person_id
-					LEFT JOIN public.tbl_benutzer on p.person_id = tbl_benutzer.person_id
-					WHERE sbeurteilung.betreuerart_kurzbz = '. $ZWEITBEGUTACHTER .'
-					AND tbl_benutzer.aktiv OR tbl_benutzer.aktiv IS NULL
-				 )
-			 ) Zweitbegutachter ON (beurteilung.projektarbeit_id = Zweitbegutachter.projektarbeit_id)
+		(
+			(
+				SELECT beurteilung.abgeschicktamum as abgeschickt,
+						p.vorname,
+						p.nachname,
+						betreuer.person_id,
+						benutzer.uid,
+						arbeit.projektarbeit_id as ProjektID
+				FROM lehre.tbl_projektbetreuer betreuer
+				JOIN lehre.tbl_projektarbeit arbeit USING(projektarbeit_id)
+				LEFT JOIN extension.tbl_projektarbeitsbeurteilung beurteilung ON arbeit.projektarbeit_id = beurteilung.projektarbeit_id AND betreuer.person_id = beurteilung.betreuer_person_id
+				LEFT JOIN public.tbl_person p ON betreuer.person_id = p.person_id
+				LEFT JOIN public.tbl_benutzer benutzer ON p.person_id = benutzer.person_id
+				WHERE betreuer.betreuerart_kurzbz = '.$ZWEITBEGUTACHTER.' AND benutzer.aktiv OR benutzer.aktiv IS NULL
+				)
+		) Zweitbegutachter ON parbeit.projektarbeit_id = Zweitbegutachter.ProjektID
+		FULL JOIN 
+		(
+			(
+				SELECT ARRAY_TO_STRING(ARRAY_AGG(DISTINCT (p.vorname || \' \' || p.nachname)), \', \') AS Mitglieder,
+						arbeit.projektarbeit_id as ProjektID
+				FROM lehre.tbl_projektbetreuer betreuer
+				JOIN lehre.tbl_projektarbeit arbeit USING(projektarbeit_id)
+				JOIN public.tbl_person p ON betreuer.person_id = p.person_id
+				JOIN public.tbl_benutzer benutzer ON p.person_id = benutzer.person_id
+				WHERE betreuer.betreuerart_kurzbz = '.$KOMISSION.'
+				AND benutzer.aktiv
+				GROUP BY arbeit.projektarbeit_id
+			)
+		) Kommission ON parbeit.projektarbeit_id = Kommission.ProjektID
 		WHERE studiensemester_kurzbz = '. $STUDIENSEMESTER .' AND oe_kurzbz IN ('. $oeKurz .')
-		ORDER BY beurteilung.projektarbeit_id DESC;';
+		ORDER BY pbeurteilung.projektarbeit_id DESC;';
 
 $filterWidgetArray = array(
 	'query' => $query,
@@ -94,7 +115,8 @@ $filterWidgetArray = array(
 		ucfirst($this->p->t('person', 'student')) . ' ' .$this->p->t('person', 'nachname'),
 		ucfirst($this->p->t('ui', 'projektarbeit')) . ' ' . $this->p->t('lehre', 'note'),
 		ucfirst($this->p->t('ui', 'projektarbeit')) . ' ' . $this->p->t('global', 'uploaddatum'),
-		ucfirst($this->p->t('lehre', 'studiengang'))
+		ucfirst($this->p->t('lehre', 'studiengang')),
+		ucfirst($this->p->t('projektarbeitsbeurteilung', 'kommissionsmitglieder'))
 	),
 	'formatRow' => function($datasetRaw) {
 
@@ -210,6 +232,9 @@ $filterWidgetArray = array(
 
 		if ($datasetRaw->{'ZweitPersonID'} === null)
 			$datasetRaw->{'ZweitPersonID'} = '-';
+
+		if ($datasetRaw->{'Kommissionsmitglieder'} === null)
+			$datasetRaw->{'Kommissionsmitglieder'} = '-';
 
 		return $datasetRaw;
 	}

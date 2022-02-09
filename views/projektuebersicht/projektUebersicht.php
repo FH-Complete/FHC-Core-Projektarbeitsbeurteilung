@@ -22,7 +22,8 @@ $this->load->view(
 					'erstBegutachter',
 					'zweitBegutachter',
 					'freischalten',
-					'freischaltung'
+					'freischaltung',
+					'kommissionsmitglieder'
 			),
 			'person' => array('vorname', 'nachname', 'uid'),
 			'global' => array('titel', 'abgeschickt', 'uploaddatum'),

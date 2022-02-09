@@ -67,7 +67,12 @@ class Projektuebersicht extends Auth_Controller
 	{
 		$data[self::FHC_CONTROLLER_ID] = $this->getControllerId();
 		$data[self::PREV_FILTER_ID] = $this->_ci->input->get(self::PREV_FILTER_ID);
-		$data['oeKurz'] = $this->_ci->permissionlib->getOE_isEntitledFor(self::BERECHTIGUNG_KURZBZ);
+		$oeKurzbz = $this->_ci->permissionlib->getOE_isEntitledFor(self::BERECHTIGUNG_KURZBZ);
+
+		if (!$oeKurzbz)
+			show_error('Keine Berechtigung.');
+
+		$data['oeKurz'] = $oeKurzbz;
 
 		$this->_ci->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/projektuebersicht/projektUebersicht.php', $data);
 	}
