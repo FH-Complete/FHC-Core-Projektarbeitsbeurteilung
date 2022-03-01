@@ -147,8 +147,7 @@ $this->load->view(
 									</b>
 								</td>
 								<td>
-									<?php echo $paarbeittyp === 'm' ? $this->p->t('projektarbeitsbeurteilung', 'ereignisseDiskussionTextMaster')
-										: $this->p->t('projektarbeitsbeurteilung', 'ereignisseDiskussionText') ?>
+									<?php echo $this->p->t('projektarbeitsbeurteilung', 'ereignisseDiskussionText') ?>
 								</td>
 									<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/beurteilungspunkte.php', array('name' => 'ereignissediskussion')); ?>
 							</tr>
