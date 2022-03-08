@@ -145,6 +145,7 @@ class ProjektarbeitsbeurteilungMailLib
 				'kommissionsmitglied_voller_name' => $kommissionsMitglied->voller_name,
 				'erstbetreuer_bezeichnung' => 'Erstbetreuer'.($erstbetreuer->geschlecht=="w"?"in":""),
 				'erstbetreuer_bezeichnung_english' => 'First assessor',
+				'erstbetreuer_bezeichnung_english_klein' => 'first assessor',
 				'erstbetreuer_anrede' => $erstbetreuer->anrede,
 				'erstbetreuer_voller_name' => $erstbetreuer->voller_name,
 				'erstbetreuer_email' => $erstbetreuerMail,
