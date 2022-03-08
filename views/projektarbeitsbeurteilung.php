@@ -46,7 +46,7 @@ $this->load->view(
 				<div class="col-lg-12">
 					<h3 class="page-header">
 						<?php echo $this->p->t('projektarbeitsbeurteilung', 'beurteilung') ?>
-						<?php echo $arbeittypName . ($paarbeittyp === 'm' ? '&nbsp' . $this->p->t('projektarbeitsbeurteilung', 'erstBegutachter') : '') ?>
+						<?php echo $arbeittypName . ($paarbeittyp === 'm' ? '&nbsp-&nbsp' . $this->p->t('projektarbeitsbeurteilung', 'erstBegutachter') : '') ?>
 					</h3>
 				</div>
 			</div>
@@ -56,7 +56,11 @@ $this->load->view(
 				<div class="col-lg-12">
 					<table class="table-condensed table-bordered table-responsive">
 						<tr>
-							<td class="tableWidthThirty"><b><?php echo ucfirst($this->p->t('global', 'titel')) . ' ' . $arbeittypName ?></b></td>
+							<td class="tableWidthThirty">
+								<b>
+									<?php echo ucfirst($this->p->t('projektarbeitsbeurteilung', 'titelDerArbeit')) . ' ' . $arbeittypName ?>
+								</b>
+							</td>
 							<td colspan="3">
 								<?php if ($readOnlyAccess): ?>
 									<?php echo $titel ?>
@@ -68,7 +72,12 @@ $this->load->view(
 							</td>
 						</tr>
 						<tr>
-							<td class="tableWidthThirty"><b><?php echo $this->p->t('projektarbeitsbeurteilung', 'plagiatscheckBeschreibung') ?></b></td>
+							<td class="tableWidthThirty">
+								<b>
+									<?php echo $paarbeittyp === 'm' ? $this->p->t('projektarbeitsbeurteilung', 'plagiatscheckBeschreibungMaster')
+										: $this->p->t('projektarbeitsbeurteilung', 'plagiatscheckBeschreibung') ?>
+								</b>
+							</td>
 							<td colspan="3">
 								<?php if ($readOnlyAccess): ?>
 									<?php echo $plagiatscheck_unauffaellig ? ucfirst($this->p->t('ui', 'ja')) : ucfirst($this->p->t('ui', 'nein')) ?>
@@ -136,7 +145,8 @@ $this->load->view(
 									</b>
 								</td>
 								<td>
-									<?php echo $this->p->t('projektarbeitsbeurteilung', 'methodeText') ?>
+									<?php echo $paarbeittyp === 'm' ? $this->p->t('projektarbeitsbeurteilung', 'methodeTextMaster')
+										: $this->p->t('projektarbeitsbeurteilung', 'methodeText') ?>
 								</td>
 									<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/beurteilungspunkte.php', array('name' => 'methode')); ?>
 							</tr>
@@ -158,7 +168,8 @@ $this->load->view(
 									</b>
 								</td>
 								<td>
-									<?php echo $this->p->t('projektarbeitsbeurteilung', 'eigenstaendigkeitText') ?>
+									<?php echo $paarbeittyp === 'm' ? $this->p->t('projektarbeitsbeurteilung', 'eigenstaendigkeitTextMaster')
+										: $this->p->t('projektarbeitsbeurteilung', 'eigenstaendigkeitText') ?>
 								</td>
 									<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/beurteilungspunkte.php', array('name' => 'eigenstaendigkeit')); ?>
 							</tr>
@@ -169,7 +180,8 @@ $this->load->view(
 									</b>
 								</td>
 								<td>
-									<?php echo $this->p->t('projektarbeitsbeurteilung', 'strukturText') ?>
+									<?php echo $paarbeittyp === 'm' ? $this->p->t('projektarbeitsbeurteilung', 'strukturTextMaster')
+										: $this->p->t('projektarbeitsbeurteilung', 'strukturText') ?>
 								</td>
 									<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/beurteilungspunkte.php', array('name' => 'struktur')); ?>
 							</tr>
@@ -202,7 +214,8 @@ $this->load->view(
 									</b>
 								</td>
 								<td>
-									<?php echo $this->p->t('projektarbeitsbeurteilung', 'literaturText') ?>
+									<?php echo $paarbeittyp === 'm' ? $this->p->t('projektarbeitsbeurteilung', 'literaturTextMaster')
+										: $this->p->t('projektarbeitsbeurteilung', 'literaturText') ?>
 								</td>
 									<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/beurteilungspunkte.php', array('name' => 'literatur')); ?>
 							</tr>
