@@ -35,7 +35,6 @@ class Projektuebersicht extends Auth_Controller
 		$this->_ci->load->model('education/Projektarbeit_model', 'ProjektarbeitModel');
 		$this->_ci->load->model('education/Projektbetreuer_model', 'ProjektbetreuerModel');
 		$this->_ci->load->model('crm/Student_model', 'StudentModel');
-		$this->load->model('extensions/FHC-Core-FHTW/VWBenutzer_model', 'VWBenutzerModel');
 
 		$this->load->helper('hlp_sancho_helper');
 
@@ -149,7 +148,9 @@ class Projektuebersicht extends Auth_Controller
 
 		$erstbegutachter = getData($erstbegutachter)[0];
 
-		$student = $this->_ci->VWBenutzerModel->loadWhere(array('uid' => $studentid));
+		$db = new DB_Model();
+		$qry = "SELECT * FROM campus.vw_benutzer WHERE uid = ?";
+		$student = $db->execReadOnlyQuery($qry, array($studentid));
 
 		if (!hasData($student))
 			$this->terminateWithJsonError('Student kann nicht geladen werden.');
