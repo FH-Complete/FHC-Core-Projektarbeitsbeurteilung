@@ -51,7 +51,7 @@ $this->load->view(
 				</div>
 			</div>
 			<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/hiddenfields.php'); ?>
-			<form id="beurteilungform">
+			<form id="beurteilungform" onsubmit="return false;">
 			<div class="row">
 				<div class="col-lg-12">
 					<table class="table-condensed table-bordered table-responsive">
@@ -83,7 +83,7 @@ $this->load->view(
 									<?php echo $plagiatscheck_unauffaellig ? ucfirst($this->p->t('ui', 'ja')) : ucfirst($this->p->t('ui', 'nein')) ?>
 								<?php else: ?>
 									<input type="checkbox" name="plagiatscheck_unauffaellig" id="plagiatscheck_unauffaellig" value="true"<?php echo $plagiatscheck_unauffaellig === true ? ' checked="checked"' : ''?>>
-									&nbsp;<span class="text-warning" id="plagiatscheckHinweisNegativ"><?php echo $this->p->t('projektarbeitsbeurteilung', 'plagiatscheckHinweisNegativeBeurteilung') ?></span>
+									&nbsp;<span class="text-warning noDisplay" id="plagiatscheckHinweisNegativ"><?php echo $this->p->t('projektarbeitsbeurteilung', 'plagiatscheckHinweisNegativeBeurteilung') ?></span>
 								<?php endif; ?>
 							</td>
 						</tr>

@@ -273,12 +273,19 @@ var Projektarbeitsbeurteilung = {
 					'&nbsp;<i class="fa fa-check text-success" id="confirmTitleEdit">'
 				);
 
-				$("#confirmTitleEdit").click(
-					function()
+				var saveTitleFunc = function()
+				{
+					Projektarbeitsbeurteilung.saveTitle($("#projektarbeit_id").val(), $("#titleInputField").val());
+				}
+
+				$("#confirmTitleEdit").click(saveTitleFunc); // when click on tick sign, save title
+				$("#titleInputField").keypress(function(event)
 					{
-						Projektarbeitsbeurteilung.saveTitle($("#projektarbeit_id").val(), $("#titleInputField").val());
+						if (event.which == '13') // when hit enter, save title as well
+							saveTitleFunc();
+						event.stopPropagation();
 					}
-				)
+				);
 			}
 		);
 	},
@@ -331,7 +338,6 @@ var Projektarbeitsbeurteilung = {
 		// add plagiatscheck to data
 		if ($("#plagiatscheck_unauffaellig").length > 0)
 			bewertungData['plagiatscheck_unauffaellig'] = $("#plagiatscheck_unauffaellig").prop('checked') === true;
-
 
 		return bewertungData;
 	},
