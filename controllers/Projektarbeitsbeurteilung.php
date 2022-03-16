@@ -15,24 +15,24 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 
 	// fields required to be filled out by Erstbetreuer
 	private $_requiredFieldsErstbegutachter = array(
-			'plagiatscheck_unauffaellig' => 'bool',
-			'bewertung_thema' => 'points',
-			'bewertung_loesungsansatz' => 'points',
-			'bewertung_methode' => 'points',
-			'bewertung_ereignissediskussion' => 'points',
-			'bewertung_eigenstaendigkeit' => 'points',
-			'bewertung_struktur' => 'points',
-			'bewertung_stil' => 'points',
-			'bewertung_form' => 'points',
-			'bewertung_literatur' => 'points',
-			'bewertung_zitierregeln' => 'points',
-			'begruendung' => 'text',
-			'betreuernote' => 'grade'
+			'plagiatscheck_unauffaellig' => array('type' => 'bool', 'phrase' => 'plagiatscheck'),
+			'bewertung_thema' => array('type' => 'points', 'phrase' => 'thema'),
+			'bewertung_loesungsansatz' => array('type' => 'points', 'phrase' => 'loesungsansatz'),
+			'bewertung_methode' => array('type' => 'points', 'phrase' => 'methode'),
+			'bewertung_ereignissediskussion' => array('type' => 'points', 'phrase' => 'ereignisseDiskussion'),
+			'bewertung_eigenstaendigkeit' => array('type' => 'points', 'phrase' => 'eigenstaendigkeit'),
+			'bewertung_struktur' => array('type' => 'points', 'phrase' => 'struktur'),
+			'bewertung_stil' => array('type' => 'points', 'phrase' => 'stil'),
+			'bewertung_form' => array('type' => 'points', 'phrase' => 'form'),
+			'bewertung_literatur' => array('type' => 'points', 'phrase' => 'literatur'),
+			'bewertung_zitierregeln' => array('type' => 'points', 'phrase' => 'zitierregeln'),
+			'begruendung' => array('type' => 'text', 'phrase' => 'begruendungText'),
+			'betreuernote' => array('type' => 'grade', 'phrase' => 'betreuernote')
 	);
 
 	// fields required to be filled out by Zweitbetreuer
 	private $_requiredFieldsZweitbegutachter = array(
-		'beurteilung_zweitbegutachter' => 'text'
+		'beurteilung_zweitbegutachter' => array('type' => 'text', 'phrase' => '')
 	);
 
 	// fields required to be filled out by Betreuer, filled depending on Betreuer type
@@ -571,37 +571,40 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 	{
 		$betreuernote = isset ($bewertung['betreuernote']) ? $bewertung['betreuernote'] : null;
 
-		foreach ($this->_requiredFields as $required_field => $fieldtype)
+		foreach ($this->_requiredFields as $requiredField => $fieldData)
 		{
-			if (!isset($bewertung[$required_field]) || (is_string($bewertung[$required_field]) && trim($bewertung[$required_field]) === ''))
+			if (!isset($bewertung[$requiredField]) || (is_string($bewertung[$requiredField]) && trim($bewertung[$requiredField]) === ''))
 			{
 				// if only save and not send, null values are allowed. Begruedung is only necessary when grade is 5.
-				if ($saveAndSend == false || ($required_field == 'begruendung' && $betreuernote != 5))
+				if ($saveAndSend == false || ($requiredField == 'begruendung' && $betreuernote != 5))
 					continue;
 
-				return error(ucfirst($required_field) . ' ' . $this->p->t('ui', 'fehlt'));
+				$fieldName = isset($fieldData['phrase']) ? $this->p->t('projektarbeitsbeurteilung', $fieldData['phrase']) : $requiredField;
+
+				return error(ucfirst($fieldName) . ' ' . $this->p->t('ui', 'fehlt'));
 			}
 
 			$valid = true;
+			$fieldType = isset($fieldData['type']) ? $fieldData['type'] : 'text';
 
-			switch($fieldtype)
+			switch($fieldType)
 			{
 				case 'text':
-					$valid = is_string($bewertung[$required_field]);
+					$valid = is_string($bewertung[$requiredField]);
 					break;
 				case 'bool':
-					$valid = is_bool($bewertung[$required_field]);
+					$valid = is_bool($bewertung[$requiredField]);
 					break;
 				case 'points':
-					$valid = is_numeric($bewertung[$required_field]);
+					$valid = is_numeric($bewertung[$requiredField]);
 					break;
 				case 'grade':
-					$valid = in_array($bewertung[$required_field], array('1', '2', '3', '4', '5'));
+					$valid = in_array($bewertung[$requiredField], array('1', '2', '3', '4', '5'));
 					break;
 			}
 
 			if (!$valid)
-				return error("$required_field" . $this->p->t('ui', 'ungueltig'));
+				return error("$requiredField" . $this->p->t('ui', 'ungueltig'));
 		}
 
 		return success('Bewertung check passed');
@@ -618,13 +621,13 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 		$punkte->gesamtpunkte = 0;
 		$punkte->maxpunkte = 0;
 
-		foreach ($this->_requiredFields as $required_field => $fieldtype)
+		foreach ($this->_requiredFields as $requiredField => $fieldData)
 		{
-			if ($fieldtype == 'points')
+			if (isset($fieldData['type']) && $fieldData['type'] == 'points')
 			{
-				if (isset($bewertung->{$required_field}) && is_numeric($bewertung->{$required_field}))
+				if (isset($bewertung->{$requiredField}) && is_numeric($bewertung->{$requiredField}))
 				{
-					$punkte->gesamtpunkte += (float)$bewertung->{$required_field};
+					$punkte->gesamtpunkte += (float)$bewertung->{$requiredField};
 				}
 				$punkte->maxpunkte += self::CATEGORY_MAX_POINTS;
 			}
