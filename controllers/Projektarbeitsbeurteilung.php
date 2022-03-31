@@ -32,7 +32,7 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 
 	// fields required to be filled out by Zweitbetreuer
 	private $_requiredFieldsZweitbegutachter = array(
-		'beurteilung_zweitbegutachter' => array('type' => 'text', 'phrase' => '')
+		'beurteilung_zweitbegutachter' => array('type' => 'text', 'phrase' => 'kurzeSchriftlicheBeurteilung')
 	);
 
 	// fields required to be filled out by Betreuer, filled depending on Betreuer type
