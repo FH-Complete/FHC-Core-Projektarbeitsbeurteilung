@@ -18,7 +18,7 @@ $this->load->view(
 			'public/extensions/FHC-Core-Projektarbeitsbeurteilung/css/projektarbeitsbeurteilung.css'
 		),
 		'customJSs' => array(
-			'public/extensions/FHC-Core-Projektarbeitsbeurteilung/js/projektarbeitsbeurteilung.js'
+			'public/extensions/FHC-Core-Projektarbeitsbeurteilung/js/projektarbeitsbeurteilung_zweitbegutachter.js'
 		)
 	)
 );
@@ -44,7 +44,7 @@ $this->load->view(
 				<div class="col-lg-12">
 					<h3 class="page-header">
 						<?php echo $this->p->t('projektarbeitsbeurteilung', 'beurteilung') ?>
-						<?php echo $arbeittypName . ($paarbeittyp === 'm' ? '&nbsp' . $this->p->t('projektarbeitsbeurteilung', 'zweitBegutachter') : '') ?>
+						<?php echo $arbeittypName . ($paarbeittyp === 'm' ? '&nbsp-&nbsp' . $this->p->t('projektarbeitsbeurteilung', 'zweitBegutachter') : '') ?>
 					</h3>
 				</div>
 			</div>
@@ -54,7 +54,11 @@ $this->load->view(
 				<div class="col-lg-12">
 					<table class="table-condensed table-bordered table-responsive">
 						<tr>
-							<td><b><?php echo ucfirst($this->p->t('global', 'titel')) ?></b></td>
+							<td>
+								<b>
+									<?php echo ucfirst($this->p->t('projektarbeitsbeurteilung', 'titelDerArbeit')) . ' ' . $arbeittypName ?>
+								</b>
+							</td>
 							<td colspan="3"><?php echo $titel ?></td>
 						</tr>
 						<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/stammdaten.php'); ?>
@@ -105,7 +109,7 @@ $this->load->view(
 			</div>
 			<br />
 			</form>
-				<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/savebuttons.php', array('sent' => $sent)); ?>
+				<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/footer.php', array('sent' => $sent)); ?>
 			<br />
 			<?php endif; ?>
 		</div>

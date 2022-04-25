@@ -44,7 +44,7 @@ class Projektarbeitsbeurteilung_model extends DB_Model
 			WHERE parbeit.projektarbeit_id = ?
 			AND betreuer.person_id = ?
 			AND parbeit.projekttyp_kurzbz IN ('Bachelor', 'Diplom')
-			AND betreuer.betreuerart_kurzbz IN ('Begutachter', 'Erstbegutachter', 'Zweitbegutachter')";
+			AND betreuer.betreuerart_kurzbz IN ('Begutachter', 'Erstbegutachter', 'Zweitbegutachter', 'Kommission')";
 
 		if (isset($student_uid))
 		{
@@ -142,7 +142,6 @@ class Projektarbeitsbeurteilung_model extends DB_Model
 
 	/**
 	 * Gets Zweitbegutachter of a Projektarbeit with a certain Erstbegutachter.
-	 * Gets only Zweitbegutachter if he already sent his assessment.
 	 * @param int $projektarbeit_id
 	 * @param int $erstbetreuer_person_id
 	 * @param string $student_uid
@@ -151,15 +150,14 @@ class Projektarbeitsbeurteilung_model extends DB_Model
 	public function getZweitbegutachterFromErstbegutachter($projektarbeit_id, $erstbetreuer_person_id, $student_uid)
 	{
 		$zweitbetrQry = "
-			SELECT betr.person_id
+			SELECT betr.person_id, beurt.abgeschicktamum
 			FROM lehre.tbl_projektbetreuer betr
 			JOIN lehre.tbl_projektarbeit parb ON betr.projektarbeit_id = parb.projektarbeit_id 
-			JOIN extension.tbl_projektarbeitsbeurteilung beurt ON betr.projektarbeit_id = beurt.projektarbeit_id
+			LEFT JOIN extension.tbl_projektarbeitsbeurteilung beurt ON betr.projektarbeit_id = beurt.projektarbeit_id
 			                                                          AND betr.betreuerart_kurzbz = beurt.betreuerart_kurzbz
 			WHERE betr.betreuerart_kurzbz = 'Zweitbegutachter'
 			AND betr.projektarbeit_id = ?
 			AND parb.student_uid = ?
-			AND beurt.abgeschicktamum IS NOT NULL
 			AND EXISTS (
 			    SELECT 1 FROM lehre.tbl_projektbetreuer
 			    WHERE person_id = ?
@@ -181,9 +179,9 @@ class Projektarbeitsbeurteilung_model extends DB_Model
 	public function getErstbegutachterFromZweitbegutachter($projektarbeit_id, $zweitbegutachter_person_id)
 	{
 		$zweitbetrQry = "
-			SELECT betr.person_id, ben.uid, parb.student_uid, pers.anrede, stud_pers.anrede AS student_anrede,
-			       trim(COALESCE(pers.titelpre,'')||' '||COALESCE(pers.vorname,'')||' '||COALESCE(pers.nachname,'')||' '||COALESCE(pers.titelpost,'')) AS fullname,
-			       trim(COALESCE(stud_pers.titelpre,'')||' '||COALESCE(stud_pers.vorname,'')||' '||COALESCE(stud_pers.nachname,'')||' '||COALESCE(stud_pers.titelpost,'')) AS student_fullname
+			SELECT betr.person_id, ben.uid, parb.student_uid, pers.anrede, pers.geschlecht, stud_pers.anrede AS student_anrede,
+					trim(COALESCE(pers.titelpre,'')||' '||COALESCE(pers.vorname,'')||' '||COALESCE(pers.nachname,'')||' '||COALESCE(pers.titelpost,'')) AS fullname,
+					trim(COALESCE(stud_pers.titelpre,'')||' '||COALESCE(stud_pers.vorname,'')||' '||COALESCE(stud_pers.nachname,'')||' '||COALESCE(stud_pers.titelpost,'')) AS student_fullname
 			FROM lehre.tbl_projektbetreuer betr
 			JOIN lehre.tbl_projektarbeit parb ON betr.projektarbeit_id = parb.projektarbeit_id
 			JOIN public.tbl_person pers ON betr.person_id = pers.person_id
@@ -192,6 +190,7 @@ class Projektarbeitsbeurteilung_model extends DB_Model
 			LEFT JOIN extension.tbl_projektarbeitsbeurteilung beurt ON betr.projektarbeit_id = beurt.projektarbeit_id
 			                                                          AND betr.betreuerart_kurzbz = beurt.betreuerart_kurzbz
 			LEFT JOIN public.tbl_benutzer ben ON betr.person_id = ben.person_id AND ben.aktiv = TRUE
+			LEFT JOIN public.tbl_mitarbeiter ma ON ben.uid = ma.mitarbeiter_uid
 			WHERE betr.betreuerart_kurzbz = 'Erstbegutachter'
 			AND betr.projektarbeit_id = ?
 			AND beurt.abgeschicktamum IS NULL
@@ -201,7 +200,9 @@ class Projektarbeitsbeurteilung_model extends DB_Model
 			    AND betreuerart_kurzbz = 'Zweitbegutachter'
 			    AND projektarbeit_id = betr.projektarbeit_id
 			)
-			ORDER BY betr.insertamum DESC
+			ORDER BY CASE WHEN ma.mitarbeiter_uid IS NULL THEN 1 ELSE 0 END, /* prefer mitarbeiter accounts */
+			         CASE WHEN ben.uid IS NULL THEN 1 ELSE 0 END,
+			         betr.insertamum DESC
 			LIMIT 1";
 
 		return $this->execQuery($zweitbetrQry, array($projektarbeit_id, $zweitbegutachter_person_id));

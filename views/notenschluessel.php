@@ -21,10 +21,9 @@
 			</tr>
 			<tr>
 				<td colspan="5">
-					<?php
-						$notenschluesselHinweis = $this->p->t('projektarbeitsbeurteilung', 'notenschluesselHinweis');
-						echo sprintf($notenschluesselHinweis, $arbeittypName);
-					?>
+					<?php echo $this->p->t('projektarbeitsbeurteilung', 'notenschluesselHinweis', array($arbeittypName));?>
+					<br />
+					<?php echo $this->p->t('projektarbeitsbeurteilung', 'notenschluesselHinweisNullPunkteEinKriterium', array($arbeittypName));?>
 				</td>
 			</tr>
 		</table>

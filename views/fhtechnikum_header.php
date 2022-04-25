@@ -1,7 +1,10 @@
 <?php
 	$language = isset($language) ? $language : 'German';
 	$studiengang = $language == 'English' ? $projektarbeitsbeurteilung->studiengangbezeichnung_englisch : $projektarbeitsbeurteilung->studiengangbezeichnung;
-	$orgform_bezeichnung = $language == 'English' ? $projektarbeitsbeurteilung->orgform_bezeichnung[1] : $projektarbeitsbeurteilung->orgform_bezeichnung[0];
+
+$orgform_bezeichnung = '';
+	if (isset($projektarbeitsbeurteilung->orgform_bezeichnung))
+		$orgform_bezeichnung = $language == 'English' ? $projektarbeitsbeurteilung->orgform_bezeichnung[1] : $projektarbeitsbeurteilung->orgform_bezeichnung[0];
 ?>
 <div class="row">
 	<div class="col-lg-12 text-right">
@@ -18,7 +21,7 @@
 			</tr>
 			<tr>
 				<td><b><?php echo ucfirst($this->p->t('projektarbeitsbeurteilung', 'organisationsform')) ?></b></td>
-				<td><?php echo $orgform_bezeichnung . ' (' . $projektarbeitsbeurteilung->orgform_kurzbz . ')' ?></td>
+				<td><?php echo $orgform_bezeichnung . ' (' . (isset($projektarbeitsbeurteilung->orgform_kurzbz) ? $projektarbeitsbeurteilung->orgform_kurzbz : '') . ')' ?></td>
 			</tr>
 		</table>
 	</div>
