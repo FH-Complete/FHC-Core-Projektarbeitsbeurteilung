@@ -25,6 +25,7 @@ $query = '
 			parbeit.note AS "Note",
 			parbeit.abgabedatum AS "Abgabedatum",
 			sg.kurzbzlang AS "Studiengang",
+			UPPER(sg.typ) as "Typ",
 			Kommission.Mitglieder AS "Kommissionsmitglieder"
 		FROM lehre.tbl_projektarbeit parbeit
 		JOIN lehre.tbl_projektbetreuer pbetreuer ON parbeit.projektarbeit_id = pbetreuer.projektarbeit_id
@@ -116,6 +117,7 @@ $filterWidgetArray = array(
 		ucfirst($this->p->t('ui', 'projektarbeit')) . ' ' . $this->p->t('lehre', 'note'),
 		ucfirst($this->p->t('ui', 'projektarbeit')) . ' ' . $this->p->t('global', 'uploaddatum'),
 		ucfirst($this->p->t('lehre', 'studiengang')),
+		ucfirst($this->p->t('global', 'typ')),
 		ucfirst($this->p->t('projektarbeitsbeurteilung', 'kommissionsmitglieder'))
 	),
 	'formatRow' => function($datasetRaw) {
@@ -138,14 +140,28 @@ $filterWidgetArray = array(
 
 			if ($datasetRaw->{'ErstAbgeschickt'} !== null)
 			{
-				$download = sprintf(
-					'<a href="%s&xsl=%s&betreuerart_kurzbz=%s&projektarbeit_id=%s&person_id=%s">' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'erstBegutachter')) . '</a>',
-					APP_ROOT.'/cis/private/pdfExport.php?xml=projektarbeitsbeurteilung.xml.php',
-					'Projektbeurteilung',
-					'Erstbegutachter',
-					$datasetRaw->{'ProjectWorkID'},
-					$datasetRaw->{'ErstPersonID'}
-				);
+				if ($datasetRaw->{'Typ'} === 'M')
+				{
+					$download = sprintf(
+						'<a href="%s&xsl=%s&betreuerart_kurzbz=%s&projektarbeit_id=%s&person_id=%s">' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'erstBegutachter')) . '</a>',
+						APP_ROOT.'/cis/private/pdfExport.php?xml=projektarbeitsbeurteilung.xml.php',
+						'Projektbeurteilung',
+						'Erstbegutachter',
+						$datasetRaw->{'ProjectWorkID'},
+						$datasetRaw->{'ErstPersonID'}
+					);
+				}
+				else if($datasetRaw->{'Typ'} === 'B')
+				{
+					$download = sprintf(
+						'<a href="%s&xsl=%s&betreuerart_kurzbz=%s&projektarbeit_id=%s&person_id=%s">' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'begutachter')) . '</a>',
+						APP_ROOT.'/cis/private/pdfExport.php?xml=projektarbeitsbeurteilung.xml.php',
+						'Projektbeurteilung',
+						'Begutachter',
+						$datasetRaw->{'ProjectWorkID'},
+						$datasetRaw->{'ErstPersonID'}
+					);
+				}
 			}
 
 			if ($datasetRaw->{'ErstAbgeschickt'} !== null & $datasetRaw->{'ZweitAbgeschickt'} !== null)
