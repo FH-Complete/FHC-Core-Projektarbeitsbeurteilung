@@ -8,7 +8,7 @@ $KOMISSION = '\'Kommission\'';
 $oeKurz = '\''. implode('\',\'', $oeKurz) . '\'';
 
 $query = '
-		SELECT DISTINCT(parbeit.projektarbeit_id) AS "ProjectWorkID",
+		SELECT DISTINCT ON (parbeit.projektarbeit_id) parbeit.projektarbeit_id AS "ProjectWorkID",
 			parbeit.titel AS "Titel",
 			Erstbegutachter.vorname AS "ErstVorname",
 			Erstbegutachter.nachname AS "ErstNachname",
@@ -36,7 +36,7 @@ $query = '
 		JOIN public.tbl_person stuperson ON stubenutzer.person_id = stuperson.person_id
 		JOIN public.tbl_studiengang sg USING(studiengang_kz)
 		LEFT JOIN extension.tbl_projektarbeitsbeurteilung pbeurteilung ON parbeit.projektarbeit_id = pbeurteilung.projektarbeit_id AND pbetreuer.person_id = pbeurteilung.betreuer_person_id
-		FULL JOIN 
+		FULL JOIN
 		(
 			(
 				SELECT beurteilung.abgeschicktamum as abgeschickt,
@@ -68,7 +68,7 @@ $query = '
 				WHERE betreuer.betreuerart_kurzbz = '.$ZWEITBEGUTACHTER.' AND benutzer.aktiv OR benutzer.aktiv IS NULL
 				)
 		) Zweitbegutachter ON parbeit.projektarbeit_id = Zweitbegutachter.ProjektID
-		FULL JOIN 
+		FULL JOIN
 		(
 			(
 				SELECT ARRAY_TO_STRING(ARRAY_AGG(DISTINCT (p.vorname || \' \' || p.nachname)), \', \') AS Mitglieder,
@@ -142,6 +142,7 @@ $filterWidgetArray = array(
 			{
 				if ($datasetRaw->{'Typ'} === 'M')
 				{
+					/* Master Erstbegutachter Download */
 					$download = sprintf(
 						'<a href="%s&xsl=%s&betreuerart_kurzbz=%s&projektarbeit_id=%s&person_id=%s">' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'erstBegutachter')) . '</a>',
 						APP_ROOT.'/cis/private/pdfExport.php?xml=projektarbeitsbeurteilung.xml.php',
@@ -153,6 +154,7 @@ $filterWidgetArray = array(
 				}
 				else if($datasetRaw->{'Typ'} === 'B')
 				{
+					/* Bachelor Betreuer Download */
 					$download = sprintf(
 						'<a href="%s&xsl=%s&betreuerart_kurzbz=%s&projektarbeit_id=%s&person_id=%s">' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'begutachter')) . '</a>',
 						APP_ROOT.'/cis/private/pdfExport.php?xml=projektarbeitsbeurteilung.xml.php',
@@ -162,10 +164,31 @@ $filterWidgetArray = array(
 						$datasetRaw->{'ErstPersonID'}
 					);
 				}
+				else
+				{
+					/* Fallback auf Erstbegutachter Download - LG */
+					$download = sprintf(
+						'<a href="%s&xsl=%s&betreuerart_kurzbz=%s&projektarbeit_id=%s&person_id=%s">' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'erstBegutachter')) . '</a>',
+						APP_ROOT.'/cis/private/pdfExport.php?xml=projektarbeitsbeurteilung.xml.php',
+						'Projektbeurteilung',
+						'Erstbegutachter',
+						$datasetRaw->{'ProjectWorkID'},
+						$datasetRaw->{'ErstPersonID'}
+					);
+				}
+
+				$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'erstBegutachter')) . ' ' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischaltung')))} = sprintf(
+					'<button class="freischalten" data-projektid="%s" data-personid="%s" data-abgeschickt="%s">' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischalten')) . '</button>',
+					$datasetRaw->{'ProjectWorkID'},
+					$datasetRaw->{'ErstPersonID'},
+					$datasetRaw->{'ErstAbgeschickt'}
+				);
 			}
+			else
+				$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'erstBegutachter')) . ' ' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischaltung')))} = '-';
 
 			if ($datasetRaw->{'ErstAbgeschickt'} !== null & $datasetRaw->{'ZweitAbgeschickt'} !== null)
-				$download .= '/';
+				$download .= ' / ';
 
 			if ($datasetRaw->{'ZweitAbgeschickt'} !== null)
 			{
@@ -177,10 +200,17 @@ $filterWidgetArray = array(
 					$datasetRaw->{'ProjectWorkID'},
 					$datasetRaw->{'ZweitPersonID'}
 				);
+				$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'zweitBegutachter')) . ' ' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischaltung')))} = sprintf(
+					'<button class="freischalten" data-projektid="%s" data-personid="%s" data-abgeschickt="%s">' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischalten')) . '</button>',
+					$datasetRaw->{'ProjectWorkID'},
+					$datasetRaw->{'ZweitPersonID'},
+					$datasetRaw->{'ZweitAbgeschickt'}
+				);
 			}
+			else
+				$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'zweitBegutachter')) . ' ' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischaltung')))} = '-';
 
-			$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'erstBegutachter')) . ' ' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischaltung')))} = '-';
-			$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'zweitBegutachter')) . ' ' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischaltung')))} = '-';
+
 		}
 		else
 		{
