@@ -166,7 +166,8 @@ $(document).on('click', '.freischalten', function()
 	if (abgeschickt === '')
 		return FHC_DialogLib.alertInfo("Freischaltung nicht möglich, da es noch nicht abgeschickt wurde.");
 
-	ProjektUebersichtDataset.unlockAssessment(personid, projektid, $(this));
+	if(confirm("Soll die Beurteilung wirklick nochmal zur Bearbeitung freigeschalten werden?"))
+		ProjektUebersichtDataset.unlockAssessment(personid, projektid, $(this));
 });
 
 $(document).on('click', '.resend', function()
@@ -178,5 +179,6 @@ $(document).on('click', '.resend', function()
 	if (personid === '')
 		return FHC_DialogLib.alertInfo("Erstbegutachter nicht eingetragen.");
 
-	ProjektUebersichtDataset.resendToken(personid, projektid, studentid);
+	if(confirm("Soll der Zugangstoken erneut an den Betreuer geschickt werden?"))
+		ProjektUebersichtDataset.resendToken(personid, projektid, studentid);
 });

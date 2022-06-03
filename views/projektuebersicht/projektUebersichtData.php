@@ -125,7 +125,9 @@ $filterWidgetArray = array(
 		if ($datasetRaw->{'ZweitPersonID'} !== null && $datasetRaw->{'ErstPersonID'} !== null && $datasetRaw->{'ZweitUID'} === null && $datasetRaw->{'Note'} === null)
 		{
 			$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'resendToken')))} = sprintf(
-				'<button class="resend" data-personid="%s" data-projektid="%s"  data-studentid="%s">' . ucfirst($this->p->t('ui', 'senden')) . '</button>',
+				'<button class="resend" data-personid="%s" data-projektid="%s"  data-studentid="%s">'
+				.' Token senden '.
+				'</button>',
 				$datasetRaw->{'ErstPersonID'},
 				$datasetRaw->{'ProjectWorkID'},
 				$datasetRaw->{'StudentID'}
@@ -144,9 +146,11 @@ $filterWidgetArray = array(
 				{
 					/* Master Erstbegutachter Download */
 					$download = sprintf(
-						'<a href="%s&xsl=%s&betreuerart_kurzbz=%s&projektarbeit_id=%s&person_id=%s">' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'erstBegutachter')) . '</a>',
-						APP_ROOT.'/cis/private/pdfExport.php?xml=projektarbeitsbeurteilung.xml.php',
-						'Projektbeurteilung',
+						'<a href="%s&xsl=%s&betreuerart_kurzbz=%s&projektarbeit_id=%s&person_id=%s"><i class="fa fa-file-pdf-o"></i> '
+						. 'Beurteilung'.
+						'</a>',
+						APP_ROOT.'/content/pdfExport.php?xml=projektarbeitsbeurteilung.xml.php',
+						'ProjektBeurteilungMAErst',
 						'Erstbegutachter',
 						$datasetRaw->{'ProjectWorkID'},
 						$datasetRaw->{'ErstPersonID'}
@@ -156,9 +160,11 @@ $filterWidgetArray = array(
 				{
 					/* Bachelor Betreuer Download */
 					$download = sprintf(
-						'<a href="%s&xsl=%s&betreuerart_kurzbz=%s&projektarbeit_id=%s&person_id=%s">' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'begutachter')) . '</a>',
-						APP_ROOT.'/cis/private/pdfExport.php?xml=projektarbeitsbeurteilung.xml.php',
-						'Projektbeurteilung',
+						'<a href="%s&xsl=%s&betreuerart_kurzbz=%s&projektarbeit_id=%s&person_id=%s"><i class="fa fa-file-pdf-o"></i> '
+						. 'Beurteilung' .
+						'</a>',
+						APP_ROOT.'/content/pdfExport.php?xml=projektarbeitsbeurteilung.xml.php',
+						'ProjektBeurteilungBA',
 						'Begutachter',
 						$datasetRaw->{'ProjectWorkID'},
 						$datasetRaw->{'ErstPersonID'}
@@ -168,9 +174,11 @@ $filterWidgetArray = array(
 				{
 					/* Fallback auf Erstbegutachter Download - LG */
 					$download = sprintf(
-						'<a href="%s&xsl=%s&betreuerart_kurzbz=%s&projektarbeit_id=%s&person_id=%s">' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'erstBegutachter')) . '</a>',
-						APP_ROOT.'/cis/private/pdfExport.php?xml=projektarbeitsbeurteilung.xml.php',
-						'Projektbeurteilung',
+						'<a href="%s&xsl=%s&betreuerart_kurzbz=%s&projektarbeit_id=%s&person_id=%s"><i class="fa fa-file-pdf-o"></i> '
+						. 'Beurteilung'.
+						'</a>',
+						APP_ROOT.'/content/pdfExport.php?xml=projektarbeitsbeurteilung.xml.php',
+						'ProjektBeurteilungMAErst',
 						'Erstbegutachter',
 						$datasetRaw->{'ProjectWorkID'},
 						$datasetRaw->{'ErstPersonID'}
@@ -188,14 +196,16 @@ $filterWidgetArray = array(
 				$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'erstBegutachter')) . ' ' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischaltung')))} = '-';
 
 			if ($datasetRaw->{'ErstAbgeschickt'} !== null & $datasetRaw->{'ZweitAbgeschickt'} !== null)
-				$download .= ' / ';
+				$download .= ' <br /> ';
 
 			if ($datasetRaw->{'ZweitAbgeschickt'} !== null)
 			{
 				$download .= sprintf(
-					'<a href="%s&xsl=%s&betreuerart_kurzbz=%s&projektarbeit_id=%s&person_id=%s">' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'zweitBegutachter')) . '</a>',
-					APP_ROOT.'/cis/private/pdfExport.php?xml=projektarbeitsbeurteilung.xml.php',
-					'Projektbeurteilung',
+					'<a href="%s&xsl=%s&betreuerart_kurzbz=%s&projektarbeit_id=%s&person_id=%s"><i class="fa fa-file-pdf-o"></i> '
+					. 'Gutachten' .
+					'</a>',
+					APP_ROOT.'/content/pdfExport.php?xml=projektarbeitsbeurteilung.xml.php',
+					'ProjektBeurteilungMAZweit',
 					'Zweitbegutachter',
 					$datasetRaw->{'ProjectWorkID'},
 					$datasetRaw->{'ZweitPersonID'}
@@ -232,6 +242,16 @@ $filterWidgetArray = array(
 
 			if ($datasetRaw->{'ZweitAbgeschickt'} !== null)
 			{
+				$download .= sprintf(
+					'<a href="%s&xsl=%s&betreuerart_kurzbz=%s&projektarbeit_id=%s&person_id=%s"><i class="fa fa-file-pdf-o"></i> '
+					. 'Gutachten' .
+					'</a>',
+					APP_ROOT.'/content/pdfExport.php?xml=projektarbeitsbeurteilung.xml.php',
+					'ProjektBeurteilungMAZweit',
+					'Zweitbegutachter',
+					$datasetRaw->{'ProjectWorkID'},
+					$datasetRaw->{'ZweitPersonID'}
+				);
 				$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'zweitBegutachter')) . ' ' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischaltung')))} = sprintf(
 					'<button class="freischalten" data-projektid="%s" data-personid="%s" data-abgeschickt="%s">' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischalten')) . '</button>',
 					$datasetRaw->{'ProjectWorkID'},
