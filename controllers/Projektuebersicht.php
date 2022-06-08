@@ -175,7 +175,7 @@ class Projektuebersicht extends Auth_Controller
 
 			$zweitbetr = getData($zweitbegutachter)[0];
 
-			$mail_baselink = APP_ROOT."index.ci.php/extensions/FHC-Core-Projektarbeitsbeurteilung/Projektarbeitsbeurteilung";
+			$mail_baselink = CIS_ROOT."index.ci.php/extensions/FHC-Core-Projektarbeitsbeurteilung/Projektarbeitsbeurteilung";
 			$mail_link = $mail_baselink;
 
 			$zweitbetmaildata = array();
