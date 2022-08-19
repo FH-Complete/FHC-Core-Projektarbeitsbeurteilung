@@ -3,13 +3,13 @@ $this->load->view(
 	'templates/FHC-Header',
 	array(
 		'title' => 'Projektarbeitsbeurteilung Login',
-		'jquery' => true,
-		'jqueryui' => true,
-		'bootstrap' => true,
-		'fontawesome' => true,
+		'jquery3' => true,
+		'jqueryui1' => true,
+		'bootstrap3' => true,
+		'fontawesome4' => true,
 		'dialoglib' => true,
 		'ajaxlib' => true,
-		'sbadmintemplate' => true,
+		'sbadmintemplate3' => true,
 		'customCSSs' => array(
 			'public/css/sbadmin2/admintemplate_contentonly.css'
 		)
