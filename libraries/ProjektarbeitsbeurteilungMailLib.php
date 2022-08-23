@@ -8,7 +8,7 @@ if (!defined('BASEPATH')) exit('No direct script access allowed');
 class ProjektarbeitsbeurteilungMailLib
 {
 	private $_ci;
-	
+
 	public function __construct()
 	{
 		$this->_ci =& get_instance();
@@ -72,7 +72,10 @@ class ProjektarbeitsbeurteilungMailLib
 	 */
 	public function sendInfoMailToStudiengang($projektarbeit_id, $betreuer_person_id)
 	{
-		$projektarbeitsbeurteilungres = $this->_ci->ProjektarbeitsbeurteilungModel->getProjektarbeitsbeurteilung($projektarbeit_id, $betreuer_person_id);
+		$projektarbeitsbeurteilungres = $this->_ci->ProjektarbeitsbeurteilungModel->getProjektarbeitsbeurteilung(
+			$projektarbeit_id,
+			$betreuer_person_id
+		);
 
 		if (!hasData($projektarbeitsbeurteilungres))
 			return error('Projektarbeitsbeurteilung not found');
@@ -88,10 +91,29 @@ class ProjektarbeitsbeurteilungMailLib
 			return error('Studiengang not found');
 
 		$studiengang_email = getData($studiengangres)[0]->email;
-		$betreuer_fullname = implode(' ', array_filter(array($projektarbeitsbeurteilung->titelpre_betreuer, $projektarbeitsbeurteilung->vorname_betreuer,
-			$projektarbeitsbeurteilung->nachname_betreuer, $projektarbeitsbeurteilung->titelpost_betreuer)));
-		$student_fullname = implode(' ', array_filter(array($projektarbeitsbeurteilung->titelpre_student, $projektarbeitsbeurteilung->vorname_student,
-			$projektarbeitsbeurteilung->nachname_student, $projektarbeitsbeurteilung->titelpost_student)));
+		$betreuer_fullname = implode(
+			' ',
+			array_filter(
+				array(
+					$projektarbeitsbeurteilung->titelpre_betreuer,
+					$projektarbeitsbeurteilung->vorname_betreuer,
+					$projektarbeitsbeurteilung->nachname_betreuer,
+					$projektarbeitsbeurteilung->titelpost_betreuer
+				)
+			)
+		);
+
+		$student_fullname = implode(
+			' ',
+			array_filter(
+				array(
+					$projektarbeitsbeurteilung->titelpre_student,
+					$projektarbeitsbeurteilung->vorname_student,
+					$projektarbeitsbeurteilung->nachname_student,
+					$projektarbeitsbeurteilung->titelpost_student
+				)
+			)
+		);
 
 		$mailcontent_data_arr = array(
 			'betreuer_voller_name' => $betreuer_fullname,
@@ -112,20 +134,20 @@ class ProjektarbeitsbeurteilungMailLib
 	}
 
 	/**
-	 * Sends info mail to commitee when requested by Erstbetreuer.
+	 * Sends info mail to commitee when requested by Erstbetreuer/Senatsvorsitz.
 	 * @param int $projektarbeit_id
 	 * @return object success or error
 	 */
 	public function sendInfoMailToKommission($projektarbeit_id)
 	{
-		$kommissionsMitgliederRes = $this->_ci->ProjektbetreuerModel->getBetreuerOfProjektarbeit($projektarbeit_id, Projektarbeitsbeurteilung::BETREUERART_KOMMISSION);
+		$kommissionsMitgliederRes = $this->_ci->ProjektbetreuerModel->getBetreuerOfProjektarbeit($projektarbeit_id, Projektarbeitsbeurteilung::BETREUERART_SENATSPRUEFER);
 
 		if (!hasData($kommissionsMitgliederRes))
 			return error('Committee members not found');
 
 		$kommissionsMitglieder = getData($kommissionsMitgliederRes);
 
-		$betreuerart = $kommissionsMitglieder[0]->projekttyp_kurzbz == 'Diplom' ? Projektarbeitsbeurteilung::BETREUERART_ERSTBEGUTACHTER : Projektarbeitsbeurteilung::BETREUERART_BACHELOR_BEGUTACHTER;
+		$betreuerart = $kommissionsMitglieder[0]->projekttyp_kurzbz == 'Diplom' ? Projektarbeitsbeurteilung::BETREUERART_ERSTBEGUTACHTER : Projektarbeitsbeurteilung::BETREUERART_SENATSVORSITZ;
 
 		$erstbetreuerRes = $this->_ci->ProjektbetreuerModel->getBetreuerOfProjektarbeit($projektarbeit_id, $betreuerart);
 
@@ -136,24 +158,37 @@ class ProjektarbeitsbeurteilungMailLib
 
 		foreach ($kommissionsMitglieder as $kommissionsMitglied)
 		{
-			$receiverMail = $kommissionsMitglied->uid.'@'.DOMAIN;
+			$palink = site_url() . "/extensions/FHC-Core-Projektarbeitsbeurteilung/Projektarbeitsbeurteilung";
+
+			// not sending mail if no Benutzer
+			if (isEmptyString($kommissionsMitglied->uid))
+			{
+				if (isEmptyString($kommissionsMitglied->private_email))
+					return error('No email address found for '.$kommissionsMitglied->voller_name);
+				else
+					$receiverMail = $kommissionsMitglied->private_email;
+			}
+			else
+			{
+				$receiverMail = $kommissionsMitglied->uid.'@'.DOMAIN;
+				// correct link for Pruefer with account
+				$palink .= "?projektarbeit_id=$projektarbeit_id&uid=".$erstbetreuer->student_uid;
+			}
+
 			$erstbetreuerMail = $erstbetreuer->uid.'@'.DOMAIN;
 
 			$mailcontent_data_arr = array(
 				'geehrt' => "geehrte".($kommissionsMitglied->geschlecht=="m"?"r":""),
 				'anrede' => $kommissionsMitglied->anrede,
 				'kommissionsmitglied_voller_name' => $kommissionsMitglied->voller_name,
-				'erstbetreuer_bezeichnung' => 'Erstbetreuer'.($erstbetreuer->geschlecht=="w"?"in":""),
-				'erstbetreuer_bezeichnung_english' => 'First assessor',
-				'erstbetreuer_bezeichnung_english_klein' => 'first assessor',
 				'erstbetreuer_anrede' => $erstbetreuer->anrede,
 				'erstbetreuer_voller_name' => $erstbetreuer->voller_name,
 				'erstbetreuer_email' => $erstbetreuerMail,
-				'link' => site_url() . "/extensions/FHC-Core-Projektarbeitsbeurteilung/Projektarbeitsbeurteilung?projektarbeit_id=$projektarbeit_id&uid=".$erstbetreuer->student_uid
+				'link' => $palink
 			);
 
 			sendSanchoMail(
-				'ParbeitsbeurteilungKommissionInf',
+				'ParbeitsbeurteilungInfoSenat',
 				$mailcontent_data_arr,
 				$receiverMail,
 				'Beurteilung einer Bachelorarbeit zur kommissionellen Prüfung',

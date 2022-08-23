@@ -300,6 +300,14 @@ $this->load->view(
 					<div class="alert alert-warning">
 						<?php echo $this->p->t('projektarbeitsbeurteilung', 'kommissionellePruefungHinweis') ?>
 						<br>
+						<?php echo $this->p->t('projektarbeitsbeurteilung', 'senatsvorsitz') ?>:
+						<?php
+							$vsStr = '';
+							$vsStr .= $kommission_vorsitz->voller_name;
+							$vsStr .= '&nbsp;<a href="mailto:'.$kommission_vorsitz->univEmail.'" title="'.$kommission_vorsitz->univEmail.'"><i class="fa fa-envelope text-warning"></i></a>';
+							echo $vsStr;
+						?>
+						<br>
 						<?php echo $this->p->t('projektarbeitsbeurteilung', 'kommissionsmitglieder') ?>:
 						<?php
 							$kbStr = '';
@@ -309,7 +317,7 @@ $this->load->view(
 								if (!$first)
 									$kbStr .= ', ';
 								$kbStr .= $kb->voller_name;
-								$kbStr .= '&nbsp;<a href="mailto:'.$kb->univEmail.'" title="'.$kb->univEmail.'"><i class="fa fa-envelope text-warning"></i></a>';
+								$kbStr .= '&nbsp;<a href="mailto:'.$kb->zustellung_mail.'" title="'.$kb->zustellung_mail.'"><i class="fa fa-envelope text-warning"></i></a>';
 								$first = false;
 							}
 							echo $kbStr;

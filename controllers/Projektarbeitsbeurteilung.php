@@ -10,24 +10,25 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 	const BETREUERART_BACHELOR_BEGUTACHTER = 'Begutachter';
 	const BETREUERART_ERSTBEGUTACHTER = 'Erstbegutachter';
 	const BETREUERART_ZWEITBEGUTACHTER = 'Zweitbegutachter';
-	const BETREUERART_KOMMISSION = 'Kommission';
+	const BETREUERART_SENATSVORSITZ = 'Senatsvorsitz';
+	const BETREUERART_SENATSPRUEFER = 'Senatspruefer';
 	const EXTERNER_BEURTEILER_NAME = 'externerBeurteiler';
 
 	// fields required to be filled out by Erstbetreuer
 	private $_requiredFieldsErstbegutachter = array(
-			'plagiatscheck_unauffaellig' => array('type' => 'bool', 'phrase' => 'plagiatscheck'),
-			'bewertung_thema' => array('type' => 'points', 'phrase' => 'thema'),
-			'bewertung_loesungsansatz' => array('type' => 'points', 'phrase' => 'loesungsansatz'),
-			'bewertung_methode' => array('type' => 'points', 'phrase' => 'methode'),
-			'bewertung_ereignissediskussion' => array('type' => 'points', 'phrase' => 'ereignisseDiskussion'),
-			'bewertung_eigenstaendigkeit' => array('type' => 'points', 'phrase' => 'eigenstaendigkeit'),
-			'bewertung_struktur' => array('type' => 'points', 'phrase' => 'struktur'),
-			'bewertung_stil' => array('type' => 'points', 'phrase' => 'stil'),
-			'bewertung_form' => array('type' => 'points', 'phrase' => 'form'),
-			'bewertung_literatur' => array('type' => 'points', 'phrase' => 'literatur'),
-			'bewertung_zitierregeln' => array('type' => 'points', 'phrase' => 'zitierregeln'),
-			'begruendung' => array('type' => 'text', 'phrase' => 'begruendungText'),
-			'betreuernote' => array('type' => 'grade', 'phrase' => 'betreuernote')
+		'plagiatscheck_unauffaellig' => array('type' => 'bool', 'phrase' => 'plagiatscheck'),
+		'bewertung_thema' => array('type' => 'points', 'phrase' => 'thema'),
+		'bewertung_loesungsansatz' => array('type' => 'points', 'phrase' => 'loesungsansatz'),
+		'bewertung_methode' => array('type' => 'points', 'phrase' => 'methode'),
+		'bewertung_ereignissediskussion' => array('type' => 'points', 'phrase' => 'ereignisseDiskussion'),
+		'bewertung_eigenstaendigkeit' => array('type' => 'points', 'phrase' => 'eigenstaendigkeit'),
+		'bewertung_struktur' => array('type' => 'points', 'phrase' => 'struktur'),
+		'bewertung_stil' => array('type' => 'points', 'phrase' => 'stil'),
+		'bewertung_form' => array('type' => 'points', 'phrase' => 'form'),
+		'bewertung_literatur' => array('type' => 'points', 'phrase' => 'literatur'),
+		'bewertung_zitierregeln' => array('type' => 'points', 'phrase' => 'zitierregeln'),
+		'begruendung' => array('type' => 'text', 'phrase' => 'begruendungText'),
+		'betreuernote' => array('type' => 'grade', 'phrase' => 'betreuernote')
 	);
 
 	// fields required to be filled out by Zweitbetreuer
@@ -38,14 +39,14 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 	// fields required to be filled out by Betreuer, filled depending on Betreuer type
 	private $_requiredFields = array();
 
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
+	/**
+	 * Constructor
+	 */
+	public function __construct()
+	{
 		parent::__construct();
 
-        // Load models
+		// Load models
 		$this->load->model('extensions/FHC-Core-Projektarbeitsbeurteilung/Projektarbeitsbeurteilung_model', 'ProjektarbeitsbeurteilungModel');
 		$this->load->model('education/Projektarbeit_model', 'ProjektarbeitModel');
 		$this->load->model('education/Projektbetreuer_model', 'ProjektbetreuerModel');
@@ -56,22 +57,22 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 		// Load helpers
 		$this->load->helper('extensions/FHC-Core-Projektarbeitsbeurteilung/projektarbeitsbeurteilung_helper');
 
-        // Load language phrases
-        $this->loadPhrases(
-            array(
-            	'ui',
-                'global',
-                'abschlusspruefung',
-                'projektarbeitsbeurteilung',
+		// Load language phrases
+		$this->loadPhrases(
+			array(
+				'ui',
+				'global',
+				'abschlusspruefung',
+				'projektarbeitsbeurteilung',
 				'lehre'
-            )
-        );
+			)
+		);
 
 		$this->_requiredFields = $this->_requiredFieldsErstbegutachter;
-    }
+	}
 
-    // -----------------------------------------------------------------------------------------------------------------
-    // Public methods
+	// -----------------------------------------------------------------------------------------------------------------
+	// Public methods
 	public function index()
 	{
 		$this->showProjektarbeitsbeurteilung();
@@ -101,7 +102,11 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 			$zweitbetreuer_input_id = $this->input->get('zweitbetreuer_id');
 
 			// get person_id of Zweitbetreuer
-			$zweitbetreuerRes = $this->ProjektarbeitsbeurteilungModel->getZweitbegutachterFromErstbegutachter($projektarbeit_id, $betreuer_person_id, $student_uid);
+			$zweitbetreuerRes = $this->ProjektarbeitsbeurteilungModel->getZweitbegutachterFromErstbegutachter(
+				$projektarbeit_id,
+				$betreuer_person_id,
+				$student_uid
+			);
 			$zweitbetreuer_person_id = null;
 			$zweitbetreuer_abgeschicktamum = null;
 
@@ -128,7 +133,11 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 			}
 
 			// get Projektarbeitsbeurteilung data for given Projektarbeit and Betreuer
-			$projektarbeitsbeurteilungResult = $this->ProjektarbeitsbeurteilungModel->getProjektarbeitsbeurteilung($projektarbeit_id, $betreuer_person_id, $student_uid);
+			$projektarbeitsbeurteilungResult = $this->ProjektarbeitsbeurteilungModel->getProjektarbeitsbeurteilung(
+				$projektarbeit_id,
+				$betreuer_person_id,
+				$student_uid
+			);
 
 			if (hasData($projektarbeitsbeurteilungResult))
 			{
@@ -137,29 +146,78 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 				$projektarbeitsbeurteilung = getData($projektarbeitsbeurteilungResult);
 
 				// check if Projektarbeit is kommissionell - for displaying additional info/functionality
-				$kommissionBetreuer = array();
 				$isKommission = false;
-				$kommissionBetreuerRes = $this->ProjektbetreuerModel->getBetreuerOfProjektarbeit($projektarbeit_id, self::BETREUERART_KOMMISSION);
 
-				if (isError($kommissionBetreuerRes))
-					show_error(getError($kommissionBetreuerRes));
+				$kommissionVorsitz = null;
+				$kommissionPruefer = array();
 
-				if (hasData($kommissionBetreuerRes))
+				// get Kommission Vorsitz
+				$kommissionVorsitzRes = $this->ProjektbetreuerModel->getBetreuerOfProjektarbeit(
+					$projektarbeit_id,
+					self::BETREUERART_SENATSVORSITZ
+				);
+
+				// if kommissionell
+				if (hasData($kommissionVorsitzRes))
 				{
-					$kommissionBetreuer = getData($kommissionBetreuerRes);
-
-					// set the university mail for kommission Betreuer
-					foreach ($kommissionBetreuer as $kb)
-					{
-						$kb->univEmail = isset($kb->uid) ? $kb->uid.'@'.DOMAIN : '';
-					}
-
 					// set flag that it is kommissionell
 					$isKommission = true;
+
+					// Kommissionvorsitz will grade the work
+					$kommissionVorsitz = getData($kommissionVorsitzRes)[0];
+					$kommissionVorsitz->univEmail = isset($kommissionVorsitz->uid) ? $kommissionVorsitz->uid.'@'.DOMAIN : '';
+					$vorsitz_person_id = $kommissionVorsitz->person_id;
+
+					// get other Kommission members
+					$kommissionPrueferRes = $this->ProjektbetreuerModel->getBetreuerOfProjektarbeit(
+						$projektarbeit_id,
+						self::BETREUERART_SENATSPRUEFER
+					);
+
+					if (isError($kommissionPrueferRes))
+						show_error(getError($kommissionPrueferRes));
+
+					if (hasData($kommissionPrueferRes))
+					{
+						$kommissionPruefer = getData($kommissionPrueferRes);
+
+						// set the mail for Kommission Prüfer
+						foreach ($kommissionPruefer as $kp)
+						{
+							$kp->zustellung_mail = '';
+							if (isEmptyString($kp->uid))
+							{
+								// if no user account, use private mail
+								if (!isEmptyString($kp->private_email))
+									$kp->zustellung_mail = $kp->private_email;
+							}
+							else // if has user account, use university mail
+								$kp->zustellung_mail = $kommissionVorsitz->uid.'@'.DOMAIN;
+						}
+
+						// Bewertung of Vorsitz has to be displayed for Senatspruefer
+						if ($projektarbeitsbeurteilung->betreuerart === self::BETREUERART_SENATSPRUEFER)
+						{
+							$vorsitzProjektarbeitsbeurteilungResult = $this->ProjektarbeitsbeurteilungModel->getProjektarbeitsbeurteilung(
+								$projektarbeit_id,
+								$vorsitz_person_id,
+								$student_uid
+							);
+
+							// copy Bewertung and Note from Senatsvorsitz to Senatspruefer
+							if (hasData($vorsitzProjektarbeitsbeurteilungResult))
+							{
+								$vorsitzProjektarbeitsbeurteilung = getData($vorsitzProjektarbeitsbeurteilungResult);
+								$projektarbeitsbeurteilung->projektarbeit_bewertung = $vorsitzProjektarbeitsbeurteilung->projektarbeit_bewertung;
+								$projektarbeitsbeurteilung->betreuernote = $vorsitzProjektarbeitsbeurteilung->betreuernote;
+							}
+						}
+					}
 				}
 
-				// read only if Projektarbeit is already sent, or logged in Betreuer is member of Kommission
-				$readOnlyAccess = isset($projektarbeitsbeurteilung->abgeschicktamum) || $projektarbeitsbeurteilung->betreuerart === self::BETREUERART_KOMMISSION;
+				// read only access if Projektarbeit is already sent, or logged in Betreuer is Senatspruefer of Kommission
+				$readOnlyAccess = isset($projektarbeitsbeurteilung->abgeschicktamum)
+									|| $projektarbeitsbeurteilung->betreuerart === self::BETREUERART_SENATSPRUEFER;
 
 				$betreuerart = $projektarbeitsbeurteilung->betreuerart;
 
@@ -169,7 +227,7 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 					$viewname = 'projektarbeitsbeurteilung_zweitbegutachter';
 				else
 				{
-					// calculate the points reached and max points for displaying
+					// if not a Zweitbegutachter, calculate the points reached and max points for displaying
 					$bewertung_punkte = $this->_calculateBewertungPunkte($projektarbeitsbeurteilung->projektarbeit_bewertung);
 					$projektarbeitsbeurteilung->bewertung_gesamtpunkte = $bewertung_punkte->gesamtpunkte;
 					$projektarbeitsbeurteilung->bewertung_maxpunkte = $bewertung_punkte->maxpunkte;
@@ -177,14 +235,15 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 
 				$data = array(
 					'projektarbeit_id' => $projektarbeit_id,
-					'betreuer_person_id' => $betreuer_person_id,
+					'betreuer_person_id' => $betreuer_person_id, // Betreuer viewing/grading the Projektarbeit
 					'student_uid' => $student_uid,
 					'authtoken' => isset($authObj->authtoken) ? $authObj->authtoken : null,
 					'projektarbeitsbeurteilung' => $projektarbeitsbeurteilung,
 					'language' => $language,
-					'zweitbetreuer_person_id' => $zweitbetreuer_person_id,
+					'zweitbetreuer_person_id' => $zweitbetreuer_person_id, // optional Zweitbetreuer
 					'zweitbetreuer_abgeschicktamum' => $zweitbetreuer_abgeschicktamum,
-					'kommission_betreuer' => $kommissionBetreuer,
+					'kommission_vorsitz' => $kommissionVorsitz, // if kommissionell, Kommissionsvorsitz
+					'kommission_betreuer' => $kommissionPruefer, // optional additional Kommissionspruefer
 					'isKommission' => $isKommission,
 					'readOnlyAccess' => $readOnlyAccess
 				);
@@ -336,7 +395,10 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 
 							$projektarbeitsbeurteilungToSave['updateamum'] = date('Y-m-d H:i:s', time());
 
-							$saveProjektarbeitsbeurteilungResult = $this->ProjektarbeitsbeurteilungModel->update($projektarbeitsbeurteilung_id, $projektarbeitsbeurteilungToSave);
+							$saveProjektarbeitsbeurteilungResult = $this->ProjektarbeitsbeurteilungModel->update(
+								$projektarbeitsbeurteilung_id,
+								$projektarbeitsbeurteilungToSave
+							);
 						}
 						else
 						{
@@ -479,7 +541,10 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 		$authObj = $this->_authenticate();
 
 		if (!isset($authObj->person_id))
+		{
 			$this->outputJsonError('invalid authentication');
+			return;
+		}
 
 		$projektarbeit_id = $this->input->post('projektarbeit_id');
 
@@ -488,8 +553,8 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 		$this->outputJson($mailRes);
 	}
 
-    // -----------------------------------------------------------------------------------------------------------------
-    // Private methods
+	// -----------------------------------------------------------------------------------------------------------------
+	// Private methods
 
 	/**
 	 * Performs authentification, either normally or via authtoken.
