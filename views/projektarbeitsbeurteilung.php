@@ -88,6 +88,26 @@ $this->load->view(
 							</td>
 						</tr>
 						<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/stammdaten.php'); ?>
+						<!-- show downloadlink if Kommission -->
+						<?php if ($isKommission): ?>
+						<tr>
+							<td>
+								<b>
+									Download
+								</b>
+							</td>
+							<td colspan="3">
+								<a
+									href="Projektarbeitsbeurteilung/downloadProjektarbeit?projektarbeit_id=<?php echo $projektarbeit_id ?>"
+									alt="<?php echo $this->p->t('projektarbeitsbeurteilung', 'parbeitDownload') ?>"
+									title="<?php echo $this->p->t('projektarbeitsbeurteilung', 'parbeitDownload') ?>"
+									target="_blank"
+								>
+									<i class="fa fa-file-pdf-o"></i>
+								</a>
+							</td>
+						</tr>
+						<?php endif; ?>
 					</table>
 				</div>
 			</div>
