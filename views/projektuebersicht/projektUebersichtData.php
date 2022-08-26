@@ -3,7 +3,8 @@ $STUDIENSEMESTER = '\''.$this->variablelib->getVar('projektuebersicht_studiensem
 $ERSTBEGUTACHTER = '\'Erstbegutachter\'';
 $BEGUTACHTER = '\'Begutachter\'';
 $ZWEITBEGUTACHTER = '\'Zweitbegutachter\'';
-$KOMISSION = '\'Kommission\'';
+$KOMISSIONVORSITZ = '\'Senatsvorsitz\'';
+$KOMISSIONPRUEFER = '\'Senatspruefer\'';
 
 $oeKurz = '\''. implode('\',\'', $oeKurz) . '\'';
 
@@ -13,6 +14,7 @@ $query = '
 			Erstbegutachter.vorname AS "ErstVorname",
 			Erstbegutachter.nachname AS "ErstNachname",
 			Erstbegutachter.person_id AS "ErstPersonID",
+			Erstbegutachter.betreuerart_kurzbz AS "ErstBetreuerart",
 			Erstbegutachter.abgeschickt AS "ErstAbgeschickt",
 			Zweitbegutachter.vorname AS "ZweitVorname",
 			Zweitbegutachter.nachname AS "ZweitNachname",
@@ -26,7 +28,8 @@ $query = '
 			parbeit.abgabedatum AS "Abgabedatum",
 			sg.kurzbzlang AS "Studiengang",
 			UPPER(sg.typ) as "Typ",
-			Kommission.Mitglieder AS "Kommissionsmitglieder"
+			Kommission.Mitglieder AS "Kommissionmitglieder",
+			Kommission.MitgliederPersonId AS "KommissionmitgliederPersonId"
 		FROM lehre.tbl_projektarbeit parbeit
 		JOIN lehre.tbl_projektbetreuer pbetreuer ON parbeit.projektarbeit_id = pbetreuer.projektarbeit_id
 		JOIN lehre.tbl_projekttyp USING (projekttyp_kurzbz)
@@ -43,12 +46,13 @@ $query = '
 						p.vorname,
 						p.nachname,
 						betreuer.person_id,
+						betreuer.betreuerart_kurzbz,
 						arbeit.projektarbeit_id as ProjektID
 				FROM lehre.tbl_projektbetreuer betreuer
 				JOIN lehre.tbl_projektarbeit arbeit USING(projektarbeit_id)
 				LEFT JOIN extension.tbl_projektarbeitsbeurteilung beurteilung ON arbeit.projektarbeit_id = beurteilung.projektarbeit_id AND betreuer.person_id = beurteilung.betreuer_person_id
 				LEFT JOIN public.tbl_person p ON betreuer.person_id = p.person_id
-				WHERE betreuer.betreuerart_kurzbz = '.$ERSTBEGUTACHTER.' OR betreuer.betreuerart_kurzbz = '. $BEGUTACHTER .'
+				WHERE betreuer.betreuerart_kurzbz IN ('.$ERSTBEGUTACHTER.', '. $BEGUTACHTER .', '.$KOMISSIONVORSITZ.')
 			)
 		) Erstbegutachter ON parbeit.projektarbeit_id = Erstbegutachter.ProjektID
 		FULL JOIN
@@ -65,20 +69,22 @@ $query = '
 				LEFT JOIN extension.tbl_projektarbeitsbeurteilung beurteilung ON arbeit.projektarbeit_id = beurteilung.projektarbeit_id AND betreuer.person_id = beurteilung.betreuer_person_id
 				LEFT JOIN public.tbl_person p ON betreuer.person_id = p.person_id
 				LEFT JOIN public.tbl_benutzer benutzer ON p.person_id = benutzer.person_id
-				WHERE betreuer.betreuerart_kurzbz = '.$ZWEITBEGUTACHTER.' AND benutzer.aktiv OR benutzer.aktiv IS NULL
-				)
+				WHERE betreuer.betreuerart_kurzbz = '.$ZWEITBEGUTACHTER.'
+				AND (benutzer.aktiv OR benutzer.aktiv IS NULL)
+			)
 		) Zweitbegutachter ON parbeit.projektarbeit_id = Zweitbegutachter.ProjektID
 		FULL JOIN
 		(
 			(
 				SELECT ARRAY_TO_STRING(ARRAY_AGG(DISTINCT (p.vorname || \' \' || p.nachname)), \', \') AS Mitglieder,
+						ARRAY_TO_STRING(ARRAY_AGG(betreuer.person_id), \', \') AS MitgliederPersonId,
 						arbeit.projektarbeit_id as ProjektID
 				FROM lehre.tbl_projektbetreuer betreuer
 				JOIN lehre.tbl_projektarbeit arbeit USING(projektarbeit_id)
 				JOIN public.tbl_person p ON betreuer.person_id = p.person_id
-				JOIN public.tbl_benutzer benutzer ON p.person_id = benutzer.person_id
-				WHERE betreuer.betreuerart_kurzbz = '.$KOMISSION.'
-				AND benutzer.aktiv
+				LEFT JOIN public.tbl_benutzer benutzer ON p.person_id = benutzer.person_id
+				WHERE betreuer.betreuerart_kurzbz = '.$KOMISSIONPRUEFER.'
+				AND (benutzer.aktiv OR benutzer.aktiv IS NULL)
 				GROUP BY arbeit.projektarbeit_id
 			)
 		) Kommission ON parbeit.projektarbeit_id = Kommission.ProjektID
@@ -105,6 +111,7 @@ $filterWidgetArray = array(
 		ucfirst($this->p->t('projektarbeitsbeurteilung', 'erstBegutachter')) .' ' . $this->p->t('person', 'vorname'),
 		ucfirst($this->p->t('projektarbeitsbeurteilung', 'erstBegutachter')) .' ' . $this->p->t('person', 'nachname'),
 		ucfirst($this->p->t('projektarbeitsbeurteilung', 'erstBegutachter')). ' PersonID',
+		ucfirst($this->p->t('projektarbeitsbeurteilung', 'erstBegutachter')). ' ' . $this->p->t('projektarbeitsbeurteilung', 'betreuerart'),
 		ucfirst($this->p->t('projektarbeitsbeurteilung', 'erstBegutachter')) .' ' . $this->p->t('global', 'abgeschickt'),
 		ucfirst($this->p->t('projektarbeitsbeurteilung', 'zweitBegutachter')) .' ' . $this->p->t('person', 'vorname'),
 		ucfirst($this->p->t('projektarbeitsbeurteilung', 'zweitBegutachter')) .' ' . $this->p->t('person', 'nachname'),
@@ -118,72 +125,72 @@ $filterWidgetArray = array(
 		ucfirst($this->p->t('ui', 'projektarbeit')) . ' ' . $this->p->t('global', 'uploaddatum'),
 		ucfirst($this->p->t('lehre', 'studiengang')),
 		ucfirst($this->p->t('global', 'typ')),
-		ucfirst($this->p->t('projektarbeitsbeurteilung', 'kommissionsmitglieder'))
+		ucfirst($this->p->t('projektarbeitsbeurteilung', 'kommissionmitglieder')),
+		ucfirst($this->p->t('projektarbeitsbeurteilung', 'kommissionmitglieder')) . ' PersonID'
 	),
 	'formatRow' => function($datasetRaw) {
 
-		if ($datasetRaw->{'ZweitPersonID'} !== null && $datasetRaw->{'ErstPersonID'} !== null && $datasetRaw->{'ZweitUID'} === null && $datasetRaw->{'Note'} === null)
+		/* Token resend */
+		if ($datasetRaw->{'ErstPersonID'} !== null && $datasetRaw->{'Note'} === null)
 		{
-			$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'resendToken')))} = sprintf(
-				'<button class="resend" data-personid="%s" data-projektid="%s"  data-studentid="%s">'
-				.' Token senden '.
-				'</button>',
-				$datasetRaw->{'ErstPersonID'},
-				$datasetRaw->{'ProjectWorkID'},
-				$datasetRaw->{'StudentID'}
-			);
+			if ($datasetRaw->{'ZweitPersonID'} !== null && $datasetRaw->{'ZweitUID'} === null)
+			{
+				$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'resendToken')))} = sprintf(
+					'<button class="resend" data-personid="%s" data-projektid="%s"  data-studentid="%s">'
+					.' Token senden '.
+					'</button>',
+					$datasetRaw->{'ErstPersonID'},
+					$datasetRaw->{'ProjectWorkID'},
+					$datasetRaw->{'StudentID'}
+				);
+			}
+			elseif ($datasetRaw->{'KommissionmitgliederPersonId'} !== null)
+			{
+				$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'resendToken')))} = '';
+				foreach (explode(', ', $datasetRaw->{'KommissionmitgliederPersonId'}) as $idx => $kommission_person_id)
+				{
+					$voller_name = explode(', ', $datasetRaw->{'Kommissionmitglieder'})[$idx];
+					$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'resendToken')))} .=
+					'<div class="kommissionsendtoken">'.
+					$voller_name . ': <br />' .
+					sprintf(
+						'<button class="resend" data-personid="%s" data-projektid="%s" data-studentid="%s" data-kommissionprueferid="%s" >'
+						.' Token senden '.
+						'</button>',
+						$datasetRaw->{'ErstPersonID'},
+						$datasetRaw->{'ProjectWorkID'},
+						$datasetRaw->{'StudentID'},
+						$kommission_person_id
+					).
+					'</div>';
+				}
+			}
+			else
+				$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'resendToken')))} = '-';
 		}
 		else
 			$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'resendToken')))} = '-';
 
+		/* Document download */
 		$download = '';
 		if ($datasetRaw->{'Note'} !== null)
 		{
-
 			if ($datasetRaw->{'ErstAbgeschickt'} !== null)
 			{
-				if ($datasetRaw->{'Typ'} === 'M')
-				{
-					/* Master Erstbegutachter Download */
-					$download = sprintf(
-						'<a href="%s&xsl=%s&betreuerart_kurzbz=%s&projektarbeit_id=%s&person_id=%s"><i class="fa fa-file-pdf-o"></i> '
-						. 'Beurteilung'.
-						'</a>',
-						APP_ROOT.'/content/pdfExport.php?xml=projektarbeitsbeurteilung.xml.php',
-						'ProjektBeurteilungMAErst',
-						'Erstbegutachter',
-						$datasetRaw->{'ProjectWorkID'},
-						$datasetRaw->{'ErstPersonID'}
-					);
-				}
-				else if($datasetRaw->{'Typ'} === 'B')
-				{
-					/* Bachelor Betreuer Download */
-					$download = sprintf(
-						'<a href="%s&xsl=%s&betreuerart_kurzbz=%s&projektarbeit_id=%s&person_id=%s"><i class="fa fa-file-pdf-o"></i> '
-						. 'Beurteilung' .
-						'</a>',
-						APP_ROOT.'/content/pdfExport.php?xml=projektarbeitsbeurteilung.xml.php',
-						'ProjektBeurteilungBA',
-						'Begutachter',
-						$datasetRaw->{'ProjectWorkID'},
-						$datasetRaw->{'ErstPersonID'}
-					);
-				}
-				else
-				{
-					/* Fallback auf Erstbegutachter Download - LG */
-					$download = sprintf(
-						'<a href="%s&xsl=%s&betreuerart_kurzbz=%s&projektarbeit_id=%s&person_id=%s"><i class="fa fa-file-pdf-o"></i> '
-						. 'Beurteilung'.
-						'</a>',
-						APP_ROOT.'/content/pdfExport.php?xml=projektarbeitsbeurteilung.xml.php',
-						'ProjektBeurteilungMAErst',
-						'Erstbegutachter',
-						$datasetRaw->{'ProjectWorkID'},
-						$datasetRaw->{'ErstPersonID'}
-					);
-				}
+				// different Dokumentvorlage depending on type
+				$xsl = $datasetRaw->{'Typ'} === 'B' ? 'ProjektBeurteilungBA' : 'ProjektBeurteilungMAErst';
+
+				/* Bewertung document Download */
+				$download = sprintf(
+					'<a href="%s&xsl=%s&betreuerart_kurzbz=%s&projektarbeit_id=%s&person_id=%s"><i class="fa fa-file-pdf-o"></i> '
+					. 'Beurteilung'.
+					'</a>',
+					APP_ROOT.'/content/pdfExport.php?xml=projektarbeitsbeurteilung.xml.php',
+					$xsl,
+					$datasetRaw->{'ErstBetreuerart'},
+					$datasetRaw->{'ProjectWorkID'},
+					$datasetRaw->{'ErstPersonID'}
+				);
 
 				$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'erstBegutachter')) . ' ' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischaltung')))} = sprintf(
 					'<button class="freischalten" data-projektid="%s" data-personid="%s" data-abgeschickt="%s">' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischalten')) . '</button>',
@@ -226,6 +233,7 @@ $filterWidgetArray = array(
 		{
 			$datasetRaw->{'Note'} = '-';
 
+			/* Bewertung freischalten */
 			if ($datasetRaw->{'ErstAbgeschickt'} !== null)
 			{
 				$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'erstBegutachter')) . ' ' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischaltung')))} = sprintf(
@@ -273,6 +281,9 @@ $filterWidgetArray = array(
 		else
 			$datasetRaw->{'Abgabedatum'} = '-';
 
+		if ($datasetRaw->{'ErstBetreuerart'} === null)
+			$datasetRaw->{'ErstBetreuerart'} = '-';
+
 		if ($datasetRaw->{'ErstAbgeschickt'} !== null)
 		{
 			$datasetRaw->{'ErstAbgeschickt'} = date_format(date_create($datasetRaw->{'ErstAbgeschickt'}), 'd.m.Y H:i');
@@ -312,8 +323,8 @@ $filterWidgetArray = array(
 		if ($datasetRaw->{'ZweitPersonID'} === null)
 			$datasetRaw->{'ZweitPersonID'} = '-';
 
-		if ($datasetRaw->{'Kommissionsmitglieder'} === null)
-			$datasetRaw->{'Kommissionsmitglieder'} = '-';
+		if ($datasetRaw->{'Kommissionmitglieder'} === null)
+			$datasetRaw->{'Kommissionmitglieder'} = '-';
 
 		return $datasetRaw;
 	}
