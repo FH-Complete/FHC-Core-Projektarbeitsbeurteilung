@@ -99,7 +99,7 @@ $this->load->view(
 									</ul><br />
 								</td>
 								<td>
-									<?php $readonly = (isset($projektarbeit_bewertung->beurteilung_zweitbegutachter) && $sent) ? ' readonly' : '' ?>
+									<?php $readonly = $readOnlyAccess ? ' readonly' : '' ?>
 									<textarea class="form-control" cols="5" rows="16" name="beurteilung_zweitbegutachter"<?php echo $readonly ?>><?php echo isset($projektarbeit_bewertung->beurteilung_zweitbegutachter) ? $projektarbeit_bewertung->beurteilung_zweitbegutachter : '' ?></textarea>
 								</td>
 							</tr>

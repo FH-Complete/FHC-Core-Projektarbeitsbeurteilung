@@ -8,7 +8,7 @@
 	<td><b><?php echo $this->p->t('projektarbeitsbeurteilung', 'beurteiltVon') ?></b></td>
 	<td>
 		<?php
-			if ($isKommission)
+			if (isset($isKommission) && $isKommission === true)
 			{
 				// display Vorsitz
 				if (isset($kommission_vorsitz))

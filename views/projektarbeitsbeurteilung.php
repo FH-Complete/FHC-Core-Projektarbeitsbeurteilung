@@ -98,7 +98,7 @@ $this->load->view(
 							</td>
 							<td colspan="3">
 								<a
-									href="Projektarbeitsbeurteilung/downloadProjektarbeit?projektarbeit_id=<?php echo $projektarbeit_id ?>"
+									href="ProjektarbeitsbeurteilungErstbegutachter/downloadProjektarbeit?projektarbeit_id=<?php echo $projektarbeit_id ?>"
 									alt="<?php echo $this->p->t('projektarbeitsbeurteilung', 'parbeitDownload') ?>"
 									title="<?php echo $this->p->t('projektarbeitsbeurteilung', 'parbeitDownload') ?>"
 									target="_blank"
@@ -286,7 +286,7 @@ $this->load->view(
 							<?php if (isset($zweitbetreuer_abgeschicktamum)): ?>
 								<?php echo $this->p->t('projektarbeitsbeurteilung', 'gutachtenZweitBegutachtung') ?>
 								<br />
-								<a href="<?php echo site_url() . '/extensions/FHC-Core-Projektarbeitsbeurteilung/Projektarbeitsbeurteilung?projektarbeit_id=' . $projektarbeit_id . '&uid=' . $student_uid . '&zweitbetreuer_id=' . $zweitbetreuer_person_id ?>" target="_blank">
+								<a href="<?php echo site_url() . '/extensions/FHC-Core-Projektarbeitsbeurteilung/ProjektarbeitsbeurteilungZweitbegutachter?projektarbeit_id=' . $projektarbeit_id . '&uid=' . $student_uid . '&zweitbetreuer_id=' . $zweitbetreuer_person_id ?>" target="_blank">
 									<i class="fa fa-external-link"></i>&nbsp;<?php echo $this->p->t('projektarbeitsbeurteilung', 'zurZweitbegutachterBewertung') ?>
 								</a>
 							<?php else: ?>

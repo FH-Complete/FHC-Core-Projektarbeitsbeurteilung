@@ -186,8 +186,12 @@ class Projektuebersicht extends Auth_Controller
 
 			$zweitbetr = getData($zweitbegutachter)[0];
 
-			$mail_baselink = CIS_ROOT."index.ci.php/extensions/FHC-Core-Projektarbeitsbeurteilung/Projektarbeitsbeurteilung";
-			$mail_link = $mail_baselink;
+			$mail_link = CIS_ROOT."index.ci.php/extensions/FHC-Core-Projektarbeitsbeurteilung/".
+			(
+				$zweitbetr->betreuertyp == Projektarbeitsbeurteilung::BETREUERART_ZWEITBEGUTACHTER
+				? "ProjektarbeitsbeurteilungErstbegutachter"
+				: "ProjektarbeitsbeurteilungZweitbegutachter"
+			);
 
 			$zweitbetmaildata = array();
 			$zweitbetmaildata['geehrt'] = "geehrte" . ($zweitbetr->anrede == "Herr" ? "r" : "");
