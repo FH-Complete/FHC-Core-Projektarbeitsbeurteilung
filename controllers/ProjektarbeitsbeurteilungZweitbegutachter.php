@@ -211,54 +211,14 @@ class ProjektarbeitsbeurteilungZweitbegutachter extends Projektarbeitsbeurteilun
 
 				if (hasData($projektbetreuerResult))
 				{
-					// data to save
-					$projektarbeitsbeurteilungToSave = array(
-						'projektarbeit_id' => $projektarbeit_id,
-						'betreuer_person_id' => $betreuer_person_id,
-						'betreuerart_kurzbz' => self::BETREUERART_ZWEITBEGUTACHTER,
-						'bewertung' => $bewertungJson
+					$saveProjektarbeitsbeurteilungResult = $this->ProjektarbeitsbeurteilungModel->saveProjektarbeitsbeurteilung(
+						$projektarbeit_id,
+						$betreuer_person_id,
+						self::BETREUERART_ZWEITBEGUTACHTER,
+						$bewertungJson,
+						$authObj->username,
+						$saveAndSend ? $abgeschicktamum : null
 					);
-
-					// additional info if Beurteilung was sent (finalized)
-					if ($saveAndSend === true)
-					{
-						$projektarbeitsbeurteilungToSave['abgeschicktvon'] = $authObj->username;
-						$projektarbeitsbeurteilungToSave['abgeschicktamum'] = $abgeschicktamum;
-					}
-
-					// check if there is an existing Projektarbeitsbeurteilung
-					$projektarbeitsbeurteilungResult = $this->ProjektarbeitsbeurteilungModel->loadWhere(
-						array(
-							'projektarbeit_id' => $projektarbeit_id,
-							'betreuer_person_id' => $betreuer_person_id,
-							'betreuerart_kurzbz' => self::BETREUERART_ZWEITBEGUTACHTER
-						)
-					);
-
-
-					if (isError($projektarbeitsbeurteilungResult))
-					{
-						$this->outputJsonError('Error when getting Beurteilung');
-						return;
-					}
-					// update if existing Beurteilung
-					elseif (hasData($projektarbeitsbeurteilungResult))
-					{
-						$projektarbeitsbeurteilung_id = getData($projektarbeitsbeurteilungResult)[0]->projektarbeitsbeurteilung_id;
-
-						$projektarbeitsbeurteilungToSave['updateamum'] = date('Y-m-d H:i:s', time());
-
-						$saveProjektarbeitsbeurteilungResult = $this->ProjektarbeitsbeurteilungModel->update(
-							$projektarbeitsbeurteilung_id,
-							$projektarbeitsbeurteilungToSave
-						);
-					}
-					else
-					{
-						// no existing Beurteilung -> insert new
-						$projektarbeitsbeurteilungToSave['insertvon'] = $authObj->username;
-						$saveProjektarbeitsbeurteilungResult = $this->ProjektarbeitsbeurteilungModel->insert($projektarbeitsbeurteilungToSave);
-					}
 
 					if (isError($saveProjektarbeitsbeurteilungResult))
 					{
@@ -275,7 +235,6 @@ class ProjektarbeitsbeurteilungZweitbegutachter extends Projektarbeitsbeurteilun
 						if (isError($mailResult))
 						{
 							$this->outputJsonError('Error when sending Mail to Erstbegutachter: '.getError($mailResult));
-							return;
 						}
 
 						$mailResult = $this->projektarbeitsbeurteilungmaillib->sendInfoMailToStudiengang($projektarbeit_id, $betreuer_person_id);
@@ -283,7 +242,6 @@ class ProjektarbeitsbeurteilungZweitbegutachter extends Projektarbeitsbeurteilun
 						if (isError($mailResult))
 						{
 							$this->outputJsonError('Error when sending Mail to Studiengang: '.getError($mailResult));
-							return;
 						}
 					}
 

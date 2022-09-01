@@ -14,10 +14,10 @@ class Projektarbeitsbeurteilung_model extends DB_Model
 
 	/**
 	 * Gets data of a Projketarbeitsbeurteilung.
-	 * @param $projektarbeit_id int
-	 * @param $projektbetreuer_person_id int
-	 * @param $student_uid
-	 * @param $betreuerart_kurzbz
+	 * @param int $projektarbeit_id
+	 * @param int $projektbetreuer_person_id
+	 * @param string $student_uid
+	 * @param string $betreuerart_kurzbz
 	 * @return object
 	 */
 	public function getProjektarbeitsbeurteilung($projektarbeit_id, $projektbetreuer_person_id, $student_uid = null, $betreuerart_kurzbz = null)
@@ -186,8 +186,8 @@ class Projektarbeitsbeurteilung_model extends DB_Model
 
 	/**
 	 * Gets Erstbegutachter of a Projektarbeit with a certain Zweitbegutachter. Includes data of student.
-	 * @param $projektarbeit_id int
-	 * @param $zweitbegutachter_person_id int
+	 * @param int $projektarbeit_id
+	 * @param int $zweitbegutachter_person_id
 	 * @return object
 	 */
 	public function getErstbegutachterFromZweitbegutachter($projektarbeit_id, $zweitbegutachter_person_id)
@@ -220,5 +220,71 @@ class Projektarbeitsbeurteilung_model extends DB_Model
 			LIMIT 1";
 
 		return $this->execQuery($zweitbetrQry, array($projektarbeit_id, $zweitbegutachter_person_id));
+	}
+
+	/**
+	* Saves Projektarbeitsbeurteilung. Updates if a Beurteilung already exists, inserts it otherwise.
+	* @param int $projektarbeit_id
+	* @param int $betreuer_person_id
+	* @param string $betreuerart_kurzbz
+	* @param object $bewertungJson
+	* @param string $username
+	* @param string $abgeschicktamum
+	* @return object
+	*/
+	public function saveProjektarbeitsbeurteilung(
+		$projektarbeit_id,
+		$betreuer_person_id,
+		$betreuerart_kurzbz,
+		$bewertungJson,
+		$username,
+		$abgeschicktamum
+	)
+	{
+		// data to save
+		$projektarbeitsbeurteilungToSave = array(
+			'projektarbeit_id' => $projektarbeit_id,
+			'betreuer_person_id' => $betreuer_person_id,
+			'betreuerart_kurzbz' => $betreuerart_kurzbz,
+			'bewertung' => $bewertungJson
+		);
+
+		// additional info if Beurteilung was sent (finalized)
+		if (isset($abgeschicktamum))
+		{
+			$projektarbeitsbeurteilungToSave['abgeschicktvon'] = $username;
+			$projektarbeitsbeurteilungToSave['abgeschicktamum'] = $abgeschicktamum;
+		}
+
+		// check if there is an existing Projektarbeitsbeurteilung
+		$projektarbeitsbeurteilungResult = $this->loadWhere(
+			array(
+				'projektarbeit_id' => $projektarbeit_id,
+				'betreuer_person_id' => $betreuer_person_id,
+				'betreuerart_kurzbz' => $betreuerart_kurzbz
+			)
+		);
+
+		if (isError($projektarbeitsbeurteilungResult))
+			return error('Error when getting Beurteilung');
+
+		// update if existing Beurteilung
+		if (hasData($projektarbeitsbeurteilungResult))
+		{
+			$projektarbeitsbeurteilung_id = getData($projektarbeitsbeurteilungResult)[0]->projektarbeitsbeurteilung_id;
+
+			$projektarbeitsbeurteilungToSave['updateamum'] = date('Y-m-d H:i:s', time());
+
+			return $this->update(
+				$projektarbeitsbeurteilung_id,
+				$projektarbeitsbeurteilungToSave
+			);
+		}
+		else
+		{
+			// no existing Beurteilung -> insert new
+			$projektarbeitsbeurteilungToSave['insertvon'] = $username;
+			return $this->insert($projektarbeitsbeurteilungToSave);
+		}
 	}
 }
