@@ -150,7 +150,6 @@ $filterWidgetArray = array(
 			}
 			elseif ($datasetRaw->{'KommissionmitgliederPersonId'} !== null)
 			{
-				var_dump($datasetRaw->{'Kommissionmitglieder'});
 				$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'resendToken')))} = '';
 				$mitglieder = explode(', ', $datasetRaw->{'Kommissionmitglieder'});
 				foreach ($mitglieder as $kommissionsmitglied)

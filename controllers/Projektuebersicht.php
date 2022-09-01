@@ -1,6 +1,8 @@
 <?php
 if (! defined('BASEPATH')) exit('No direct script access allowed');
 
+require_once('Projektarbeitsbeurteilung.php');
+
 class Projektuebersicht extends Auth_Controller
 {
 
@@ -188,9 +190,9 @@ class Projektuebersicht extends Auth_Controller
 
 			$mail_link = CIS_ROOT."index.ci.php/extensions/FHC-Core-Projektarbeitsbeurteilung/".
 			(
-				$zweitbetr->betreuertyp == Projektarbeitsbeurteilung::BETREUERART_ZWEITBEGUTACHTER
-				? "ProjektarbeitsbeurteilungErstbegutachter"
-				: "ProjektarbeitsbeurteilungZweitbegutachter"
+				$zweitbetr->betreuerart_kurzbz == Projektarbeitsbeurteilung::BETREUERART_ZWEITBEGUTACHTER
+				? "ProjektarbeitsbeurteilungZweitbegutachter"
+				: "ProjektarbeitsbeurteilungErstbegutachter"
 			);
 
 			$zweitbetmaildata = array();
