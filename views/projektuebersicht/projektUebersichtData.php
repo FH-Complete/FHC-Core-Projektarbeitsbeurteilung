@@ -66,7 +66,8 @@ $query = '
 						arbeit.projektarbeit_id as ProjektID
 				FROM lehre.tbl_projektbetreuer betreuer
 				JOIN lehre.tbl_projektarbeit arbeit USING(projektarbeit_id)
-				LEFT JOIN extension.tbl_projektarbeitsbeurteilung beurteilung ON arbeit.projektarbeit_id = beurteilung.projektarbeit_id AND betreuer.person_id = beurteilung.betreuer_person_id
+				LEFT JOIN extension.tbl_projektarbeitsbeurteilung beurteilung
+					ON arbeit.projektarbeit_id = beurteilung.projektarbeit_id AND betreuer.person_id = beurteilung.betreuer_person_id
 				LEFT JOIN public.tbl_person p ON betreuer.person_id = p.person_id
 				LEFT JOIN public.tbl_benutzer benutzer ON p.person_id = benutzer.person_id
 				WHERE betreuer.betreuerart_kurzbz = '.$ZWEITBEGUTACHTER.'
@@ -76,9 +77,12 @@ $query = '
 		FULL JOIN
 		(
 			(
-				SELECT ARRAY_TO_STRING(ARRAY_AGG(DISTINCT (p.vorname || \' \' || p.nachname)), \', \') AS Mitglieder,
-						ARRAY_TO_STRING(ARRAY_AGG(betreuer.person_id), \', \') AS MitgliederPersonId,
-						arbeit.projektarbeit_id as ProjektID
+				SELECT ARRAY_TO_STRING(ARRAY_AGG(DISTINCT (
+					p.person_id || \' \' || (CASE WHEN benutzer.uid IS NULL THEN TRUE ELSE FALSE END)
+					|| \' \' || p.vorname || \' \' || p.nachname
+				)), \', \') AS Mitglieder,
+					ARRAY_TO_STRING(ARRAY_AGG(DISTINCT (betreuer.person_id)), \', \') AS MitgliederPersonId,
+					arbeit.projektarbeit_id as ProjektID
 				FROM lehre.tbl_projektbetreuer betreuer
 				JOIN lehre.tbl_projektarbeit arbeit USING(projektarbeit_id)
 				JOIN public.tbl_person p ON betreuer.person_id = p.person_id
@@ -146,10 +150,16 @@ $filterWidgetArray = array(
 			}
 			elseif ($datasetRaw->{'KommissionmitgliederPersonId'} !== null)
 			{
+				var_dump($datasetRaw->{'Kommissionmitglieder'});
 				$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'resendToken')))} = '';
-				foreach (explode(', ', $datasetRaw->{'KommissionmitgliederPersonId'}) as $idx => $kommission_person_id)
+				$mitglieder = explode(', ', $datasetRaw->{'Kommissionmitglieder'});
+				foreach ($mitglieder as $kommissionsmitglied)
 				{
-					$voller_name = explode(', ', $datasetRaw->{'Kommissionmitglieder'})[$idx];
+					$person_data = explode(' ', $kommissionsmitglied);
+					if ($person_data[1] == 'false')
+						break;
+					$kommission_person_id = $person_data[0];
+					$voller_name = $person_data[2].' '.$person_data[3];
 					$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'resendToken')))} .=
 					'<div class="kommissionsendtoken">'.
 					$voller_name . ': <br />' .

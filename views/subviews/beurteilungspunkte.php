@@ -9,7 +9,7 @@
 <td class="beurteilungpoints text-center">
 	<?php
 		if ($readOnlyAccess):
-			if (isset($projektarbeit_bewertung))
+			if (isset($projektarbeit_bewertung->{'bewertung_'.$name}))
 			{
 				$punktewert = $projektarbeit_bewertung->{'bewertung_'.$name};
 				echo $language === 'German' ? formatDecimalGerman($punktewert) : $punktewert;
