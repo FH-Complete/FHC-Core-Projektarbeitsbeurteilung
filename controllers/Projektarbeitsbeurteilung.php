@@ -117,7 +117,7 @@ class Projektarbeitsbeurteilung extends FHC_Controller
 				if (isset($zweitbetreuer_input_id))
 				{
 					// if zweitbetreuer id passed is same as zweitbetreuer id from Projektarbeit
-					if ($zweitbetreuer_input_id === $zweitbetreuer_person_id)
+					if ($zweitbetreuer_input_id == $zweitbetreuer_person_id)
 					{
 						// save person_id of Zweitbetreuer to display Beurteilung from Zweitbegutachter
 						$betreuer_person_id = $zweitbetreuer_person_id;
