@@ -31,7 +31,7 @@ $this->load->view(
 			'ui' => array('bitteEintragWaehlen', 'projektarbeit', 'senden')
 
 		),
-		'customCSSs' => array('public/css/sbadmin2/tablesort_bootstrap.css'),
+		'customCSSs' => array('public/css/sbadmin2/tablesort_bootstrap.css', 'public/extensions/FHC-Core-Projektarbeitsbeurteilung/css/projektuebersicht.css'),
 		'customJSs' => array('public/js/bootstrapper.js', 'public/extensions/FHC-Core-Projektarbeitsbeurteilung/js/projektUebersicht.js'),
 	)
 );

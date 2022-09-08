@@ -1,6 +1,8 @@
 <?php
 if (! defined('BASEPATH')) exit('No direct script access allowed');
 
+require_once('Projektarbeitsbeurteilung.php');
+
 class Projektuebersicht extends Auth_Controller
 {
 
@@ -119,9 +121,15 @@ class Projektuebersicht extends Auth_Controller
 
 	public function resendToken()
 	{
-		$personid = $this->_ci->input->post('personid');
+		$erstbetreuerid = $this->_ci->input->post('personid');
 		$projektarbeitid = $this->_ci->input->post('projektid');
 		$studentid = $this->_ci->input->post('studentid');
+		$kommissionprueferid = $this->_ci->input->post('kommissionprueferid');
+
+		// optional kommissionspruefer id if kommissionelle Prüfung (can have multiple Pruefer)
+		// token needs to be sent for one Pruefer at a time, so id identification needed
+		if (isEmptyString($kommissionprueferid))
+			$kommissionprueferid = null;
 
 		$projektarbeit = $this->_ci->ProjektarbeitModel->load($projektarbeitid);
 
@@ -130,23 +138,12 @@ class Projektuebersicht extends Auth_Controller
 
 		$projektarbeit = getData($projektarbeit)[0];
 
-		$person = $this->_ci->PersonModel->load($personid);
+		$person = $this->_ci->PersonModel->load($erstbetreuerid);
 
 		if (!hasData($person))
 			$this->terminateWithJsonError('Die Person kann nicht geladen werden.');
 
 		$person = getData($person)[0];
-
-		$erstbegutachter = $this->_ci->ProjektbetreuerModel->loadWhere(array(
-			'person_id' => $person->person_id,
-			'projektarbeit_id' => $projektarbeit->projektarbeit_id,
-			'betreuerart_kurzbz' => 'Erstbegutachter'
-		));
-
-		if (!hasData($erstbegutachter))
-			$this->terminateWithJsonError('Erstbegutachter kann nicht geladen werden.');
-
-		$erstbegutachter = getData($erstbegutachter)[0];
 
 		$db = new DB_Model();
 		$qry = "SELECT * FROM campus.vw_benutzer WHERE uid = ?";
@@ -157,26 +154,46 @@ class Projektuebersicht extends Auth_Controller
 
 		$student = getData($student)[0];
 
-		$zweitbegutachter = $this->_ci->ProjektbetreuerModel->getZweitbegutachterWithToken($erstbegutachter->person_id, $projektarbeit->projektarbeit_id, $student->uid);
+		// Get Zweitbegutachter before Token generation
+		$zweitbegutachter = $this->_ci->ProjektbetreuerModel->getZweitbegutachterWithToken(
+			$erstbetreuerid,
+			$projektarbeit->projektarbeit_id,
+			$student->uid,
+			$kommissionprueferid
+		);
 
 		if (!hasData($zweitbegutachter))
 			$this->terminateWithJsonError('Zweitbegutachter kann nicht geladen werden.');
 
 		$zweitbegutachter = getData($zweitbegutachter)[0];
 
-		$tokenGenRes = $this->_ci->ProjektbetreuerModel->generateZweitbegutachterToken($zweitbegutachter->person_id, $projektarbeit->projektarbeit_id);
+		// Token generation
+		$tokenGenRes = $this->_ci->ProjektbetreuerModel->generateZweitbegutachterToken(
+			$zweitbegutachter->person_id,
+			$projektarbeit->projektarbeit_id
+		);
 
 		if(isSuccess($tokenGenRes))
 		{
-			$zweitbegutachter = $this->_ci->ProjektbetreuerModel->getZweitbegutachterWithToken($erstbegutachter->person_id, $projektarbeit->projektarbeit_id, $student->uid);
+			// Get Zweitbegutachter after Token generation
+			$zweitbegutachter = $this->_ci->ProjektbetreuerModel->getZweitbegutachterWithToken(
+				$erstbetreuerid,
+				$projektarbeit->projektarbeit_id,
+				$student->uid,
+				$kommissionprueferid
+			);
 
 			if (!hasData($zweitbegutachter))
 				$this->terminateWithJsonError('Zweitbegutachter kann nicht geladen werden.');
 
 			$zweitbetr = getData($zweitbegutachter)[0];
 
-			$mail_baselink = APP_ROOT."index.ci.php/extensions/FHC-Core-Projektarbeitsbeurteilung/Projektarbeitsbeurteilung";
-			$mail_link = $mail_baselink;
+			$mail_link = CIS_ROOT."index.ci.php/extensions/FHC-Core-Projektarbeitsbeurteilung/".
+			(
+				$zweitbetr->betreuerart_kurzbz == Projektarbeitsbeurteilung::BETREUERART_ZWEITBEGUTACHTER
+				? "ProjektarbeitsbeurteilungZweitbegutachter"
+				: "ProjektarbeitsbeurteilungErstbegutachter"
+			);
 
 			$zweitbetmaildata = array();
 			$zweitbetmaildata['geehrt'] = "geehrte" . ($zweitbetr->anrede == "Herr" ? "r" : "");
@@ -204,6 +221,4 @@ class Projektuebersicht extends Auth_Controller
 		else
 			$this->terminateWithJsonError('Fehler beim Erstellen des Tokens.');
 	}
-
-
 }

@@ -39,7 +39,7 @@ $this->load->view(
 				?>
 			<br />
 			<br />
-				<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/fhtechnikum_header.php', array()); ?>
+				<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/fhtechnikum_header.php', array()); ?>
 			<div class="row">
 				<div class="col-lg-12">
 					<h3 class="page-header">
@@ -48,7 +48,7 @@ $this->load->view(
 					</h3>
 				</div>
 			</div>
-			<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/hiddenfields.php'); ?>
+			<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/hiddenfields.php'); ?>
 			<form id="beurteilungform">
 			<div class="row">
 				<div class="col-lg-12">
@@ -61,7 +61,7 @@ $this->load->view(
 							</td>
 							<td colspan="3"><?php echo $titel ?></td>
 						</tr>
-						<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/stammdaten.php'); ?>
+						<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/stammdaten.php'); ?>
 					</table>
 				</div>
 			</div>
@@ -99,7 +99,7 @@ $this->load->view(
 									</ul><br />
 								</td>
 								<td>
-									<?php $readonly = (isset($projektarbeit_bewertung->beurteilung_zweitbegutachter) && $sent) ? ' readonly' : '' ?>
+									<?php $readonly = $readOnlyAccess ? ' readonly' : '' ?>
 									<textarea class="form-control" cols="5" rows="16" name="beurteilung_zweitbegutachter"<?php echo $readonly ?>><?php echo isset($projektarbeit_bewertung->beurteilung_zweitbegutachter) ? $projektarbeit_bewertung->beurteilung_zweitbegutachter : '' ?></textarea>
 								</td>
 							</tr>
@@ -109,7 +109,7 @@ $this->load->view(
 			</div>
 			<br />
 			</form>
-				<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/footer.php', array('sent' => $sent)); ?>
+				<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/footer.php', array('sent' => $sent)); ?>
 			<br />
 			<?php endif; ?>
 		</div>
