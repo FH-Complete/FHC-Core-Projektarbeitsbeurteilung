@@ -11,7 +11,6 @@ $this->load->view(
 		'tablesorter' => true,
 		'ajaxlib' => true,
 		'filterwidget' => true,
-		'tablewidget' => true,
 		'navigationwidget' => true,
 		'dialoglib' => true,
 		'tabulator' => true,
