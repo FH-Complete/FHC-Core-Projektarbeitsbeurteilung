@@ -1,7 +1,5 @@
 <?php
-$this->load->view(
-	'templates/FHC-Header',
-	array(
+	$includesArray = array(
 		'title' => 'Projektarbeitsbeurteilung Zweitbegutachter',
 		'jquery3' => true,
 		'jqueryui1' => true,
@@ -20,8 +18,9 @@ $this->load->view(
 		'customJSs' => array(
 			'public/extensions/FHC-Core-Projektarbeitsbeurteilung/js/projektarbeitsbeurteilung_zweitbegutachter.js'
 		)
-	)
-);
+	);
+
+	$this->load->view('templates/FHC-Header', $includesArray);
 ?>
 <body>
 <div id="wrapper">
@@ -116,3 +115,4 @@ $this->load->view(
 	</div>
 </div>
 </body>
+<?php $this->load->view('templates/FHC-Footer', $includesArray); ?>
