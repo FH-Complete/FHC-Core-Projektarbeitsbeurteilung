@@ -1,22 +1,24 @@
 <?php
-$this->load->view(
-	'templates/FHC-Header',
-	array(
-		'title' => 'Projektarbeitsbeurteilung Login',
-		'jquery' => true,
-		'jqueryui' => true,
-		'bootstrap' => true,
-		'fontawesome' => true,
-		'dialoglib' => true,
-		'ajaxlib' => true,
-		'sbadmintemplate' => true,
-		'customCSSs' => array(
-			'public/css/sbadmin2/admintemplate_contentonly.css'
-		)
+$sitesettings =
+array(
+	'title' => 'Projektarbeitsbeurteilung Login',
+	'jquery3' => true,
+	'jqueryui1' => true,
+	'bootstrap3' => true,
+	'fontawesome4' => true,
+	'dialoglib' => true,
+	'ajaxlib' => true,
+	'sbadmintemplate3' => true,
+	'customCSSs' => array(
+		'public/css/sbadmin2/admintemplate_contentonly.css'
 	)
 );
+
+$this->load->view(
+	'templates/FHC-Header',
+	$sitesettings
+);
 ?>
-<body>
 <div id="wrapper">
 	<div id="page-wrapper">
 		<div class="container-fluid">
@@ -65,4 +67,9 @@ $this->load->view(
 		</div>
 	</div>
 </div>
-</body>
+
+<?php
+$this->load->view(
+	'templates/FHC-Footer',
+	$sitesettings
+);
