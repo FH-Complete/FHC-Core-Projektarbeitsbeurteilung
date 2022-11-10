@@ -22,7 +22,6 @@
 	);
 	$this->load->view('templates/FHC-Header', $includesArray);
 ?>
-<body>
 <div id="wrapper">
 	<div id="page-wrapper">
 		<div class="container-fluid" id="containerFluid">
@@ -86,8 +85,8 @@
 							</td>
 						</tr>
 						<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/stammdaten.php'); ?>
-						<!-- show downloadlink if Kommission -->
-						<?php if ($isKommission): ?>
+						<!-- show downloadlink of Projektarbeit -->
+<!--
 						<tr>
 							<td>
 								<b>
@@ -105,7 +104,7 @@
 								</a>
 							</td>
 						</tr>
-						<?php endif; ?>
+-->
 					</table>
 				</div>
 			</div>
@@ -358,5 +357,4 @@
 		</div>
 	</div>
 </div>
-</body>
 <?php $this->load->view('templates/FHC-Footer', $includesArray); ?>

@@ -22,7 +22,6 @@
 
 	$this->load->view('templates/FHC-Header', $includesArray);
 ?>
-<body>
 <div id="wrapper">
 	<div id="page-wrapper">
 		<div class="container-fluid" id="containerFluid">
@@ -114,5 +113,4 @@
 		</div>
 	</div>
 </div>
-</body>
 <?php $this->load->view('templates/FHC-Footer', $includesArray); ?>

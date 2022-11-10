@@ -105,23 +105,23 @@ $filterWidgetArray = array(
 	'tableUniqueId' => 'projectWorkAssessment',
 	'hideOptions' => false,
 	'additionalColumns' => array(
-								(ucfirst($this->p->t('projektarbeitsbeurteilung', 'erstBegutachter')) . ' ' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischaltung'))),
+								(ucfirst($this->p->t('projektarbeitsbeurteilung', 'nebenBegutachter'))),
+								(ucfirst($this->p->t('projektarbeitsbeurteilung', 'begutachter')) . ' ' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischaltung'))),
 								(ucfirst($this->p->t('projektarbeitsbeurteilung', 'zweitBegutachter')) . ' ' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischaltung'))),
-								(ucfirst($this->p->t('projektarbeitsbeurteilung', 'resendToken'))),
 								'Download'),
 	'columnsAliases' => array(
 		'ProjektarbeitID',
 		ucfirst($this->p->t('ui', 'projektarbeit')) . ' ' . $this->p->t('global', 'titel'),
-		ucfirst($this->p->t('projektarbeitsbeurteilung', 'erstBegutachter')) .' ' . $this->p->t('person', 'vorname'),
-		ucfirst($this->p->t('projektarbeitsbeurteilung', 'erstBegutachter')) .' ' . $this->p->t('person', 'nachname'),
-		ucfirst($this->p->t('projektarbeitsbeurteilung', 'erstBegutachter')). ' PersonID',
-		ucfirst($this->p->t('projektarbeitsbeurteilung', 'erstBegutachter')). ' ' . $this->p->t('projektarbeitsbeurteilung', 'betreuerart'),
-		ucfirst($this->p->t('projektarbeitsbeurteilung', 'erstBegutachter')) .' ' . $this->p->t('global', 'abgeschickt'),
-		ucfirst($this->p->t('projektarbeitsbeurteilung', 'zweitBegutachter')) .' ' . $this->p->t('person', 'vorname'),
-		ucfirst($this->p->t('projektarbeitsbeurteilung', 'zweitBegutachter')) .' ' . $this->p->t('person', 'nachname'),
-		ucfirst($this->p->t('projektarbeitsbeurteilung', 'zweitBegutachter')). ' PersonID',
-		ucfirst($this->p->t('projektarbeitsbeurteilung', 'zweitBegutachter')) . ' ' . $this->p->t('person', 'uid'),
-		ucfirst($this->p->t('projektarbeitsbeurteilung', 'zweitBegutachter')) .' ' . $this->p->t('global', 'abgeschickt'),
+		ucfirst($this->p->t('projektarbeitsbeurteilung', 'begutachter')) .' ' . $this->p->t('person', 'vorname'),
+		ucfirst($this->p->t('projektarbeitsbeurteilung', 'begutachter')) .' ' . $this->p->t('person', 'nachname'),
+		ucfirst($this->p->t('projektarbeitsbeurteilung', 'begutachter')). ' PersonID',
+		ucfirst($this->p->t('projektarbeitsbeurteilung', 'begutachter')). ' ' . $this->p->t('projektarbeitsbeurteilung', 'betreuerart'),
+		ucfirst($this->p->t('projektarbeitsbeurteilung', 'begutachter')) .' ' . $this->p->t('global', 'abgeschickt'),
+		ucfirst($this->p->t('projektarbeitsbeurteilung', 'nebenBegutachter')) .' ' . $this->p->t('person', 'vorname'),
+		ucfirst($this->p->t('projektarbeitsbeurteilung', 'nebenBegutachter')) .' ' . $this->p->t('person', 'nachname'),
+		ucfirst($this->p->t('projektarbeitsbeurteilung', 'nebenBegutachter')). ' PersonID',
+		ucfirst($this->p->t('projektarbeitsbeurteilung', 'nebenBegutachter')) . ' ' . $this->p->t('person', 'uid'),
+		ucfirst($this->p->t('projektarbeitsbeurteilung', 'nebenBegutachter')) .' ' . $this->p->t('global', 'abgeschickt'),
 		ucfirst($this->p->t('person', 'student')) . $this->p->t('person', 'uid'),
 		ucfirst($this->p->t('person', 'student')) . ' ' . $this->p->t('person', 'vorname'),
 		ucfirst($this->p->t('person', 'student')) . ' ' .$this->p->t('person', 'nachname'),
@@ -129,56 +129,65 @@ $filterWidgetArray = array(
 		ucfirst($this->p->t('ui', 'projektarbeit')) . ' ' . $this->p->t('global', 'uploaddatum'),
 		ucfirst($this->p->t('lehre', 'studiengang')),
 		ucfirst($this->p->t('global', 'typ')),
-		ucfirst($this->p->t('projektarbeitsbeurteilung', 'kommissionmitglieder')),
-		ucfirst($this->p->t('projektarbeitsbeurteilung', 'kommissionmitglieder')) . ' PersonID'
+		ucfirst($this->p->t('projektarbeitsbeurteilung', 'kommissionsmitglieder')),
+		ucfirst($this->p->t('projektarbeitsbeurteilung', 'kommissionsmitglieder')) . ' PersonID'
 	),
 	'formatRow' => function($datasetRaw) {
 
-		/* Token resend */
-		if ($datasetRaw->{'ErstPersonID'} !== null && $datasetRaw->{'Note'} === null)
+		/* Nebenbegutachter column */
+		$tokenbuttonStr = '<button class="resend" data-personid="%s" data-projektid="%s" data-studentid="%s"%s>'
+							.' Token senden '.
+							'</button>';
+
+		$tokenbuttonParams = array(
+			'erstbetreuerid' => $datasetRaw->{'ErstPersonID'},
+			'projektarbeitid' => $datasetRaw->{'ProjectWorkID'},
+			'studentuid' => $datasetRaw->{'StudentID'},
+			'kommissionprueferid' => ''
+		);
+
+		if ($datasetRaw->{'ErstPersonID'} !== null)
 		{
-			if ($datasetRaw->{'ZweitPersonID'} !== null && $datasetRaw->{'ZweitUID'} === null)
+			$nebenbetreuerStr = '<div class="kommissionsendtoken">';
+			if ($datasetRaw->{'ZweitPersonID'} !== null)
 			{
-				$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'resendToken')))} = sprintf(
-					'<button class="resend" data-personid="%s" data-projektid="%s"  data-studentid="%s">'
-					.' Token senden '.
-					'</button>',
-					$datasetRaw->{'ErstPersonID'},
-					$datasetRaw->{'ProjectWorkID'},
-					$datasetRaw->{'StudentID'}
-				);
+				// show full name
+				$nebenbetreuerStr .= $datasetRaw->{'ZweitVorname'} . ' ' . $datasetRaw->{'ZweitNachname'};
+
+				// if has benutzer, show token resend button
+				if ($datasetRaw->{'ZweitUID'} === null)
+				{
+					$nebenbetreuerStr .= ':<br>' . vsprintf($tokenbuttonStr, $tokenbuttonParams);
+				}
 			}
 			elseif ($datasetRaw->{'KommissionmitgliederPersonId'} !== null)
 			{
-				$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'resendToken')))} = '';
 				$mitglieder = explode(', ', $datasetRaw->{'Kommissionmitglieder'});
+				$first = true;
 				foreach ($mitglieder as $kommissionsmitglied)
 				{
 					$person_data = explode(' ', $kommissionsmitglied);
-					if ($person_data[1] == 'false')
-						break;
-					$kommission_person_id = $person_data[0];
-					$voller_name = $person_data[2].' '.$person_data[3];
-					$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'resendToken')))} .=
-					'<div class="kommissionsendtoken">'.
-					$voller_name . ': <br />' .
-					sprintf(
-						'<button class="resend" data-personid="%s" data-projektid="%s" data-studentid="%s" data-kommissionprueferid="%s" >'
-						.' Token senden '.
-						'</button>',
-						$datasetRaw->{'ErstPersonID'},
-						$datasetRaw->{'ProjectWorkID'},
-						$datasetRaw->{'StudentID'},
-						$kommission_person_id
-					).
-					'</div>';
+
+					// show full name
+					if (!$first) $nebenbetreuerStr .= '<br><br>'; // space before next Nebenbegutachter
+					$nebenbetreuerStr .= $person_data[2] . ' ' . $person_data[3];
+
+					// if has benutzer, show token resend button
+					if ($person_data[1] !== 'false')
+					{
+						$tokenbuttonParams['kommissionprueferid'] = 'data-kommissionprueferid="'.$person_data[0].'"';
+						$nebenbetreuerStr .= ':<br>' . vsprintf($tokenbuttonStr, $tokenbuttonParams);
+					}
+
+					$first = false;
 				}
 			}
 			else
-				$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'resendToken')))} = '-';
+				$nebenbetreuerStr .= '-';
+
+			$nebenbetreuerStr .= '</div>';
+			$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'nebenBegutachter')))} = $nebenbetreuerStr;
 		}
-		else
-			$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'resendToken')))} = '-';
 
 		/* Document download */
 		$download = '';
@@ -201,7 +210,7 @@ $filterWidgetArray = array(
 					$datasetRaw->{'ErstPersonID'}
 				);
 
-				$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'erstBegutachter')) . ' ' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischaltung')))} = sprintf(
+				$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'begutachter')) . ' ' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischaltung')))} = sprintf(
 					'<button class="freischalten" data-projektid="%s" data-personid="%s" data-abgeschickt="%s">' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischalten')) . '</button>',
 					$datasetRaw->{'ProjectWorkID'},
 					$datasetRaw->{'ErstPersonID'},
@@ -209,7 +218,7 @@ $filterWidgetArray = array(
 				);
 			}
 			else
-				$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'erstBegutachter')) . ' ' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischaltung')))} = '-';
+				$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'begutachter')) . ' ' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischaltung')))} = '-';
 
 			if ($datasetRaw->{'ErstAbgeschickt'} !== null & $datasetRaw->{'ZweitAbgeschickt'} !== null)
 				$download .= ' <br /> ';
@@ -235,8 +244,6 @@ $filterWidgetArray = array(
 			}
 			else
 				$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'zweitBegutachter')) . ' ' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischaltung')))} = '-';
-
-
 		}
 		else
 		{
@@ -245,7 +252,7 @@ $filterWidgetArray = array(
 			/* Bewertung freischalten */
 			if ($datasetRaw->{'ErstAbgeschickt'} !== null)
 			{
-				$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'erstBegutachter')) . ' ' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischaltung')))} = sprintf(
+				$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'begutachter')) . ' ' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischaltung')))} = sprintf(
 					'<button class="freischalten" data-projektid="%s" data-personid="%s" data-abgeschickt="%s">' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischalten')) . '</button>',
 					$datasetRaw->{'ProjectWorkID'},
 					$datasetRaw->{'ErstPersonID'},
@@ -254,7 +261,7 @@ $filterWidgetArray = array(
 			}
 			else
 			{
-				$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'erstBegutachter')) . ' ' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischaltung')))} = '-';
+				$datasetRaw->{(ucfirst($this->p->t('projektarbeitsbeurteilung', 'begutachter')) . ' ' . ucfirst($this->p->t('projektarbeitsbeurteilung', 'freischaltung')))} = '-';
 			}
 
 			if ($datasetRaw->{'ZweitAbgeschickt'} !== null)
