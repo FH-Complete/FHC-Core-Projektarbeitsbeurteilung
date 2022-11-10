@@ -34,3 +34,20 @@
 	<td><b><?php echo ucfirst($this->p->t('global', 'datum')) ?></b></td>
 	<td><?php echo isset($projektarbeitsbeurteilung->abgeschicktamum) ? date("d.m.Y", strtotime($projektarbeitsbeurteilung->abgeschicktamum)): date('d.m.Y'); ?></td>
 </tr>
+<tr>
+	<td>
+		<b>
+			Download
+		</b>
+	</td>
+	<td colspan="3">
+		<a
+			href="ProjektarbeitsbeurteilungErstbegutachter/downloadProjektarbeit?projektarbeit_id=<?php echo $projektarbeit_id ?>"
+			alt="<?php echo $this->p->t('projektarbeitsbeurteilung', 'parbeitDownload') ?>"
+			title="<?php echo $this->p->t('projektarbeitsbeurteilung', 'parbeitDownload') ?>"
+			target="_blank"
+		>
+			<i class="fa fa-file-pdf-o"></i>
+		</a>
+	</td>
+</tr>

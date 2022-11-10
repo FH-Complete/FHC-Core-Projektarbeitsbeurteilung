@@ -85,7 +85,8 @@
 							</td>
 						</tr>
 						<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/stammdaten.php'); ?>
-						<!-- show downloadlink if Kommission -->
+						<!-- show downloadlink of Projektarbeit -->
+<!--
 						<tr>
 							<td>
 								<b>
@@ -103,6 +104,7 @@
 								</a>
 							</td>
 						</tr>
+-->
 					</table>
 				</div>
 			</div>
