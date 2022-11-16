@@ -90,7 +90,7 @@ class ProjektarbeitsbeurteilungErstbegutachter extends Projektarbeitsbeurteilung
 					self::BETREUERART_BACHELOR_BEGUTACHTER,
 					self::BETREUERART_ERSTBEGUTACHTER,
 					self::BETREUERART_SENATSVORSITZ,
-					self::BETREUERART_SENATSPRUEFER
+					self::BETREUERART_SENATSMITGLIED
 				)
 			);
 
@@ -126,7 +126,7 @@ class ProjektarbeitsbeurteilungErstbegutachter extends Projektarbeitsbeurteilung
 					// get other Kommission members
 					$kommissionPrueferRes = $this->ProjektbetreuerModel->getBetreuerOfProjektarbeit(
 						$projektarbeit_id,
-						self::BETREUERART_SENATSPRUEFER
+						self::BETREUERART_SENATSMITGLIED
 					);
 
 					if (isError($kommissionPrueferRes))
@@ -150,8 +150,8 @@ class ProjektarbeitsbeurteilungErstbegutachter extends Projektarbeitsbeurteilung
 								$kp->zustellung_mail = $kommissionVorsitz->uid.'@'.DOMAIN;
 						}
 
-						// Bewertung of Vorsitz has to be displayed for Senatspruefer
-						if ($projektarbeitsbeurteilung->betreuerart === self::BETREUERART_SENATSPRUEFER)
+						// Bewertung of Vorsitz has to be displayed for Senatsmitglied
+						if ($projektarbeitsbeurteilung->betreuerart === self::BETREUERART_SENATSMITGLIED)
 						{
 							$vorsitzProjektarbeitsbeurteilungResult = $this->ProjektarbeitsbeurteilungModel->getProjektarbeitsbeurteilung(
 								$projektarbeit_id,
@@ -160,7 +160,7 @@ class ProjektarbeitsbeurteilungErstbegutachter extends Projektarbeitsbeurteilung
 								self::BETREUERART_SENATSVORSITZ
 							);
 
-							// copy Bewertung and Note from Senatsvorsitz to Senatspruefer
+							// copy Bewertung and Note from Senatsvorsitz to Senatsmitglied
 							if (hasData($vorsitzProjektarbeitsbeurteilungResult))
 							{
 								$vorsitzProjektarbeitsbeurteilung = getData($vorsitzProjektarbeitsbeurteilungResult);
@@ -172,9 +172,9 @@ class ProjektarbeitsbeurteilungErstbegutachter extends Projektarbeitsbeurteilung
 					}
 				}
 
-				// read only access if Projektarbeit is already sent, or logged in Betreuer is Senatspruefer of Kommission
+				// read only access if Projektarbeit is already sent, or logged in Betreuer is Senatsmitglied of Kommission
 				$readOnlyAccess = isset($projektarbeitsbeurteilung->abgeschicktamum)
-									|| $projektarbeitsbeurteilung->betreuerart === self::BETREUERART_SENATSPRUEFER;
+									|| $projektarbeitsbeurteilung->betreuerart === self::BETREUERART_SENATSMITGLIED;
 
 				// calculate the points reached and max points for displaying
 				$bewertung_punkte = $this->_calculateBewertungPunkte($projektarbeitsbeurteilung->projektarbeit_bewertung);

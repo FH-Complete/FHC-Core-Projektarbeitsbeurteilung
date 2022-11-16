@@ -49,7 +49,7 @@ class Projektarbeitsbeurteilung_model extends DB_Model
 			WHERE parbeit.projektarbeit_id = ?
 			AND betreuer.person_id = ?
 			AND parbeit.projekttyp_kurzbz IN ('Bachelor', 'Diplom')
-			AND betreuer.betreuerart_kurzbz IN ('Begutachter', 'Erstbegutachter', 'Zweitbegutachter', 'Senatsvorsitz', 'Senatspruefer')";
+			AND betreuer.betreuerart_kurzbz IN ('Begutachter', 'Erstbegutachter', 'Zweitbegutachter', 'Senatsvorsitz', 'Senatsmitglied')";
 
 		if (isset($student_uid))
 		{
@@ -69,7 +69,7 @@ class Projektarbeitsbeurteilung_model extends DB_Model
 						WHEN betreuer.betreuerart_kurzbz = 'Begutachter' THEN 2
 						WHEN betreuer.betreuerart_kurzbz = 'Erstbegutachter' THEN 3
 						WHEN betreuer.betreuerart_kurzbz = 'Zweitbegutachter' THEN 4
-						WHEN betreuer.betreuerart_kurzbz = 'Senatspruefer' THEN 5
+						WHEN betreuer.betreuerart_kurzbz = 'Senatsmitglied' THEN 5
 						ELSE 5
 					END
 			LIMIT 1";

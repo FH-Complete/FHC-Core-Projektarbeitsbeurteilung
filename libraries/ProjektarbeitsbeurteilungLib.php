@@ -11,7 +11,7 @@ class ProjektarbeitsbeurteilungLib
 	const BETREUERART_ERSTBEGUTACHTER = 'Erstbegutachter';
 	const BETREUERART_ZWEITBEGUTACHTER = 'Zweitbegutachter';
 	const BETREUERART_SENATSVORSITZ = 'Senatsvorsitz';
-	const BETREUERART_SENATSPRUEFER = 'Senatspruefer';
+	const BETREUERART_SENATSMITGLIED = 'Senatsmitglied';
 
 	private $_ci;
 
@@ -39,7 +39,7 @@ class ProjektarbeitsbeurteilungLib
 		$kommissionPruefer = array();
 		$kommissionPrueferRes = $this->_ci->ProjektbetreuerModel->getBetreuerOfProjektarbeit(
 			$projektarbeit_id,
-			self::BETREUERART_SENATSPRUEFER
+			self::BETREUERART_SENATSMITGLIED
 		);
 
 		if (isError($kommissionPrueferRes))
@@ -63,8 +63,8 @@ class ProjektarbeitsbeurteilungLib
 					$deliveryEmail = $kommissionVorsitz->uid.'@'.DOMAIN;
 			}
 
-			// Bewertung of Vorsitz has to be displayed for Senatspruefer
-			if ($projektarbeitsbeurteilung->betreuerart === self::BETREUERART_SENATSPRUEFER)
+			// Bewertung of Vorsitz has to be displayed for Senatsmitglied
+			if ($projektarbeitsbeurteilung->betreuerart === self::BETREUERART_SENATSMITGLIED)
 			{
 				$vorsitzProjektarbeitsbeurteilungResult = $this->ProjektarbeitsbeurteilungModel->getProjektarbeitsbeurteilung(
 					$projektarbeit_id,
@@ -72,7 +72,7 @@ class ProjektarbeitsbeurteilungLib
 					$student_uid
 				);
 
-				// copy Bewertung and Note from Senatsvorsitz to Senatspruefer
+				// copy Bewertung and Note from Senatsvorsitz to Senatsmitglied
 				if (hasData($vorsitzProjektarbeitsbeurteilungResult))
 				{
 					$vorsitzProjektarbeitsbeurteilung = getData($vorsitzProjektarbeitsbeurteilungResult);

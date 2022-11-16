@@ -11,7 +11,7 @@ abstract class Projektarbeitsbeurteilung extends FHC_Controller
 	const BETREUERART_ERSTBEGUTACHTER = 'Erstbegutachter';
 	const BETREUERART_ZWEITBEGUTACHTER = 'Zweitbegutachter';
 	const BETREUERART_SENATSVORSITZ = 'Senatsvorsitz';
-	const BETREUERART_SENATSPRUEFER = 'Senatspruefer';
+	const BETREUERART_SENATSMITGLIED = 'Senatsmitglied';
 	const EXTERNER_BEURTEILER_NAME = 'externerBeurteiler';
 
 	// fields required to be filled out by Betreuer
