@@ -153,7 +153,7 @@ class ProjektarbeitsbeurteilungMailLib
 	 */
 	public function sendInfoMailToKommission($projektarbeit_id)
 	{
-		$kommissionsMitgliederRes = $this->_ci->ProjektbetreuerModel->getBetreuerOfProjektarbeit($projektarbeit_id, Projektarbeitsbeurteilung::BETREUERART_SENATSPRUEFER);
+		$kommissionsMitgliederRes = $this->_ci->ProjektbetreuerModel->getBetreuerOfProjektarbeit($projektarbeit_id, Projektarbeitsbeurteilung::BETREUERART_SENATSMITGLIED);
 
 		if (!hasData($kommissionsMitgliederRes))
 			return error('Committee members not found');

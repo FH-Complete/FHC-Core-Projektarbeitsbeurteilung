@@ -4,7 +4,7 @@ $ERSTBEGUTACHTER = '\'Erstbegutachter\'';
 $BEGUTACHTER = '\'Begutachter\'';
 $ZWEITBEGUTACHTER = '\'Zweitbegutachter\'';
 $KOMISSIONVORSITZ = '\'Senatsvorsitz\'';
-$KOMISSIONPRUEFER = '\'Senatspruefer\'';
+$KOMISSIONPRUEFER = '\'Senatsmitglied\'';
 
 $oeKurz = '\''. implode('\',\'', $oeKurz) . '\'';
 
