@@ -190,7 +190,7 @@ class Projektuebersicht extends Auth_Controller
 
 			$mail_link = CIS_ROOT."index.ci.php/extensions/FHC-Core-Projektarbeitsbeurteilung/".
 			(
-				$zweitbetr->betreuerart_kurzbz == Projektarbeitsbeurteilung::BETREUERART_ZWEITBEGUTACHTER
+				$zweitbetr->betreuerart_kurzbz == AbstractProjektarbeitsbeurteilung::BETREUERART_ZWEITBEGUTACHTER
 				? "ProjektarbeitsbeurteilungZweitbegutachter"
 				: "ProjektarbeitsbeurteilungErstbegutachter"
 			);

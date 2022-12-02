@@ -79,10 +79,10 @@ class ProjektarbeitsbeurteilungMailLib
 			$betreuer_person_id,
 			null,
 			array(
-				Projektarbeitsbeurteilung::BETREUERART_BACHELOR_BEGUTACHTER,
-				Projektarbeitsbeurteilung::BETREUERART_ERSTBEGUTACHTER,
-				Projektarbeitsbeurteilung::BETREUERART_SENATSVORSITZ,
-				Projektarbeitsbeurteilung::BETREUERART_ZWEITBEGUTACHTER
+				AbstractProjektarbeitsbeurteilung::BETREUERART_BACHELOR_BEGUTACHTER,
+				AbstractProjektarbeitsbeurteilung::BETREUERART_ERSTBEGUTACHTER,
+				AbstractProjektarbeitsbeurteilung::BETREUERART_SENATSVORSITZ,
+				AbstractProjektarbeitsbeurteilung::BETREUERART_ZWEITBEGUTACHTER
 			)
 		);
 
@@ -153,7 +153,7 @@ class ProjektarbeitsbeurteilungMailLib
 	 */
 	public function sendInfoMailToKommission($projektarbeit_id)
 	{
-		$kommissionsMitgliederRes = $this->_ci->ProjektbetreuerModel->getBetreuerOfProjektarbeit($projektarbeit_id, Projektarbeitsbeurteilung::BETREUERART_SENATSMITGLIED);
+		$kommissionsMitgliederRes = $this->_ci->ProjektbetreuerModel->getBetreuerOfProjektarbeit($projektarbeit_id, AbstractProjektarbeitsbeurteilung::BETREUERART_SENATSMITGLIED);
 
 		if (!hasData($kommissionsMitgliederRes))
 			return error('Committee members not found');
@@ -162,8 +162,8 @@ class ProjektarbeitsbeurteilungMailLib
 
 		$betreuerart =
 			$kommissionsMitglieder[0]->projekttyp_kurzbz == 'Diplom'
-			? Projektarbeitsbeurteilung::BETREUERART_ERSTBEGUTACHTER
-			: Projektarbeitsbeurteilung::BETREUERART_SENATSVORSITZ;
+			? AbstractProjektarbeitsbeurteilung::BETREUERART_ERSTBEGUTACHTER
+			: AbstractProjektarbeitsbeurteilung::BETREUERART_SENATSVORSITZ;
 
 		$erstbetreuerRes = $this->_ci->ProjektbetreuerModel->getBetreuerOfProjektarbeit($projektarbeit_id, $betreuerart);
 

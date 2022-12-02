@@ -2,11 +2,11 @@
 
 if (! defined('BASEPATH')) exit('No direct script access allowed');
 
-require_once('Projektarbeitsbeurteilung.php');
+require_once('AbstractProjektarbeitsbeurteilung.php');
 
 /**
  */
-class ProjektarbeitsbeurteilungZweitbegutachter extends Projektarbeitsbeurteilung
+class ProjektarbeitsbeurteilungZweitbegutachter extends AbstractProjektarbeitsbeurteilung
 {
 	/**
 	 * Constructor
@@ -21,7 +21,7 @@ class ProjektarbeitsbeurteilungZweitbegutachter extends Projektarbeitsbeurteilun
 		// set fields required for assessment
 		$this->requiredFields = array(
 			'beurteilung_zweitbegutachter' => array('type' => 'text', 'phrase' => 'kurzeSchriftlicheBeurteilung')
-		);;
+		);
 	}
 
 	// -----------------------------------------------------------------------------------------------------------------
@@ -49,13 +49,7 @@ class ProjektarbeitsbeurteilungZweitbegutachter extends Projektarbeitsbeurteilun
 				show_error('invalid student uid');
 
 			// get type of logged in Betreuer
-			$this->ProjektbetreuerModel->addSelect('betreuerart_kurzbz');
-			$betreuerartRes = $this->ProjektbetreuerModel->loadWhere(
-				array(
-					'person_id' => $betreuer_person_id,
-					'projektarbeit_id' => $projektarbeit_id
-				)
-			);
+			$betreuerartRes = $this->ProjektbetreuerModel->getBetreuerart($projektarbeit_id, $betreuer_person_id);
 
 			if (hasData($betreuerartRes))
 			{
