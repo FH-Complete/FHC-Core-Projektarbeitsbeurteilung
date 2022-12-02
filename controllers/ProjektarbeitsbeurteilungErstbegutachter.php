@@ -2,11 +2,11 @@
 
 if (! defined('BASEPATH')) exit('No direct script access allowed');
 
-require_once('Projektarbeitsbeurteilung.php');
+require_once('AbstractProjektarbeitsbeurteilung.php');
 
 /**
  */
-class ProjektarbeitsbeurteilungErstbegutachter extends Projektarbeitsbeurteilung
+class ProjektarbeitsbeurteilungErstbegutachter extends AbstractProjektarbeitsbeurteilung
 {
 	const CATEGORY_MAX_POINTS = 10;
 

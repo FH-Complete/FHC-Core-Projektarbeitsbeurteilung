@@ -17,7 +17,7 @@
 		</div>
 		<?php
 			$zweitbetreuerBewertungMissing = isset($zweitbetreuer_person_id) && !isset($zweitbetreuer_abgeschicktamum)
-												&& $projektarbeitsbeurteilung->betreuerart == Projektarbeitsbeurteilung::BETREUERART_ERSTBEGUTACHTER;
+												&& $projektarbeitsbeurteilung->betreuerart == AbstractProjektarbeitsbeurteilung::BETREUERART_ERSTBEGUTACHTER;
 			$disabled = $zweitbetreuerBewertungMissing ? ' disabled = "disabled"' : '';
 			$quickinfo = $zweitbetreuerBewertungMissing ? 'data-toggle="tooltip" title="'.$this->p->t('projektarbeitsbeurteilung', 'zweitbetreuerBewertungFehlt').'"' : '';
 		?>
