@@ -32,7 +32,7 @@ $this->load->view(
 			<div class="row">
 				<div class="col-lg-12">
 					<form id="tokenloginform" method="post"
-						action="<?php echo site_url() ?>/extensions/FHC-Core-Projektarbeitsbeurteilung/Projektarbeitsbeurteilung">
+						action="<?php echo site_url() ?>/extensions/FHC-Core-Projektarbeitsbeurteilung/<?php echo $controllerName ?>">
 						<label>Token</label>
 						<div class="input-group">
 							<input class="form-control" name="authtoken" value="<?php echo isset($authtoken) ? $authtoken : '' ?>">

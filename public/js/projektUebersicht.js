@@ -115,14 +115,15 @@ var ProjektUebersichtDataset = {
 		);
 	},
 
-	resendToken: function(personid, projektid, studentid)
+	resendToken: function(personid, projektid, studentid, kommissionprueferid)
 	{
 		FHC_AjaxClient.ajaxCallPost(
 			CALLED_PATH + '/resendToken',
 			{
 				'personid': personid,
 				'projektid': projektid,
-				'studentid': studentid
+				'studentid': studentid,
+				'kommissionprueferid': kommissionprueferid
 			},
 			{
 				successCallback: function(data, textStatus, jqXHR) {
@@ -166,7 +167,7 @@ $(document).on('click', '.freischalten', function()
 	if (abgeschickt === '')
 		return FHC_DialogLib.alertInfo("Freischaltung nicht möglich, da es noch nicht abgeschickt wurde.");
 
-	if(confirm("Soll die Beurteilung wirklick nochmal zur Bearbeitung freigeschalten werden?"))
+	if (confirm("Soll die Beurteilung wirklich nochmal zur Bearbeitung freigeschalten werden?"))
 		ProjektUebersichtDataset.unlockAssessment(personid, projektid, $(this));
 });
 
@@ -175,10 +176,11 @@ $(document).on('click', '.resend', function()
 	var personid = $(this).data('personid');
 	var projektid = $(this).data('projektid');
 	var studentid = $(this).data('studentid');
+	var kommissionprueferid = $(this).data('kommissionprueferid') ? $(this).data('kommissionprueferid') : null;
 
 	if (personid === '')
 		return FHC_DialogLib.alertInfo("Erstbegutachter nicht eingetragen.");
 
-	if(confirm("Soll der Zugangstoken erneut an den Betreuer geschickt werden?"))
-		ProjektUebersichtDataset.resendToken(personid, projektid, studentid);
+	if (confirm("Soll der Zugangstoken erneut an den Betreuer geschickt werden?"))
+		ProjektUebersichtDataset.resendToken(personid, projektid, studentid, kommissionprueferid);
 });
