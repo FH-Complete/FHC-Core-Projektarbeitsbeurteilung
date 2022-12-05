@@ -86,25 +86,6 @@
 						</tr>
 						<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/stammdaten.php'); ?>
 						<!-- show downloadlink of Projektarbeit -->
-<!--
-						<tr>
-							<td>
-								<b>
-									Download
-								</b>
-							</td>
-							<td colspan="3">
-								<a
-									href="ProjektarbeitsbeurteilungErstbegutachter/downloadProjektarbeit?projektarbeit_id=<?php echo $projektarbeit_id ?>"
-									alt="<?php echo $this->p->t('projektarbeitsbeurteilung', 'parbeitDownload') ?>"
-									title="<?php echo $this->p->t('projektarbeitsbeurteilung', 'parbeitDownload') ?>"
-									target="_blank"
-								>
-									<i class="fa fa-file-pdf-o"></i>
-								</a>
-							</td>
-						</tr>
--->
 					</table>
 				</div>
 			</div>
@@ -254,18 +235,8 @@
 								<td class="text-center">
 									<b>
 									<span id="gesamtpunkte">
-										<?php
-											$gesamtpunkte = 0;
-											if (isset($projektarbeitsbeurteilung->bewertung_gesamtpunkte) && is_numeric($projektarbeitsbeurteilung->bewertung_gesamtpunkte))
-											{
-												if ($language == 'German')
-													$gesamtpunkte = formatDecimalGerman($projektarbeitsbeurteilung->bewertung_gesamtpunkte);
-												else
-													$gesamtpunkte = $projektarbeitsbeurteilung->bewertung_gesamtpunkte;
-											}
-										?>
-
-										<?php echo $gesamtpunkte ?></span><?php echo isset($projektarbeitsbeurteilung->bewertung_maxpunkte) && is_numeric($projektarbeitsbeurteilung->bewertung_maxpunkte) ? '/' . $projektarbeitsbeurteilung->bewertung_maxpunkte : '' ?>
+									</span>/<span id="maxpunkte">
+									</span>
 									</b>
 								</td>
 							</tr>

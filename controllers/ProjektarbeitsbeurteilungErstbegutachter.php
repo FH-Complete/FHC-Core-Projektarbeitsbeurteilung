@@ -8,8 +8,6 @@ require_once('AbstractProjektarbeitsbeurteilung.php');
  */
 class ProjektarbeitsbeurteilungErstbegutachter extends AbstractProjektarbeitsbeurteilung
 {
-	const CATEGORY_MAX_POINTS = 10;
-
 	/**
 	 * Constructor
 	 */
@@ -35,7 +33,7 @@ class ProjektarbeitsbeurteilungErstbegutachter extends AbstractProjektarbeitsbeu
 			'bewertung_zitierregeln' => array('type' => 'points', 'phrase' => 'zitierregeln'),
 			'begruendung' => array('type' => 'text', 'phrase' => 'begruendungText'),
 			'betreuernote' => array('type' => 'grade', 'phrase' => 'betreuernote')
-		);;
+		);
 	}
 
 	// -----------------------------------------------------------------------------------------------------------------
@@ -175,11 +173,6 @@ class ProjektarbeitsbeurteilungErstbegutachter extends AbstractProjektarbeitsbeu
 				// read only access if Projektarbeit is already sent, or logged in Betreuer is Senatsmitglied of Kommission
 				$readOnlyAccess = isset($projektarbeitsbeurteilung->abgeschicktamum)
 									|| $projektarbeitsbeurteilung->betreuerart === self::BETREUERART_SENATSMITGLIED;
-
-				// calculate the points reached and max points for displaying
-				$bewertung_punkte = $this->_calculateBewertungPunkte($projektarbeitsbeurteilung->projektarbeit_bewertung);
-				$projektarbeitsbeurteilung->bewertung_gesamtpunkte = $bewertung_punkte->gesamtpunkte;
-				$projektarbeitsbeurteilung->bewertung_maxpunkte = $bewertung_punkte->maxpunkte;
 
 				$data = array(
 					'projektarbeit_id' => $projektarbeit_id,
@@ -490,34 +483,5 @@ class ProjektarbeitsbeurteilungErstbegutachter extends AbstractProjektarbeitsbeu
 		$mailRes = $this->projektarbeitsbeurteilungmaillib->sendInfoMailToKommission($projektarbeit_id);
 
 		$this->outputJson($mailRes);
-	}
-
-	// -----------------------------------------------------------------------------------------------------------------
-	// Private methods
-
-	/**
-	 * Calculates scored Bewertungpunkte and maximum reachable points before passing to view.
-	 * @param object $bewertung contains bewertungdata including points
-	 * @return object containing gesamtpunkte (reached) and maxpunkte (max. reachable)
-	 */
-	private function _calculateBewertungPunkte($bewertung)
-	{
-		$punkte = new stdClass();
-		$punkte->gesamtpunkte = 0;
-		$punkte->maxpunkte = 0;
-
-		foreach ($this->requiredFields as $requiredField => $fieldData)
-		{
-			if (isset($fieldData['type']) && $fieldData['type'] == 'points')
-			{
-				if (isset($bewertung->{$requiredField}) && is_numeric($bewertung->{$requiredField}))
-				{
-					$punkte->gesamtpunkte += (float)$bewertung->{$requiredField};
-				}
-				$punkte->maxpunkte += self::CATEGORY_MAX_POINTS;
-			}
-		}
-
-		return $punkte;
 	}
 }
