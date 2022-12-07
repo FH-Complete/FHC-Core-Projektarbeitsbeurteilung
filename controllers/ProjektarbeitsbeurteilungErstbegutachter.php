@@ -32,6 +32,7 @@ class ProjektarbeitsbeurteilungErstbegutachter extends AbstractProjektarbeitsbeu
 			'bewertung_literatur' => array('type' => 'points', 'phrase' => 'literatur'),
 			'bewertung_zitierregeln' => array('type' => 'points', 'phrase' => 'zitierregeln'),
 			'begruendung' => array('type' => 'text', 'phrase' => 'begruendungText'),
+			'gesamtpunkte' => array('type' => 'points', 'phrase' => 'gesamtpunkte'),
 			'betreuernote' => array('type' => 'grade', 'phrase' => 'betreuernote')
 		);
 	}

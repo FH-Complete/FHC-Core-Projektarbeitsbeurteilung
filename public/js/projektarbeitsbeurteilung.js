@@ -75,6 +75,7 @@ $("document").ready(function() {
 })
 
 var Projektarbeitsbeurteilung = {
+	gesamtpunkte: null, // total points
 	finalNote: null, // final grade to save
 	negativeNoteValue: 5, // grade value of negative grade
 	categoryMaxPoints: 10, // max reachable points of every category
@@ -109,8 +110,14 @@ var Projektarbeitsbeurteilung = {
 	},
 	// points from each compound category can be weighted differently (in percent)
 	compoundCategoriesWeight: {
-		1: 70,
-		2: 30
+		'bachelor': {
+			1: 50,
+			2: 50
+		},
+		'master': {
+			1: 70,
+			2: 30
+		}
 	},
 	refreshPlagiatscheck: function()
 	{
@@ -154,13 +161,18 @@ var Projektarbeitsbeurteilung = {
 	refreshBewertungPointsAndNote: function()
 	{
 		// set existing Betreuernote if there is one
-		var oldBetreuernote = $("#oldbetreuernote").val();
-		Projektarbeitsbeurteilung.setFinalNote(oldBetreuernote);
+		//~ var oldBetreuernote = $("#oldbetreuernote").val();
+		//~ Projektarbeitsbeurteilung.setFinalNote(oldBetreuernote);
 
-		var pointsEl = $("#beurteilungtbl td.beurteilungpoints select");
+		//~ var pointsEl = null;
+		//~ if ($("#beurteilungtbl td.beurteilungpoints select").length)
+			//~ pointsEl = $("#beurteilungtbl td.beurteilungpoints select");
+		//~ else if (($("#beurteilungtbl td.beurteilungpoints").length))
+		var pointsEl = $("#beurteilungtbl td.beurteilungpoints");
 
 		if (pointsEl.length)
 		{
+			var numCompoundCategories = Object.keys(Projektarbeitsbeurteilung.compoundCategoriesWeight).length;
 			var sumPoints = 0;
 			var sumMaxPoints = 0;
 			var finalNote = null;
@@ -171,8 +183,9 @@ var Projektarbeitsbeurteilung = {
 			pointsEl.each(
 				function()
 				{
-					var points = $(this).val();
-					var categoryName = $(this).prop('name').replace('bewertung_', '');
+					// get points from dropdown if form not sent or data attribute if sent
+					var points = $(this).find('select').val() || $(this).find('span').attr("data-points");
+					var categoryName = $(this).attr("id");
 					var compoundCategoryNumber = Projektarbeitsbeurteilung.compoundCategories[categoryName];
 
 					// null if score not entered => not finished, do not display grade yet
@@ -189,7 +202,11 @@ var Projektarbeitsbeurteilung = {
 					// calculate points and maxpoints for each compound category
 					if (jQuery.isNumeric(points))
 					{
-						var categoryWeight = Projektarbeitsbeurteilung.compoundCategoriesWeight[compoundCategoryNumber] / 100;
+						// weight factor, multiplied by number of compound categories to scale up to 100 to have 100 points in total
+						var compoundCategoriesWeights = $("#paarbeittyp").val() === 'm'
+							? Projektarbeitsbeurteilung.compoundCategoriesWeight['master']
+							: Projektarbeitsbeurteilung.compoundCategoriesWeight['bachelor'];
+						var categoryWeight = compoundCategoriesWeights[compoundCategoryNumber] / 100 * numCompoundCategories;
 						var floatPoints = parseFloat(points) * categoryWeight;
 						var maxPoints = Projektarbeitsbeurteilung.categoryMaxPoints * categoryWeight;
 
@@ -268,6 +285,7 @@ var Projektarbeitsbeurteilung = {
 				}
 			}
 
+			Projektarbeitsbeurteilung.gesamtpunkte = sumPoints;
 			Projektarbeitsbeurteilung.setFinalNote(finalNote);
 		}
 	},
@@ -278,7 +296,7 @@ var Projektarbeitsbeurteilung = {
 			titel +
 			'</span>&nbsp;' +
 			'<i class="fa fa-edit" id="editTitle" title="'+FHC_PhrasesLib.t("projektarbeitsbeurteilung", "titelBearbeiten")+'"></i>'
-		)
+		);
 
 		// edit and save title
 		$("#editTitle").click(
@@ -308,6 +326,20 @@ var Projektarbeitsbeurteilung = {
 		);
 	},
 	// print final grade
+	setFinalPoints: function(gesam) {
+		if (jQuery.isNumeric(finalNote))
+		{
+			Projektarbeitsbeurteilung.finalNote = finalNote;
+			var finalNotePhrase = FHC_PhrasesLib.t("lehre", Projektarbeitsbeurteilung.notenphrasen[finalNote]);
+			$("#betreuernote").text(finalNotePhrase + " (" + finalNote + ")");
+		}
+		else
+		{
+			Projektarbeitsbeurteilung.finalNote = null;
+			$("#betreuernote").text('');
+		}
+	},
+	// save final grade in property and print it
 	setFinalNote: function(finalNote) {
 		if (jQuery.isNumeric(finalNote))
 		{
@@ -348,6 +380,10 @@ var Projektarbeitsbeurteilung = {
 		}
 
 		bewertungData['begruendung'] = $("#beurteilungform textarea[name=begruendung]").val();
+
+		// add points to data
+		if (jQuery.isNumeric(Projektarbeitsbeurteilung.gesamtpunkte))
+			bewertungData['gesamtpunkte'] = Projektarbeitsbeurteilung.gesamtpunkte;
 
 		// add final grade to data
 		if (jQuery.isNumeric(Projektarbeitsbeurteilung.finalNote))
@@ -494,7 +530,7 @@ var Projektarbeitsbeurteilung = {
 		}
 		else
 		{
-			dec = parseFloat(sum).toFixed(2);
+			dec = parseFloat(sum).toFixed(1);
 
 			dec = dec.split('.');
 			var dec1 = dec[0];

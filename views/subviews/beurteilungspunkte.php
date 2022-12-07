@@ -6,13 +6,15 @@
 	'10' => 'vollstaendigErfuellt',
 );
 ?>
-<td class="beurteilungpoints text-center">
+<td class="beurteilungpoints text-center" id="<?php echo $name ?>">
 	<?php
 		if ($readOnlyAccess):
 			if (isset($projektarbeit_bewertung->{'bewertung_'.$name}))
 			{
 				$punktewert = $projektarbeit_bewertung->{'bewertung_'.$name};
+				echo "<span data-points='".$punktewert."'>";
 				echo $language === 'German' ? formatDecimalGerman($punktewert) : $punktewert;
+				echo "</span>";
 			}
 			else
 				echo '';

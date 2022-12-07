@@ -25,12 +25,12 @@
 <div id="wrapper">
 	<div id="page-wrapper">
 		<div class="container-fluid" id="containerFluid">
-            <?php if (!isset($projektarbeitsbeurteilung)):
+			<?php if (!isset($projektarbeitsbeurteilung)):
 					echo "Keine Projektarbeit eingetragen.";
-            else:
-            	$sent = isset($projektarbeitsbeurteilung->abgeschicktamum);
-            	$paarbeittyp = $projektarbeitsbeurteilung->parbeit_typ === 'Bachelor' ? 'b' : 'm';
-            	$arbeittypName = $paarbeittyp === 'b' ? $this->p->t('projektarbeitsbeurteilung', 'arbeitBachelor') : $this->p->t('abschlusspruefung', 'arbeitMaster');
+			else:
+				$sent = isset($projektarbeitsbeurteilung->abgeschicktamum);
+				$paarbeittyp = $projektarbeitsbeurteilung->parbeit_typ === 'Bachelor' ? 'b' : 'm';
+				$arbeittypName = $paarbeittyp === 'b' ? $this->p->t('projektarbeitsbeurteilung', 'arbeitBachelor') : $this->p->t('abschlusspruefung', 'arbeitMaster');
 
 				$titel = isset($projektarbeitsbeurteilung->projektarbeit_titel) ? $projektarbeitsbeurteilung->projektarbeit_titel : $projektarbeitsbeurteilung->projektarbeit_titel_english;
 				$projektarbeit_bewertung = $projektarbeitsbeurteilung->projektarbeit_bewertung;
@@ -64,8 +64,8 @@
 				</div>
 			</div>
 			<br />
-            <div class="row">
-                <div class="col-lg-12">
+			<div class="row">
+				<div class="col-lg-12">
 					<table class="table-condensed table-bordered table-responsive" id="beurteilungtbl">
 						<thead>
 							<tr>

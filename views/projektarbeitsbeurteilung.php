@@ -25,12 +25,12 @@
 <div id="wrapper">
 	<div id="page-wrapper">
 		<div class="container-fluid" id="containerFluid">
-            <?php
+			<?php
 			if (!isset($projektarbeitsbeurteilung)):
 					echo "Keine Projektarbeit eingetragen.";
-            else:
-            	$paarbeittyp = $projektarbeitsbeurteilung->parbeit_typ === 'Bachelor' ? 'b' : 'm';
-            	$arbeittypName = $paarbeittyp === 'b' ? $this->p->t('projektarbeitsbeurteilung', 'arbeitBachelor') : $this->p->t('abschlusspruefung', 'arbeitMaster');
+			else:
+				$paarbeittyp = $projektarbeitsbeurteilung->parbeit_typ === 'Bachelor' ? 'b' : 'm';
+				$arbeittypName = $paarbeittyp === 'b' ? $this->p->t('projektarbeitsbeurteilung', 'arbeitBachelor') : $this->p->t('abschlusspruefung', 'arbeitMaster');
 
 				$titel = isset($projektarbeitsbeurteilung->projektarbeit_titel) ? $projektarbeitsbeurteilung->projektarbeit_titel : $projektarbeitsbeurteilung->projektarbeit_titel_english;
 				$projektarbeit_bewertung = $projektarbeitsbeurteilung->projektarbeit_bewertung;
@@ -47,7 +47,9 @@
 					</h3>
 				</div>
 			</div>
-			<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/hiddenfields.php'); ?>
+				<?php
+					$this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/hiddenfields.php', array('paarbeittyp' => $paarbeittyp));
+				?>
 			<form id="beurteilungform" onsubmit="return false;">
 			<div class="row">
 				<div class="col-lg-12">
@@ -90,8 +92,8 @@
 				</div>
 			</div>
 			<br />
-            <div class="row">
-                <div class="col-lg-12">
+			<div class="row">
+				<div class="col-lg-12">
 					<table class="table-condensed table-bordered table-responsive" id="beurteilungtbl">
 						<thead>
 							<tr>
@@ -122,8 +124,11 @@
 										: $this->p->t('projektarbeitsbeurteilung', 'themaText') ?>
 								</td>
 									<?php //projektarbeit_bewertung needs to be passed only first time
-										$this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/beurteilungspunkte.php',
-											array('name' => 'thema', 'projektarbeit_bewertung' => $projektarbeit_bewertung));?>
+										$this->load->view(
+											'extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/beurteilungspunkte.php',
+											array('name' => 'thema', 'projektarbeit_bewertung' => $projektarbeit_bewertung)
+										);
+									?>
 							</tr>
 							<tr>
 								<td>
@@ -230,13 +235,15 @@
 							</tr>
 							<tr>
 								<td colspan="2" class="text-right">
-									<b><?php echo $this->p->t('projektarbeitsbeurteilung', 'gesamtpunkte') ?></b>
+									<b>
+										<?php echo $paarbeittyp === 'm' ? ucfirst($this->p->t('projektarbeitsbeurteilung', 'gewichtet')) : ''?>
+										<?php echo $this->p->t('projektarbeitsbeurteilung', 'gesamtpunkte') ?>
+									</b>
 								</td>
 								<td class="text-center">
 									<b>
 									<span id="gesamtpunkte">
-									</span>/<span id="maxpunkte">
-									</span>
+										<?php echo isset($projektarbeit_bewertung->gesamtpunkte) ? $projektarbeit_bewertung->gesamtpunkte : '' ?></span>/<span id="maxpunkte">100</span>
 									</b>
 								</td>
 							</tr>
