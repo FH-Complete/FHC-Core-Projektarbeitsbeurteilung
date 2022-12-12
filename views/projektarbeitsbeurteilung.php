@@ -252,7 +252,13 @@
 				</div>
 			</div>
 			<br />
-				<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/notenschluessel.php', array('arbeittypName' => $arbeittypName)); ?>
+				<?php $this->load->view(
+					'extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/notenschluessel.php',
+					array(
+						'paarbeittyp' => $paarbeittyp,
+						'arbeittypName' => $arbeittypName
+					)
+				); ?>
 			<br />
 			<?php if ($paarbeittyp === 'm'): ?>
 				<div class="row">

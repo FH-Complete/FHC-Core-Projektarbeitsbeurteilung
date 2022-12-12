@@ -80,7 +80,6 @@ var Projektarbeitsbeurteilung = {
 	negativeNoteValue: 5, // grade value of negative grade
 	categoryMaxPoints: 10, // max reachable points of every category
 	bewertungData: null,
-	plagiatscheckInitiallyUnaffaellig: null,
 	notenphrasen: { // notenwert: phrasenname
 		1: 'sehrGut',
 		2: 'gut',
@@ -160,14 +159,6 @@ var Projektarbeitsbeurteilung = {
 	// recalculate points and resulting grade value
 	refreshBewertungPointsAndNote: function()
 	{
-		// set existing Betreuernote if there is one
-		//~ var oldBetreuernote = $("#oldbetreuernote").val();
-		//~ Projektarbeitsbeurteilung.setFinalNote(oldBetreuernote);
-
-		//~ var pointsEl = null;
-		//~ if ($("#beurteilungtbl td.beurteilungpoints select").length)
-			//~ pointsEl = $("#beurteilungtbl td.beurteilungpoints select");
-		//~ else if (($("#beurteilungtbl td.beurteilungpoints").length))
 		var pointsEl = $("#beurteilungtbl td.beurteilungpoints");
 
 		if (pointsEl.length)
@@ -324,20 +315,6 @@ var Projektarbeitsbeurteilung = {
 				);
 			}
 		);
-	},
-	// print final grade
-	setFinalPoints: function(gesam) {
-		if (jQuery.isNumeric(finalNote))
-		{
-			Projektarbeitsbeurteilung.finalNote = finalNote;
-			var finalNotePhrase = FHC_PhrasesLib.t("lehre", Projektarbeitsbeurteilung.notenphrasen[finalNote]);
-			$("#betreuernote").text(finalNotePhrase + " (" + finalNote + ")");
-		}
-		else
-		{
-			Projektarbeitsbeurteilung.finalNote = null;
-			$("#betreuernote").text('');
-		}
 	},
 	// save final grade in property and print it
 	setFinalNote: function(finalNote) {

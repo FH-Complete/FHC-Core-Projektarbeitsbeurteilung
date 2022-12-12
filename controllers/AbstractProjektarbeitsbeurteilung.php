@@ -68,53 +68,53 @@ abstract class AbstractProjektarbeitsbeurteilung extends FHC_Controller
 	// -----------------------------------------------------------------------------------------------------------------
 	// Protected methods
 
-	 /**
-	  * Performs authentification, either normally or via authtoken.
-	  * @return object|null object with authentification data or null on authentification failure
-	  */
-	 protected function authenticate()
-	 {
-		 $authData = null;
+	/**
+	 * Performs authentification, either normally or via authtoken.
+	 * @return object|null object with authentification data or null on authentification failure
+	 */
+	protected function authenticate()
+	{
+		$authData = null;
 
-		 $token = $this->input->post('authtoken');
-		 $projektarbeit_id = $this->input->get('projektarbeit_id');
+		$token = $this->input->post('authtoken');
+		$projektarbeit_id = $this->input->get('projektarbeit_id');
 
-		 if (!isset($projektarbeit_id)) // posted on save
-			 $projektarbeit_id =  $this->input->post('projektarbeit_id');
+		if (!isset($projektarbeit_id)) // posted on save
+			$projektarbeit_id = $this->input->post('projektarbeit_id');
 
-		 if (!isEmptyString($token)) // if token passed, get projektarbeit from token
-		 {
-			 $tokenResult = $this->ProjektbetreuerModel->getBetreuerByToken($token);
-			 $authData = new stdClass();
-			 $authData->authtoken = $token;
+		if (!isEmptyString($token)) // if token passed, get projektarbeit from token
+		{
+			$tokenResult = $this->ProjektbetreuerModel->getBetreuerByToken($token);
+			$authData = new stdClass();
+			$authData->authtoken = $token;
 
-			 if (hasData($tokenResult))
-			 {
-				 $tokenData = getData($tokenResult)[0];
+			if (hasData($tokenResult))
+			{
+				$tokenData = getData($tokenResult)[0];
 
-				 $authData->username = self::EXTERNER_BEURTEILER_NAME;
-				 $authData->person_id = $tokenData->person_id;
-				 $authData->projektarbeit_id = $tokenData->projektarbeit_id;
-				 $authData->uid = $tokenData->student_uid;
-			 }
-		 }
-		 // when projektarbeit given - normal login
-		 elseif (isset($projektarbeit_id) && is_numeric($projektarbeit_id))
-		 {
-			 $this->load->library('AuthLib');
-			 $authObj = $this->authlib->getAuthObj();
+				$authData->username = self::EXTERNER_BEURTEILER_NAME;
+				$authData->person_id = $tokenData->person_id;
+				$authData->projektarbeit_id = $tokenData->projektarbeit_id;
+				$authData->uid = $tokenData->student_uid;
+			}
+		}
+		// when projektarbeit given - normal login
+		elseif (isset($projektarbeit_id) && is_numeric($projektarbeit_id))
+		{
+			$this->load->library('AuthLib');
+			$authObj = $this->authlib->getAuthObj();
 
-			 // if already logged in (e.g. CIS)
-			 if (isset($authObj->person_id) && isset($authObj->username))
-			 {
-				 $authData = new stdClass();
-				 $authData->username = $authObj->username;
-				 $authData->person_id = $authObj->person_id;
-			 }
-		 }
+			// if already logged in (e.g. CIS)
+			if (isset($authObj->person_id) && isset($authObj->username))
+			{
+				$authData = new stdClass();
+				$authData->username = $authObj->username;
+				$authData->person_id = $authObj->person_id;
+			}
+		}
 
-		 return $authData;
-	 }
+		return $authData;
+	}
 
 	/**
 	 * Prepares Beurteilungdata for save in database, replaces null strings, integer strings, bool strings.
