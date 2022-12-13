@@ -163,7 +163,6 @@ var Projektarbeitsbeurteilung = {
 
 		if (pointsEl.length)
 		{
-			var numCompoundCategories = Object.keys(Projektarbeitsbeurteilung.compoundCategoriesWeight).length;
 			var sumPoints = 0;
 			var sumMaxPoints = 0;
 			var finalNote = null;
@@ -197,9 +196,14 @@ var Projektarbeitsbeurteilung = {
 						var compoundCategoriesWeights = $("#paarbeittyp").val() === 'm'
 							? Projektarbeitsbeurteilung.compoundCategoriesWeight['master']
 							: Projektarbeitsbeurteilung.compoundCategoriesWeight['bachelor'];
-						var categoryWeight = compoundCategoriesWeights[compoundCategoryNumber] / 100 * numCompoundCategories;
-						var floatPoints = parseFloat(points) * categoryWeight;
-						var maxPoints = Projektarbeitsbeurteilung.categoryMaxPoints * categoryWeight;
+
+						// weight each score
+						var categoryWeight = compoundCategoriesWeights[compoundCategoryNumber] / 100;
+						var numCategoriesInCompoundCat = Projektarbeitsbeurteilung._getNumberCategoriesInCompoundCategory(compoundCategoryNumber);
+						// scale up so total points stay the same.
+						var scalingFactor = Object.keys(Projektarbeitsbeurteilung.compoundCategories).length / numCategoriesInCompoundCat;
+						var floatPoints = parseFloat(points) * categoryWeight * scalingFactor;
+						var maxPoints = Projektarbeitsbeurteilung.categoryMaxPoints * categoryWeight * scalingFactor;
 
 						// add points to total sum
 						sumPoints += floatPoints;
@@ -515,5 +519,15 @@ var Projektarbeitsbeurteilung = {
 			dec = dec1 + dec2;
 		}
 		return dec;
+	},
+	_getNumberCategoriesInCompoundCategory: function(compoundCategoryNumber)
+	{
+		var num = 0;
+		for (var cat in Projektarbeitsbeurteilung.compoundCategories)
+		{
+			if (Projektarbeitsbeurteilung.compoundCategories[cat] == compoundCategoryNumber)
+				num++;
+		}
+		return num;
 	}
 }
