@@ -13,14 +13,17 @@
 				// display Vorsitz
 				if (isset($kommission_vorsitz))
 				{
-					echo $kommission_vorsitz->voller_name;
+					echo '<b>'.$this->p->t('projektarbeitsbeurteilung', 'senatsvorsitz') . ':</b>&nbsp;' . $kommission_vorsitz->voller_name;
 				}
 				// if given, display Kommissionsbetreuer (Pruefer)
-				if (isset($kommission_betreuer))
+				if (isset($kommission_betreuer) && !isEmptyArray($kommission_betreuer))
 				{
-					foreach ($kommission_betreuer as $betr)
+					echo '<br><b>'.$this->p->t('projektarbeitsbeurteilung', 'kommissionsmitglieder') . ':</b><br>';
+
+					for ($i = 0; $i < count($kommission_betreuer); $i++)
 					{
-						echo ', ' . $betr->voller_name;
+						if ($i != 0) echo ',&nbsp;';
+						echo $kommission_betreuer[$i]->voller_name;
 					}
 				}
 			}
