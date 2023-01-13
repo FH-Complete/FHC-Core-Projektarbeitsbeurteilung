@@ -22,16 +22,15 @@
 	);
 	$this->load->view('templates/FHC-Header', $includesArray);
 ?>
-<body>
 <div id="wrapper">
 	<div id="page-wrapper">
 		<div class="container-fluid" id="containerFluid">
-            <?php
+			<?php
 			if (!isset($projektarbeitsbeurteilung)):
 					echo "Keine Projektarbeit eingetragen.";
-            else:
-            	$paarbeittyp = $projektarbeitsbeurteilung->parbeit_typ === 'Bachelor' ? 'b' : 'm';
-            	$arbeittypName = $paarbeittyp === 'b' ? $this->p->t('projektarbeitsbeurteilung', 'arbeitBachelor') : $this->p->t('abschlusspruefung', 'arbeitMaster');
+			else:
+				$paarbeittyp = $projektarbeitsbeurteilung->parbeit_typ === 'Bachelor' ? 'b' : 'm';
+				$arbeittypName = $paarbeittyp === 'b' ? $this->p->t('projektarbeitsbeurteilung', 'arbeitBachelor') : $this->p->t('abschlusspruefung', 'arbeitMaster');
 
 				$titel = isset($projektarbeitsbeurteilung->projektarbeit_titel) ? $projektarbeitsbeurteilung->projektarbeit_titel : $projektarbeitsbeurteilung->projektarbeit_titel_english;
 				$projektarbeit_bewertung = $projektarbeitsbeurteilung->projektarbeit_bewertung;
@@ -39,7 +38,7 @@
 				?>
 			<br />
 			<br />
-				<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/fhtechnikum_header.php', array()); ?>
+				<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/fhtechnikum_header.php', array()); ?>
 			<div class="row">
 				<div class="col-lg-12">
 					<h3 class="page-header">
@@ -48,7 +47,9 @@
 					</h3>
 				</div>
 			</div>
-			<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/hiddenfields.php'); ?>
+				<?php
+					$this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/hiddenfields.php', array('paarbeittyp' => $paarbeittyp));
+				?>
 			<form id="beurteilungform" onsubmit="return false;">
 			<div class="row">
 				<div class="col-lg-12">
@@ -85,13 +86,13 @@
 								<?php endif; ?>
 							</td>
 						</tr>
-						<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/stammdaten.php'); ?>
+						<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/stammdaten.php'); ?>
 					</table>
 				</div>
 			</div>
 			<br />
-            <div class="row">
-                <div class="col-lg-12">
+			<div class="row">
+				<div class="col-lg-12">
 					<table class="table-condensed table-bordered table-responsive" id="beurteilungtbl">
 						<thead>
 							<tr>
@@ -122,8 +123,11 @@
 										: $this->p->t('projektarbeitsbeurteilung', 'themaText') ?>
 								</td>
 									<?php //projektarbeit_bewertung needs to be passed only first time
-										$this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/beurteilungspunkte.php',
-											array('name' => 'thema', 'projektarbeit_bewertung' => $projektarbeit_bewertung));?>
+										$this->load->view(
+											'extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/beurteilungspunkte.php',
+											array('name' => 'thema', 'projektarbeit_bewertung' => $projektarbeit_bewertung)
+										);
+									?>
 							</tr>
 							<tr>
 								<td>
@@ -134,7 +138,7 @@
 								<td>
 									<?php echo $this->p->t('projektarbeitsbeurteilung', 'loesungsansatzText') ?>
 								</td>
-									<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/beurteilungspunkte.php', array('name' => 'loesungsansatz')); ?>
+									<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/beurteilungspunkte.php', array('name' => 'loesungsansatz')); ?>
 							</tr>
 							<tr>
 								<td>
@@ -146,7 +150,7 @@
 									<?php echo $paarbeittyp === 'm' ? $this->p->t('projektarbeitsbeurteilung', 'methodeTextMaster')
 										: $this->p->t('projektarbeitsbeurteilung', 'methodeText') ?>
 								</td>
-									<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/beurteilungspunkte.php', array('name' => 'methode')); ?>
+									<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/beurteilungspunkte.php', array('name' => 'methode')); ?>
 							</tr>
 							<tr>
 								<td>
@@ -157,7 +161,7 @@
 								<td>
 									<?php echo $this->p->t('projektarbeitsbeurteilung', 'ereignisseDiskussionText') ?>
 								</td>
-									<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/beurteilungspunkte.php', array('name' => 'ereignissediskussion')); ?>
+									<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/beurteilungspunkte.php', array('name' => 'ereignissediskussion')); ?>
 							</tr>
 							<tr>
 								<td>
@@ -169,7 +173,7 @@
 									<?php echo $paarbeittyp === 'm' ? $this->p->t('projektarbeitsbeurteilung', 'eigenstaendigkeitTextMaster')
 										: $this->p->t('projektarbeitsbeurteilung', 'eigenstaendigkeitText') ?>
 								</td>
-									<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/beurteilungspunkte.php', array('name' => 'eigenstaendigkeit')); ?>
+									<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/beurteilungspunkte.php', array('name' => 'eigenstaendigkeit')); ?>
 							</tr>
 							<tr>
 								<td>
@@ -181,7 +185,7 @@
 									<?php echo $paarbeittyp === 'm' ? $this->p->t('projektarbeitsbeurteilung', 'strukturTextMaster')
 										: $this->p->t('projektarbeitsbeurteilung', 'strukturText') ?>
 								</td>
-									<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/beurteilungspunkte.php', array('name' => 'struktur')); ?>
+									<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/beurteilungspunkte.php', array('name' => 'struktur')); ?>
 							</tr>
 							<tr>
 								<td>
@@ -192,7 +196,7 @@
 								<td>
 									<?php echo $this->p->t('projektarbeitsbeurteilung', 'stilText') ?>
 								</td>
-									<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/beurteilungspunkte.php', array('name' => 'stil')); ?>
+									<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/beurteilungspunkte.php', array('name' => 'stil')); ?>
 							</tr>
 							<tr>
 								<td>
@@ -203,7 +207,7 @@
 								<td>
 									<?php echo $this->p->t('projektarbeitsbeurteilung', 'formText') ?>
 								</td>
-									<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/beurteilungspunkte.php', array('name' => 'form')); ?>
+									<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/beurteilungspunkte.php', array('name' => 'form')); ?>
 							</tr>
 							<tr>
 								<td>
@@ -215,7 +219,7 @@
 									<?php echo $paarbeittyp === 'm' ? $this->p->t('projektarbeitsbeurteilung', 'literaturTextMaster')
 										: $this->p->t('projektarbeitsbeurteilung', 'literaturText') ?>
 								</td>
-									<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/beurteilungspunkte.php', array('name' => 'literatur')); ?>
+									<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/beurteilungspunkte.php', array('name' => 'literatur')); ?>
 							</tr>
 							<tr>
 								<td>
@@ -226,27 +230,19 @@
 								<td>
 									<?php echo $this->p->t('projektarbeitsbeurteilung', 'zitierregelnText') ?>
 								</td>
-									<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/beurteilungspunkte.php', array('name' => 'zitierregeln')); ?>
+									<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/beurteilungspunkte.php', array('name' => 'zitierregeln')); ?>
 							</tr>
 							<tr>
 								<td colspan="2" class="text-right">
-									<b><?php echo $this->p->t('projektarbeitsbeurteilung', 'gesamtpunkte') ?></b>
+									<b>
+										<?php echo $paarbeittyp === 'm' ? ucfirst($this->p->t('projektarbeitsbeurteilung', 'gewichtet')) : ''?>
+										<?php echo $this->p->t('projektarbeitsbeurteilung', 'gesamtpunkte') ?>
+									</b>
 								</td>
 								<td class="text-center">
 									<b>
 									<span id="gesamtpunkte">
-										<?php
-											$gesamtpunkte = 0;
-											if (isset($projektarbeitsbeurteilung->bewertung_gesamtpunkte) && is_numeric($projektarbeitsbeurteilung->bewertung_gesamtpunkte))
-											{
-												if ($language == 'German')
-													$gesamtpunkte = formatDecimalGerman($projektarbeitsbeurteilung->bewertung_gesamtpunkte);
-												else
-													$gesamtpunkte = $projektarbeitsbeurteilung->bewertung_gesamtpunkte;
-											}
-										?>
-
-										<?php echo $gesamtpunkte ?></span><?php echo isset($projektarbeitsbeurteilung->bewertung_maxpunkte) && is_numeric($projektarbeitsbeurteilung->bewertung_maxpunkte) ? '/' . $projektarbeitsbeurteilung->bewertung_maxpunkte : '' ?>
+										<?php echo isset($projektarbeit_bewertung->gesamtpunkte) ? $projektarbeit_bewertung->gesamtpunkte : '' ?></span>/<span id="maxpunkte">100</span>
 									</b>
 								</td>
 							</tr>
@@ -255,7 +251,13 @@
 				</div>
 			</div>
 			<br />
-				<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/notenschluessel.php', array('arbeittypName' => $arbeittypName)); ?>
+				<?php $this->load->view(
+					'extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/notenschluessel.php',
+					array(
+						'paarbeittyp' => $paarbeittyp,
+						'arbeittypName' => $arbeittypName
+					)
+				); ?>
 			<br />
 			<?php if ($paarbeittyp === 'm'): ?>
 				<div class="row">
@@ -264,7 +266,7 @@
 							<?php if (isset($zweitbetreuer_abgeschicktamum)): ?>
 								<?php echo $this->p->t('projektarbeitsbeurteilung', 'gutachtenZweitBegutachtung') ?>
 								<br />
-								<a href="<?php echo site_url() . '/extensions/FHC-Core-Projektarbeitsbeurteilung/Projektarbeitsbeurteilung?projektarbeit_id=' . $projektarbeit_id . '&uid=' . $student_uid . '&zweitbetreuer_id=' . $zweitbetreuer_person_id ?>" target="_blank">
+								<a href="<?php echo site_url() . '/extensions/FHC-Core-Projektarbeitsbeurteilung/ProjektarbeitsbeurteilungZweitbegutachter?projektarbeit_id=' . $projektarbeit_id . '&uid=' . $student_uid . '&zweitbetreuer_id=' . $zweitbetreuer_person_id ?>" target="_blank">
 									<i class="fa fa-external-link"></i>&nbsp;<?php echo $this->p->t('projektarbeitsbeurteilung', 'zurZweitbegutachterBewertung') ?>
 								</a>
 							<?php else: ?>
@@ -298,6 +300,14 @@
 					<div class="alert alert-warning">
 						<?php echo $this->p->t('projektarbeitsbeurteilung', 'kommissionellePruefungHinweis') ?>
 						<br>
+						<?php echo $this->p->t('projektarbeitsbeurteilung', 'senatsvorsitz') ?>:
+						<?php
+							$vsStr = '';
+							$vsStr .= $kommission_vorsitz->voller_name;
+							$vsStr .= '&nbsp;<a href="mailto:'.$kommission_vorsitz->univEmail.'" title="'.$kommission_vorsitz->univEmail.'"><i class="fa fa-envelope text-warning"></i></a>';
+							echo $vsStr;
+						?>
+						<br>
 						<?php echo $this->p->t('projektarbeitsbeurteilung', 'kommissionsmitglieder') ?>:
 						<?php
 							$kbStr = '';
@@ -307,7 +317,7 @@
 								if (!$first)
 									$kbStr .= ', ';
 								$kbStr .= $kb->voller_name;
-								$kbStr .= '&nbsp;<a href="mailto:'.$kb->univEmail.'" title="'.$kb->univEmail.'"><i class="fa fa-envelope text-warning"></i></a>';
+								$kbStr .= '&nbsp;<a href="mailto:'.$kb->zustellung_mail.'" title="'.$kb->zustellung_mail.'"><i class="fa fa-envelope text-warning"></i></a>';
 								$first = false;
 							}
 							echo $kbStr;
@@ -324,11 +334,10 @@
 				</div>
 			</div>
 			<?php endif; ?>
-				<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/footer.php'); ?>
+				<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/footer.php'); ?>
 			<br />
 			<?php endif; ?>
 		</div>
 	</div>
 </div>
-</body>
 <?php $this->load->view('templates/FHC-Footer', $includesArray); ?>

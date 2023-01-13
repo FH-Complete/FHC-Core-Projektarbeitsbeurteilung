@@ -22,23 +22,22 @@
 
 	$this->load->view('templates/FHC-Header', $includesArray);
 ?>
-<body>
 <div id="wrapper">
 	<div id="page-wrapper">
 		<div class="container-fluid" id="containerFluid">
-            <?php if (!isset($projektarbeitsbeurteilung)):
+			<?php if (!isset($projektarbeitsbeurteilung)):
 					echo "Keine Projektarbeit eingetragen.";
-            else:
-            	$sent = isset($projektarbeitsbeurteilung->abgeschicktamum);
-            	$paarbeittyp = $projektarbeitsbeurteilung->parbeit_typ === 'Bachelor' ? 'b' : 'm';
-            	$arbeittypName = $paarbeittyp === 'b' ? $this->p->t('projektarbeitsbeurteilung', 'arbeitBachelor') : $this->p->t('abschlusspruefung', 'arbeitMaster');
+			else:
+				$sent = isset($projektarbeitsbeurteilung->abgeschicktamum);
+				$paarbeittyp = $projektarbeitsbeurteilung->parbeit_typ === 'Bachelor' ? 'b' : 'm';
+				$arbeittypName = $paarbeittyp === 'b' ? $this->p->t('projektarbeitsbeurteilung', 'arbeitBachelor') : $this->p->t('abschlusspruefung', 'arbeitMaster');
 
 				$titel = isset($projektarbeitsbeurteilung->projektarbeit_titel) ? $projektarbeitsbeurteilung->projektarbeit_titel : $projektarbeitsbeurteilung->projektarbeit_titel_english;
 				$projektarbeit_bewertung = $projektarbeitsbeurteilung->projektarbeit_bewertung;
 				?>
 			<br />
 			<br />
-				<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/fhtechnikum_header.php', array()); ?>
+				<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/fhtechnikum_header.php', array()); ?>
 			<div class="row">
 				<div class="col-lg-12">
 					<h3 class="page-header">
@@ -47,7 +46,7 @@
 					</h3>
 				</div>
 			</div>
-			<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/hiddenfields.php'); ?>
+			<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/hiddenfields.php'); ?>
 			<form id="beurteilungform">
 			<div class="row">
 				<div class="col-lg-12">
@@ -60,13 +59,13 @@
 							</td>
 							<td colspan="3"><?php echo $titel ?></td>
 						</tr>
-						<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/stammdaten.php'); ?>
+						<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/stammdaten.php'); ?>
 					</table>
 				</div>
 			</div>
 			<br />
-            <div class="row">
-                <div class="col-lg-12">
+			<div class="row">
+				<div class="col-lg-12">
 					<table class="table-condensed table-bordered table-responsive" id="beurteilungtbl">
 						<thead>
 							<tr>
@@ -98,7 +97,7 @@
 									</ul><br />
 								</td>
 								<td>
-									<?php $readonly = (isset($projektarbeit_bewertung->beurteilung_zweitbegutachter) && $sent) ? ' readonly' : '' ?>
+									<?php $readonly = $readOnlyAccess ? ' readonly' : '' ?>
 									<textarea class="form-control" cols="5" rows="16" name="beurteilung_zweitbegutachter"<?php echo $readonly ?>><?php echo isset($projektarbeit_bewertung->beurteilung_zweitbegutachter) ? $projektarbeit_bewertung->beurteilung_zweitbegutachter : '' ?></textarea>
 								</td>
 							</tr>
@@ -108,11 +107,10 @@
 			</div>
 			<br />
 			</form>
-				<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/footer.php', array('sent' => $sent)); ?>
+				<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/footer.php', array('sent' => $sent)); ?>
 			<br />
 			<?php endif; ?>
 		</div>
 	</div>
 </div>
-</body>
 <?php $this->load->view('templates/FHC-Footer', $includesArray); ?>

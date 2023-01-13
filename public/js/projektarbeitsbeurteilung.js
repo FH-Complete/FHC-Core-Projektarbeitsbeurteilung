@@ -75,11 +75,11 @@ $("document").ready(function() {
 })
 
 var Projektarbeitsbeurteilung = {
+	gesamtpunkte: null, // total points
 	finalNote: null, // final grade to save
 	negativeNoteValue: 5, // grade value of negative grade
 	categoryMaxPoints: 10, // max reachable points of every category
 	bewertungData: null,
-	plagiatscheckInitiallyUnaffaellig: null,
 	notenphrasen: { // notenwert: phrasenname
 		1: 'sehrGut',
 		2: 'gut',
@@ -94,7 +94,8 @@ var Projektarbeitsbeurteilung = {
 		4: [50, 63],
 		5: [0, 50]
 	},
-	punkteCompoundCategories: { // if points of any compound category are below 50%, assessment is negative
+	// each compound category consists of multiple criteria. if points of any compound category are below 50%, assessment is negative
+	compoundCategories: {
 		'thema': 1,
 		'loesungsansatz': 1,
 		'methode': 1,
@@ -105,6 +106,17 @@ var Projektarbeitsbeurteilung = {
 		'form': 2,
 		'literatur': 2,
 		'zitierregeln': 2
+	},
+	// points from each compound category can be weighted differently (in percent)
+	compoundCategoriesWeight: {
+		'bachelor': {
+			1: 50,
+			2: 50
+		},
+		'master': {
+			1: 70,
+			2: 30
+		}
 	},
 	refreshPlagiatscheck: function()
 	{
@@ -125,7 +137,7 @@ var Projektarbeitsbeurteilung = {
 					// enable input dropdowns and remove tooltip
 					inputDropdowns.prop("disabled", null);
 
-					tooltipElements.attr("data-original-title", "")/*.attr("title", "")*/;
+					tooltipElements.attr("data-original-title", "");
 					$("#plagiatscheckHinweisNegativ").hide();
 
 					// set the values in html form
@@ -147,15 +159,12 @@ var Projektarbeitsbeurteilung = {
 	// recalculate points and resulting grade value
 	refreshBewertungPointsAndNote: function()
 	{
-		// set existing Betreuernote if there is one
-		var oldBetreuernote = $("#oldbetreuernote").val();
-		Projektarbeitsbeurteilung.setFinalNote(oldBetreuernote);
-
-		var pointsEl = $("#beurteilungtbl td.beurteilungpoints select");
+		var pointsEl = $("#beurteilungtbl td.beurteilungpoints");
 
 		if (pointsEl.length)
 		{
 			var sumPoints = 0;
+			var sumMaxPoints = 0;
 			var finalNote = null;
 			var compoundCategoryPoints = {};
 			var finished = true;
@@ -164,9 +173,10 @@ var Projektarbeitsbeurteilung = {
 			pointsEl.each(
 				function()
 				{
-					var points = $(this).val();
-					var categoryName = $(this).prop('name').replace('bewertung_', '');
-					var compoundCategoryNumber = Projektarbeitsbeurteilung.punkteCompoundCategories[categoryName];
+					// get points from dropdown if form not sent or data attribute if sent
+					var points = $(this).find('select').val() || $(this).find('span').attr("data-points");
+					var categoryName = $(this).attr("id");
+					var compoundCategoryNumber = Projektarbeitsbeurteilung.compoundCategories[categoryName];
 
 					// null if score not entered => not finished, do not display grade yet
 					if (points == 'null')
@@ -182,31 +192,51 @@ var Projektarbeitsbeurteilung = {
 					// calculate points and maxpoints for each compound category
 					if (jQuery.isNumeric(points))
 					{
-						var floatPoints = parseFloat(points);
+						// weight factor, multiplied by number of compound categories to scale up to 100 to have 100 points in total
+						var compoundCategoriesWeights = $("#paarbeittyp").val() === 'm'
+							? Projektarbeitsbeurteilung.compoundCategoriesWeight['master']
+							: Projektarbeitsbeurteilung.compoundCategoriesWeight['bachelor'];
+
+						// weight each score
+						var categoryWeight = compoundCategoriesWeights[compoundCategoryNumber] / 100;
+						var numCategoriesInCompoundCat = Projektarbeitsbeurteilung._getNumberCategoriesInCompoundCategory(compoundCategoryNumber);
+						// scale up so total points stay the same.
+						var scalingFactor = Object.keys(Projektarbeitsbeurteilung.compoundCategories).length / numCategoriesInCompoundCat;
+						var floatPoints = parseFloat(points) * categoryWeight * scalingFactor;
+						var maxPoints = Projektarbeitsbeurteilung.categoryMaxPoints * categoryWeight * scalingFactor;
 
 						// add points to total sum
 						sumPoints += floatPoints;
+						sumMaxPoints += maxPoints;
 
 						// add the points to compound category
 						if (!compoundCategoryPoints[compoundCategoryNumber])
 						{
 							compoundCategoryPoints[compoundCategoryNumber] = {
 								points: floatPoints,
-								maxpoints: Projektarbeitsbeurteilung.categoryMaxPoints
+								maxpoints: maxPoints
 							};
 						}
 						else
 						{
 							compoundCategoryPoints[compoundCategoryNumber].points += floatPoints;
-							compoundCategoryPoints[compoundCategoryNumber].maxpoints += Projektarbeitsbeurteilung.categoryMaxPoints;
+							compoundCategoryPoints[compoundCategoryNumber].maxpoints += maxPoints;
 						}
 					}
 				}
 			)
 
 			// show sum of points with correct language format
-			var sumPointsDisplay = $("#language").val() === 'German' ? Projektarbeitsbeurteilung._formatDecimalGerman(sumPoints) : sumPoints;
+			var sumPointsDisplay = sumPoints;
+			var maxPointsDisplay = sumMaxPoints;
+			if ($("#language").val() === 'German')
+			{
+				sumPointsDisplay = Projektarbeitsbeurteilung._formatDecimalGerman(sumPoints);
+				maxPointsDisplay = Projektarbeitsbeurteilung._formatDecimalGerman(sumMaxPoints);
+			}
+
 			$("#gesamtpunkte").text(sumPointsDisplay);
+			$("#maxpunkte").text(maxPointsDisplay);
 
 			// if points filled out, calculate and display note
 			if (finished)
@@ -215,7 +245,6 @@ var Projektarbeitsbeurteilung = {
 					finalNote = Projektarbeitsbeurteilung.negativeNoteValue; // set finalNote to negative
 				else
 				{
-
 					var compoundCtgNegative = false;
 
 					// check: if any of the compound categories is negative, finalNote is negative
@@ -232,6 +261,7 @@ var Projektarbeitsbeurteilung = {
 					}
 
 					// if compound category not negative, get appropriate grade according to Notenschlüssel
+					var sumPointsPercent = sumPoints / sumMaxPoints * 100;
 					if (!compoundCtgNegative)
 					{
 						for (var note in Projektarbeitsbeurteilung.notenschluessel)
@@ -240,7 +270,7 @@ var Projektarbeitsbeurteilung = {
 							var upper = Projektarbeitsbeurteilung.notenschluessel[note][1];
 
 							// get correct grade depending on upper/lower boundaries
-							if (sumPoints >= lower && sumPoints < upper)
+							if (sumPointsPercent >= lower && sumPointsPercent < upper)
 							{
 								finalNote = note;
 								break;
@@ -250,6 +280,7 @@ var Projektarbeitsbeurteilung = {
 				}
 			}
 
+			Projektarbeitsbeurteilung.gesamtpunkte = sumPoints;
 			Projektarbeitsbeurteilung.setFinalNote(finalNote);
 		}
 	},
@@ -260,7 +291,7 @@ var Projektarbeitsbeurteilung = {
 			titel +
 			'</span>&nbsp;' +
 			'<i class="fa fa-edit" id="editTitle" title="'+FHC_PhrasesLib.t("projektarbeitsbeurteilung", "titelBearbeiten")+'"></i>'
-		)
+		);
 
 		// edit and save title
 		$("#editTitle").click(
@@ -289,7 +320,7 @@ var Projektarbeitsbeurteilung = {
 			}
 		);
 	},
-	// print final grade
+	// save final grade in property and print it
 	setFinalNote: function(finalNote) {
 		if (jQuery.isNumeric(finalNote))
 		{
@@ -324,12 +355,16 @@ var Projektarbeitsbeurteilung = {
 	{
 		var bewertungData = {};
 
-		for (var category in Projektarbeitsbeurteilung.punkteCompoundCategories)
+		for (var category in Projektarbeitsbeurteilung.compoundCategories)
 		{
 			bewertungData['bewertung_'+category] = $("#beurteilungform select[name=bewertung_"+category+"]").val();
 		}
 
 		bewertungData['begruendung'] = $("#beurteilungform textarea[name=begruendung]").val();
+
+		// add points to data
+		if (jQuery.isNumeric(Projektarbeitsbeurteilung.gesamtpunkte))
+			bewertungData['gesamtpunkte'] = Projektarbeitsbeurteilung.gesamtpunkte;
 
 		// add final grade to data
 		if (jQuery.isNumeric(Projektarbeitsbeurteilung.finalNote))
@@ -484,5 +519,15 @@ var Projektarbeitsbeurteilung = {
 			dec = dec1 + dec2;
 		}
 		return dec;
+	},
+	_getNumberCategoriesInCompoundCategory: function(compoundCategoryNumber)
+	{
+		var num = 0;
+		for (var cat in Projektarbeitsbeurteilung.compoundCategories)
+		{
+			if (Projektarbeitsbeurteilung.compoundCategories[cat] == compoundCategoryNumber)
+				num++;
+		}
+		return num;
 	}
 }
