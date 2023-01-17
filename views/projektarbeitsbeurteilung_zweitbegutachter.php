@@ -16,6 +16,7 @@
 			'public/extensions/FHC-Core-Projektarbeitsbeurteilung/css/projektarbeitsbeurteilung.css'
 		),
 		'customJSs' => array(
+			'public/extensions/FHC-Core-Projektarbeitsbeurteilung/js/projektarbeitsbeurteilung_lib.js',
 			'public/extensions/FHC-Core-Projektarbeitsbeurteilung/js/projektarbeitsbeurteilung_zweitbegutachter.js'
 		)
 	);
@@ -98,7 +99,12 @@
 								</td>
 								<td>
 									<?php $readonly = $readOnlyAccess ? ' readonly' : '' ?>
-									<textarea class="form-control" cols="5" rows="16" name="beurteilung_zweitbegutachter"<?php echo $readonly ?>><?php echo isset($projektarbeit_bewertung->beurteilung_zweitbegutachter) ? $projektarbeit_bewertung->beurteilung_zweitbegutachter : '' ?></textarea>
+									<textarea
+										class="form-control"
+										cols="5"
+										rows="16"
+										name="beurteilung_zweitbegutachter"
+										id="beurteilung_zweitbegutachter"<?php echo $readonly ?>><?php echo isset($projektarbeit_bewertung->beurteilung_zweitbegutachter) ? $projektarbeit_bewertung->beurteilung_zweitbegutachter : '' ?></textarea>
 								</td>
 							</tr>
 						</tbody>

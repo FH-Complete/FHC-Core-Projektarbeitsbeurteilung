@@ -1,5 +1,3 @@
-const CALLED_PATH = FHC_JS_DATA_STORAGE_OBJECT.called_path;
-
 $("document").ready(function() {
 
 	// temporarily save current form bewertung data
@@ -10,65 +8,8 @@ $("document").ready(function() {
 	Projektarbeitsbeurteilung.refreshPlagiatscheck();
 	// refresh grade and points after page load
 	Projektarbeitsbeurteilung.refreshBewertungPointsAndNote();
-
-	// refresh plagiatscheck after checkbox change
-	if ($("#plagiatscheck_unauffaellig").length)
-	{
-		$("#plagiatscheck_unauffaellig").change(
-			function()
-			{
-				Projektarbeitsbeurteilung.refreshPlagiatscheck();
-				Projektarbeitsbeurteilung.refreshBewertungPointsAndNote();
-			}
-		);
-	}
-
-	// make title editable
-	Projektarbeitsbeurteilung.setTitleEditEvent($("#titleField").text());
-
-	// refresh grade and points after changing Bewertung
-	if ($("#beurteilungtbl select").length)
-	{
-		$("#beurteilungtbl select").change(
-			function()
-			{
-				Projektarbeitsbeurteilung.refreshBewertungPointsAndNote();
-			}
-		);
-	}
-
-	// click on save -> initiate saving of entered data
-	if ($("#saveBeurteilungBtn").length)
-	{
-		$("#saveBeurteilungBtn").click(
-			function()
-			{
-				Projektarbeitsbeurteilung.initSaveProjektarbeitsbeurteilung(false);
-			}
-		)
-	}
-
-	// click on save and send -> initiate saving of entered data and finish grading
-	if ($("#saveSendBeurteilungBtn").length)
-	{
-		$("#saveSendBeurteilungBtn").click(
-			function()
-			{
-				Projektarbeitsbeurteilung.initSaveProjektarbeitsbeurteilung(true);
-			}
-		)
-	}
-
-	// button for sending info mail to committee members
-	if ($("#sendKommissionMail").length)
-	{
-		$("#sendKommissionMail").click(
-			function()
-			{
-				Projektarbeitsbeurteilung.sendInfoMailToKommission($("#projektarbeit_id").val());
-			}
-		)
-	}
+	// set JS events
+	Projektarbeitsbeurteilung.setEvents();
 
 	// enable tooltips
 	$('[data-toggle="tooltip"]').tooltip();
@@ -117,6 +58,104 @@ var Projektarbeitsbeurteilung = {
 			1: 70,
 			2: 30
 		}
+	},
+	setEvents: function()
+	{
+		// set event for language change dropdown
+		if ($("#lang").length)
+		{
+			// language dropdown change
+			$("#lang").change(
+				function()
+				{
+					var successCallback = function()
+					{
+						// save entered bewertung data so it doesn't get lost on refresh
+						localStorage.setItem("erstbegutachterFormData", JSON.stringify(Projektarbeitsbeurteilung.getBewertungFormData()));
+						// reload page to show text in different language
+						window.location.reload();
+					}
+
+					ProjektarbeitsbeurteilungLib.changeLanguage($(this).val(), successCallback);
+				}
+			);
+
+			// retrieve saved bewertung data
+			var formData = JSON.parse(localStorage.getItem("erstbegutachterFormData"));
+			if (formData)
+			{
+				// set temporarily saved bewertung data
+				Projektarbeitsbeurteilung.bewertungData = formData;
+				Projektarbeitsbeurteilung.fillBewertungFormWithData();
+				// recalculate grade and points
+				Projektarbeitsbeurteilung.refreshBewertungPointsAndNote();
+				// remove temporarily saved data
+				localStorage.removeItem("erstbegutachterFormData");
+			}
+		}
+
+		// refresh plagiatscheck after checkbox change
+		if ($("#plagiatscheck_unauffaellig").length)
+		{
+			$("#plagiatscheck_unauffaellig").change(
+				function()
+				{
+					Projektarbeitsbeurteilung.refreshPlagiatscheck();
+					Projektarbeitsbeurteilung.refreshBewertungPointsAndNote();
+				}
+			);
+		}
+
+		// make title editable
+		Projektarbeitsbeurteilung.setTitleEditEvent($("#titleField").text());
+
+		// refresh grade and points after changing Bewertung
+		if ($("#beurteilungtbl select").length)
+		{
+			$("#beurteilungtbl select").change(
+				function()
+				{
+					Projektarbeitsbeurteilung.refreshBewertungPointsAndNote();
+				}
+			);
+		}
+
+		// click on save -> initiate saving of entered data
+		if ($("#saveBeurteilungBtn").length)
+		{
+			$("#saveBeurteilungBtn").click(
+				function()
+				{
+					Projektarbeitsbeurteilung.initSaveProjektarbeitsbeurteilung(false);
+				}
+			)
+		}
+
+		// click on save and send -> initiate saving of entered data and finish grading
+		if ($("#saveSendBeurteilungBtn").length)
+		{
+			$("#saveSendBeurteilungBtn").click(
+				function()
+				{
+					Projektarbeitsbeurteilung.initSaveProjektarbeitsbeurteilung(true);
+				}
+			)
+		}
+
+		// button for sending info mail to committee members
+		if ($("#sendKommissionMail").length)
+		{
+			$("#sendKommissionMail").click(
+				function()
+				{
+					Projektarbeitsbeurteilung.sendInfoMailToKommission($("#projektarbeit_id").val());
+				}
+			)
+		}
+
+		// enable tooltips
+		$('[data-toggle="tooltip"]').tooltip();
+
 	},
 	refreshPlagiatscheck: function()
 	{

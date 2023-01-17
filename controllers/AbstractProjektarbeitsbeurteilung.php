@@ -64,6 +64,15 @@ abstract class AbstractProjektarbeitsbeurteilung extends FHC_Controller
 	 */
 	abstract public function saveProjektarbeitsbeurteilung();
 
+	/**
+	 * Change interface language.
+	 * @return object success or error
+	 */
+	public function changeLanguage()
+	{
+		$language = $this->input->get('language');
+		$this->outputJson(setUserLanguage($language));
+	}
 
 	// -----------------------------------------------------------------------------------------------------------------
 	// Protected methods
