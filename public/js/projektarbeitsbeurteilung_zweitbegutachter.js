@@ -18,8 +18,9 @@ var Projektarbeitsbeurteilung = {
 					{
 						// save entered bewertung data so it doesn't get lost on refresh
 						localStorage.setItem("zweitbegutachterFormData", JSON.stringify(Projektarbeitsbeurteilung.getBewertungFormData()));
-						// reload page with ajax to show text in different language
-						window.location.reload();
+						// reload page by sending form with authtoken param to show text in different language
+						$("#authtokenform").removeAttr('onsubmit');
+						$("#authtokenform").submit();
 					}
 					ProjektarbeitsbeurteilungLib.changeLanguage($(this).val(), successCallback);
 				}
