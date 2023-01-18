@@ -457,13 +457,15 @@ var Projektarbeitsbeurteilung = {
 						{// when saved and sent, reload the form so it is read only
 							$.ajax({
 								type: 'POST',
-								url: null,//$("#authtokenform").attr('action'),
-								data: null,//$("#authtokenform").serialize(),
+								url: null,
+								data: null,
 								success: function(resp) {
 									FHC_AjaxClient._showVeil();
 									var html = $(resp).find("#containerFluid").html();
 									$("#containerFluid").html(html);
 									Projektarbeitsbeurteilung.refreshBewertungPointsAndNote();
+									// reset events
+									Projektarbeitsbeurteilung.setEvents();
 									FHC_AjaxClient._hideVeil();
 									FHC_DialogLib.alertSuccess(FHC_PhrasesLib.t("projektarbeitsbeurteilung", "beurteilungGespeichertGesendet"));
 								}

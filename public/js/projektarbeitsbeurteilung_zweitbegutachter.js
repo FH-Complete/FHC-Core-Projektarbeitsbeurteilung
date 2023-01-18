@@ -102,12 +102,14 @@ var Projektarbeitsbeurteilung = {
 						{// when saved and sent, reload the form so it is read only
 							$.ajax({
 								type: 'POST',
-								url: null,//$("#authtokenform").attr('action'),
+								url: null,
 								data: $("#authtokenform").serialize(),
 								success: function(resp) {
 									FHC_AjaxClient._showVeil();
 									var html = $(resp).find("#containerFluid").html();
 									$("#containerFluid").html(html);
+									// reset events
+									Projektarbeitsbeurteilung.setEvents();
 									FHC_AjaxClient._hideVeil();
 									FHC_DialogLib.alertSuccess(FHC_PhrasesLib.t("projektarbeitsbeurteilung", "beurteilungGespeichertGesendet"));
 								}
