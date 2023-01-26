@@ -236,8 +236,15 @@
 							<tr>
 								<td colspan="2" class="text-right">
 									<b>
-										<?php echo $paarbeittyp === 'm' ? ucfirst($this->p->t('projektarbeitsbeurteilung', 'gewichtet')) : ''?>
-										<?php echo $this->p->t('projektarbeitsbeurteilung', 'gesamtpunkte') ?>
+										<?php
+											if ($paarbeittyp === 'm')
+											{
+												echo ucfirst($this->p->t('projektarbeitsbeurteilung', 'gewichtet')).'&nbsp;';
+												echo $this->p->t('projektarbeitsbeurteilung', 'gesamtpunkte');
+											}
+											else
+												echo ucfirst($this->p->t('projektarbeitsbeurteilung', 'gesamtpunkte'));
+										?>
 									</b>
 								</td>
 								<td class="text-center">
