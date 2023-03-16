@@ -232,39 +232,41 @@ var Projektarbeitsbeurteilung = {
 						ctgNegative = true;
 					}
 
+					// weight each score
+					// weight factor, multiplied by number of compound categories to scale up to 100 to have 100 points in total
+					var compoundCategoriesWeights = $("#paarbeittyp").val() === 'm'
+						? Projektarbeitsbeurteilung.compoundCategoriesWeight['master']
+						: Projektarbeitsbeurteilung.compoundCategoriesWeight['bachelor'];
+					var categoryWeight = compoundCategoriesWeights[compoundCategoryNumber] / 100;
+					var numCategoriesInCompoundCat = Projektarbeitsbeurteilung._getNumberCategoriesInCompoundCategory(compoundCategoryNumber);
+					// scale up so total points stay the same.
+					var scalingFactor = Object.keys(Projektarbeitsbeurteilung.compoundCategories).length / numCategoriesInCompoundCat;
+
+					// get max points for each category
+					var maxPoints = Projektarbeitsbeurteilung.categoryMaxPoints * categoryWeight * scalingFactor;
+					sumMaxPoints += maxPoints;
+					if (!compoundCategoryPoints[compoundCategoryNumber])
+					{
+						compoundCategoryPoints[compoundCategoryNumber] = {
+							points: 0,
+							maxpoints: maxPoints
+						};
+					}
+					else
+					{
+						compoundCategoryPoints[compoundCategoryNumber].maxpoints += maxPoints;
+					}
+
 					// calculate points and maxpoints for each compound category
 					if (jQuery.isNumeric(points))
 					{
-						// weight factor, multiplied by number of compound categories to scale up to 100 to have 100 points in total
-						var compoundCategoriesWeights = $("#paarbeittyp").val() === 'm'
-							? Projektarbeitsbeurteilung.compoundCategoriesWeight['master']
-							: Projektarbeitsbeurteilung.compoundCategoriesWeight['bachelor'];
-
-						// weight each score
-						var categoryWeight = compoundCategoriesWeights[compoundCategoryNumber] / 100;
-						var numCategoriesInCompoundCat = Projektarbeitsbeurteilung._getNumberCategoriesInCompoundCategory(compoundCategoryNumber);
-						// scale up so total points stay the same.
-						var scalingFactor = Object.keys(Projektarbeitsbeurteilung.compoundCategories).length / numCategoriesInCompoundCat;
 						var floatPoints = parseFloat(points) * categoryWeight * scalingFactor;
-						var maxPoints = Projektarbeitsbeurteilung.categoryMaxPoints * categoryWeight * scalingFactor;
 
 						// add points to total sum
 						sumPoints += floatPoints;
-						sumMaxPoints += maxPoints;
 
 						// add the points to compound category
-						if (!compoundCategoryPoints[compoundCategoryNumber])
-						{
-							compoundCategoryPoints[compoundCategoryNumber] = {
-								points: floatPoints,
-								maxpoints: maxPoints
-							};
-						}
-						else
-						{
-							compoundCategoryPoints[compoundCategoryNumber].points += floatPoints;
-							compoundCategoryPoints[compoundCategoryNumber].maxpoints += maxPoints;
-						}
+						compoundCategoryPoints[compoundCategoryNumber].points += floatPoints;
 					}
 				}
 			)
