@@ -11,7 +11,7 @@
 		if ($readOnlyAccess):
 			if (isset($projektarbeit_bewertung->{'bewertung_'.$name}))
 			{
-				$punktewert = $projektarbeit_bewertung->{'bewertung_'.$name};
+				$punktewert = number_format($projektarbeit_bewertung->{'bewertung_'.$name}, 1, '.', '');
 				echo "<span data-points='".$punktewert."'>";
 				echo $language === 'German' ? formatDecimalGerman($punktewert) : $punktewert;
 				echo "</span>";
