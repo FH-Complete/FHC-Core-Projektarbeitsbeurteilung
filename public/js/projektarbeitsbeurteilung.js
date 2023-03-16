@@ -1,13 +1,14 @@
 $("document").ready(function() {
 
 	// temporarily save current form bewertung data
-	if ($("#plagiatscheck_unauffaellig").prop('checked') === true)
-		Projektarbeitsbeurteilung.bewertungData = Projektarbeitsbeurteilung.getBewertungFormData();
+	Projektarbeitsbeurteilung.storeBewertungFormData();
 
 	// refresh plagiatscheck after page load
 	Projektarbeitsbeurteilung.refreshPlagiatscheck();
+
 	// refresh grade and points after page load
 	Projektarbeitsbeurteilung.refreshBewertungPointsAndNote();
+
 	// set JS events
 	Projektarbeitsbeurteilung.setEvents();
 
@@ -71,7 +72,7 @@ var Projektarbeitsbeurteilung = {
 					var successCallback = function()
 					{
 						// save entered bewertung data so it doesn't get lost on refresh
-						localStorage.setItem("erstbegutachterFormData", JSON.stringify(Projektarbeitsbeurteilung.getBewertungFormData()));
+						localStorage.setItem("erstbegutachterFormData", JSON.stringify(Projektarbeitsbeurteilung.bewertungData));
 						// reload page to show text in different language
 						window.location.reload();
 					}
@@ -88,6 +89,7 @@ var Projektarbeitsbeurteilung = {
 				Projektarbeitsbeurteilung.bewertungData = formData;
 				Projektarbeitsbeurteilung.fillBewertungFormWithData();
 				// recalculate grade and points
+				Projektarbeitsbeurteilung.refreshPlagiatscheck();
 				Projektarbeitsbeurteilung.refreshBewertungPointsAndNote();
 				// remove temporarily saved data
 				localStorage.removeItem("erstbegutachterFormData");
@@ -100,6 +102,7 @@ var Projektarbeitsbeurteilung = {
 			$("#plagiatscheck_unauffaellig").change(
 				function()
 				{
+					Projektarbeitsbeurteilung.storePlagiatscheck();
 					Projektarbeitsbeurteilung.refreshPlagiatscheck();
 					Projektarbeitsbeurteilung.refreshBewertungPointsAndNote();
 				}
@@ -115,6 +118,7 @@ var Projektarbeitsbeurteilung = {
 			$("#beurteilungtbl select").change(
 				function()
 				{
+					Projektarbeitsbeurteilung.storeBewertungFormData();
 					Projektarbeitsbeurteilung.refreshBewertungPointsAndNote();
 				}
 			);
@@ -161,7 +165,7 @@ var Projektarbeitsbeurteilung = {
 	{
 		if ($("#plagiatscheck_unauffaellig").length)
 		{
-			var plagiatcheck_unauffaellig = $("#plagiatscheck_unauffaellig");
+			var plagiatscheck_unauffaellig = $("#plagiatscheck_unauffaellig");
 
 			// grey out all point dropdowns, no input should be possible
 			if ($("#beurteilungtbl select").length)
@@ -171,7 +175,7 @@ var Projektarbeitsbeurteilung = {
 				var tooltipElements = $("#beurteilungtbl .selectTooltip");
 
 				// if plagiatcheck checkbox is ticked
-				if (plagiatcheck_unauffaellig.prop('checked') === true)
+				if (plagiatscheck_unauffaellig.prop('checked') === true)
 				{
 					// enable input dropdowns and remove tooltip
 					inputDropdowns.prop("disabled", null);
@@ -189,7 +193,7 @@ var Projektarbeitsbeurteilung = {
 
 					// changing of bootstrap tooltip only works with attr function and setting data-original-title
 					var title = FHC_PhrasesLib.t("projektarbeitsbeurteilung", "plagiatscheckNichtGesetzt");
-					tooltipElements.attr("data-original-title", title)/*.attr("title", title)*/;
+					tooltipElements.attr("data-original-title", title);
 					$("#plagiatscheckHinweisNegativ").show();
 				}
 			}
@@ -415,6 +419,15 @@ var Projektarbeitsbeurteilung = {
 
 		return bewertungData;
 	},
+	storeBewertungFormData: function() // storing current (but maybe not saved) Bewertung data in JS
+	{
+		Projektarbeitsbeurteilung.bewertungData = Projektarbeitsbeurteilung.getBewertungFormData();
+	},
+	storePlagiatscheck: function() // store only plagiatscheck bool in JS
+	{
+		Projektarbeitsbeurteilung.bewertungData.plagiatscheck_unauffaellig =
+			Projektarbeitsbeurteilung.getBewertungFormData().plagiatscheck_unauffaellig;
+	},
 	fillBewertungFormWithData: function()
 	{
 		// prefill with default null values
@@ -423,6 +436,10 @@ var Projektarbeitsbeurteilung = {
 		// fill the form with tempoararily saved data
 		if (Projektarbeitsbeurteilung.bewertungData != null)
 		{
+			// set plagiat checkbox
+			$("#plagiatscheck_unauffaellig").prop('checked', Projektarbeitsbeurteilung.bewertungData.plagiatscheck_unauffaellig);
+
+			// set points
 			for (var name in Projektarbeitsbeurteilung.bewertungData)
 			{
 				$("#beurteilungform select[name=" + name + "]").val(Projektarbeitsbeurteilung.bewertungData[name]);
@@ -461,12 +478,22 @@ var Projektarbeitsbeurteilung = {
 								data: null,
 								success: function(resp) {
 									FHC_AjaxClient._showVeil();
+
+									// refresh storage after save
+									Projektarbeitsbeurteilung.storeBewertungFormData();
+
+									// reload part of html to refresh display
 									var html = $(resp).find("#containerFluid").html();
 									$("#containerFluid").html(html);
+
+									// points and grade have to be recalculated
 									Projektarbeitsbeurteilung.refreshBewertungPointsAndNote();
-									// reset events
+
+									// set events
 									Projektarbeitsbeurteilung.setEvents();
+
 									FHC_AjaxClient._hideVeil();
+
 									FHC_DialogLib.alertSuccess(FHC_PhrasesLib.t("projektarbeitsbeurteilung", "beurteilungGespeichertGesendet"));
 								}
 							})
