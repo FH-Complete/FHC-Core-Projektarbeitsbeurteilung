@@ -25,7 +25,7 @@ $orgform_bezeichnung = '';
 		</select>
 	</div>
 	<div class="col-lg-6 text-right">
-		<img src="<?php echo base_url() ?>/public/images/logo-300x160.png" title="FH Technikum Wien Logo" alt="FH Technikum Wien Logo" id="technikumlogo">
+		<img src="<?php echo base_url() ?>/<?php echo $logoPath ?>" title="FH Technikum Wien Logo" alt="FH Technikum Wien Logo" id="technikumlogo">
 	</div>
 </div>
 <br />
