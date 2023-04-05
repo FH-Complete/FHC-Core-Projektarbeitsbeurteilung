@@ -17,6 +17,9 @@ abstract class AbstractProjektarbeitsbeurteilung extends FHC_Controller
 	// fields required to be filled out by Betreuer
 	protected $requiredFields = array();
 
+	// path to header logo
+	protected $logoPath = '';
+
 	/**
 	 * Constructor
 	 */
@@ -34,6 +37,12 @@ abstract class AbstractProjektarbeitsbeurteilung extends FHC_Controller
 
 		// Load helpers
 		$this->load->helper('extensions/FHC-Core-Projektarbeitsbeurteilung/projektarbeitsbeurteilung_helper');
+
+		// load config
+		$this->config->load('extensions/FHC-Core-Projektarbeitsbeurteilung/config');
+
+		// set logo path
+		$this->logoPath = $this->config->item('projektarbeitsbeurteilung_logo_path');
 
 		// Load language phrases
 		$this->loadPhrases(

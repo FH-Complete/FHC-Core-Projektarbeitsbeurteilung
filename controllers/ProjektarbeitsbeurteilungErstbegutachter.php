@@ -187,7 +187,8 @@ class ProjektarbeitsbeurteilungErstbegutachter extends AbstractProjektarbeitsbeu
 					'kommission_vorsitz' => $kommissionVorsitz, // if kommissionell, Kommissionsvorsitz
 					'kommission_betreuer' => $kommissionPruefer, // optional additional Kommissionspruefer
 					'isKommission' => $isKommission,
-					'readOnlyAccess' => $readOnlyAccess
+					'readOnlyAccess' => $readOnlyAccess,
+					'logoPath' => $this->logoPath
 				);
 
 				// load the view

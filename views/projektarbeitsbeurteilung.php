@@ -39,7 +39,7 @@
 				?>
 			<br />
 			<br />
-				<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/fhtechnikum_header.php', array()); ?>
+				<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/header.php', array()); ?>
 			<div class="row">
 				<div class="col-lg-12">
 					<h3 class="page-header">

@@ -103,7 +103,8 @@ class ProjektarbeitsbeurteilungZweitbegutachter extends AbstractProjektarbeitsbe
 					'authtoken' => isset($authObj->authtoken) ? $authObj->authtoken : null,
 					'projektarbeitsbeurteilung' => $projektarbeitsbeurteilung,
 					'language' => $language,
-					'readOnlyAccess' => $readOnlyAccess
+					'readOnlyAccess' => $readOnlyAccess,
+					'logoPath' => $this->logoPath
 				);
 
 				// load the view
