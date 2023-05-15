@@ -1,55 +1,59 @@
 #headerlogo {
-    width: 262px;
-    height: 140px;
+	width: 262px;
+	height: 140px;
 }
 
 table {
-    width: 100%;
+	width: 100%;
 }
 
 /* set list symbols */
 #beurteilungtbl ul {
-    list-style-type: square
+	list-style-type: square
 }
 
 .tableWidthHalf {
-    width: 50%;
+	width: 50%;
 }
 
 .tableWidthThirty {
-    width: 30%;
+	width: 30%;
 }
 
 /* display final grade */
 #betreuernote {
-    display: inline-block;
-    margin-left: 1.5%;
-    text-transform: capitalize;
+	display: inline-block;
+	margin-left: 1.5%;
+	text-transform: capitalize;
 }
 
 /* position "send committee mail" button */
 #sendKommissionMail {
-    margin-top: 1em;
+	margin-top: 1em;
 }
 
 /* "edit title" symbol */
 #editTitle {
-    cursor: pointer;
-    font-size: 1.2em;
+	cursor: pointer;
+	font-size: 1.2em;
+}
+
+.projektarbeitsbeurteilungDownloadBtn {
+	padding: 3px 8px;
 }
 
 /* inline inputfield for editing title */
 .inline-inputfield {
-    width: 90%;
-    display: inline;
+	width: 90%;
+	display: inline;
 }
 
 /* confirmation tick symbol for editing title */
 #confirmTitleEdit {
-    cursor: pointer;
-    font-size: 1.4em;
+	cursor: pointer;
+	font-size: 1.4em;
 }
 
 .noDisplay {
-    display: none;
+	display: none;
 }

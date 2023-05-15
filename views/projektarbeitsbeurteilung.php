@@ -51,7 +51,6 @@
 				<?php
 					$this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/hiddenfields.php', array('paarbeittyp' => $paarbeittyp));
 				?>
-			<form id="beurteilungform" onsubmit="return false;">
 			<div class="row">
 				<div class="col-lg-12">
 					<table class="table-condensed table-bordered table-responsive">
@@ -82,7 +81,7 @@
 								<?php if ($readOnlyAccess): ?>
 									<?php echo $plagiatscheck_unauffaellig ? ucfirst($this->p->t('ui', 'ja')) : ucfirst($this->p->t('ui', 'nein')) ?>
 								<?php else: ?>
-									<input type="checkbox" name="plagiatscheck_unauffaellig" id="plagiatscheck_unauffaellig" value="true"<?php echo $plagiatscheck_unauffaellig === true ? ' checked="checked"' : ''?>>
+									<input type="checkbox" form="beurteilungform" name="plagiatscheck_unauffaellig" id="plagiatscheck_unauffaellig" value="true"<?php echo $plagiatscheck_unauffaellig === true ? ' checked="checked"' : ''?>>
 									&nbsp;<span class="text-warning noDisplay" id="plagiatscheckHinweisNegativ"><?php echo $this->p->t('projektarbeitsbeurteilung', 'plagiatscheckHinweisNegativeBeurteilung') ?></span>
 								<?php endif; ?>
 							</td>
@@ -92,6 +91,7 @@
 				</div>
 			</div>
 			<br />
+			<form id="beurteilungform" onsubmit="return false;">
 			<div class="row">
 				<div class="col-lg-12">
 					<table class="table-condensed table-bordered table-responsive" id="beurteilungtbl">

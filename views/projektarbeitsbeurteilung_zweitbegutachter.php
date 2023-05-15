@@ -48,7 +48,6 @@
 				</div>
 			</div>
 			<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/hiddenfields.php'); ?>
-			<form id="beurteilungform">
 			<div class="row">
 				<div class="col-lg-12">
 					<table class="table-condensed table-bordered table-responsive">
@@ -65,6 +64,7 @@
 				</div>
 			</div>
 			<br />
+			<form id="beurteilungform">
 			<div class="row">
 				<div class="col-lg-12">
 					<table class="table-condensed table-bordered table-responsive" id="beurteilungtbl">

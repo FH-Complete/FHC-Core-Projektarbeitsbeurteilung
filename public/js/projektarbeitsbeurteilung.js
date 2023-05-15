@@ -14,7 +14,8 @@ $("document").ready(function() {
 
 	// enable tooltips
 	$('[data-toggle="tooltip"]').tooltip();
-})
+
+});
 
 var Projektarbeitsbeurteilung = {
 	gesamtpunkte: null, // total points
