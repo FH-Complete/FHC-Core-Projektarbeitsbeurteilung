@@ -53,7 +53,6 @@ class Projektarbeitsbeurteilung extends AbstractProjektarbeitsbeurteilung
 					redirect('extensions/FHC-Core-Projektarbeitsbeurteilung/ProjektarbeitsbeurteilungZweitbegutachter/showProjektarbeitsbeurteilung?'.$getParamsStr);
 				else
 					redirect('extensions/FHC-Core-Projektarbeitsbeurteilung/ProjektarbeitsbeurteilungErstbegutachter/showProjektarbeitsbeurteilung?'.$getParamsStr);
-
 			}
 			else
 			{

@@ -1,8 +1,9 @@
 $("document").ready(function() {
 
+	// set JS events
 	Projektarbeitsbeurteilung.setEvents();
 
-})
+});
 
 var Projektarbeitsbeurteilung = {
 	setEvents: function()
