@@ -20,7 +20,7 @@
 				{
 					echo '<br><b>'.$this->p->t('projektarbeitsbeurteilung', 'kommissionsmitglieder') . ':</b><br>';
 
-					for ($i = 0; $i < count($kommission_betreuer); $i++)
+					for ($i = 0; $i < numberOfElements($kommission_betreuer); $i++)
 					{
 						if ($i != 0) echo ',&nbsp;';
 						echo $kommission_betreuer[$i]->voller_name;
