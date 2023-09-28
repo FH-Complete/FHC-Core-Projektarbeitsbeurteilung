@@ -228,7 +228,7 @@ var Projektarbeitsbeurteilung = {
 						points = 0;
 						finished = false;
 					}
-					else if(points === '0') // if only one category has 0 points => final grade is negative
+					else if(parseFloat(points) == 0) // if only one category has 0 points => final grade is negative
 					{
 						ctgNegative = true;
 					}
