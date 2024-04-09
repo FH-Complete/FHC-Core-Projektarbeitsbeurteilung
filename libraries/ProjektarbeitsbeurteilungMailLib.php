@@ -68,7 +68,7 @@ class ProjektarbeitsbeurteilungMailLib
 	/**
 	 * Sends sancho infomail to Studiengang after Erstbegutachter finished assessment.
 	 * @param $projektarbeit_id int
-	 * @param $zweitbetreuer_person_id int
+	 * @param $betreuer_person_id int
 	 * @return object success or error
 	 */
 	public function sendInfoMailToStudiengang($projektarbeit_id, $betreuer_person_id)
@@ -144,6 +144,98 @@ class ProjektarbeitsbeurteilungMailLib
 		);
 
 		return success($studiengang_email);
+	}
+
+	/**
+	 * Sends sancho infomail to student after Erstbegutachter finished assessment.
+	 * @param $projektarbeit_id int
+	 * @param $betreuer_person_id int
+	 * @return object success or error
+	 */
+	public function sendInfoMailToStudent($projektarbeit_id, $betreuer_person_id)
+	{
+		$this->_ci->load->model('crm/Student_model', 'StudentModel');
+		$this->_ci->load->model('education/Projektarbeit_model', 'ProjektarbeitModel');
+		$this->_ci->load->model('person/Person_model', 'PersonModel');
+
+		// get Projektarbeit data
+		$this->_ci->ProjektarbeitModel->addSelect('student_uid, titel');
+		$projektarbeitRes = $this->_ci->ProjektarbeitModel->load($projektarbeit_id);
+
+		if (!hasData($projektarbeitRes))
+			return error("no Projektarbeit found");
+
+		$projektarbeit = getData($projektarbeitRes)[0];
+
+		$student_uid = $projektarbeit->student_uid;
+		$titel = $projektarbeit->titel;
+
+		// get student mail
+		$student_mail = $this->_ci->StudentModel->getEmailFH($student_uid);
+
+		// get student data
+		$this->_ci->PersonModel->addLimit('1');
+		$this->_ci->PersonModel->addSelect('titelpre, vorname, nachname, titelpost');
+		$this->_ci->PersonModel->addJoin('public.tbl_benutzer', 'person_id');
+		$studentRes = $this->_ci->PersonModel->loadWhere(array('uid' => $student_uid));
+
+		if (!hasData($studentRes))
+			return error("no student found");
+
+		$student = getData($studentRes)[0];
+
+		// get Projektbetreuer data
+		$this->_ci->PersonModel->addSelect('titelpre, vorname, nachname, titelpost');
+		$projektbetreuerRes = $this->_ci->PersonModel->load($betreuer_person_id);
+
+		if (!hasData($projektbetreuerRes))
+			return error("no Projektbetreuer found");
+
+		$projektbetreuer = getData($projektbetreuerRes)[0];
+
+		// get Betreuer and Student names
+		$betreuer_fullname = implode(
+			' ',
+			array_filter(
+				array(
+					$projektbetreuer->titelpre,
+					$projektbetreuer->vorname,
+					$projektbetreuer->nachname,
+					$projektbetreuer->titelpost
+				)
+			)
+		);
+
+		$student_fullname = implode(
+			' ',
+			array_filter(
+				array(
+					$student->titelpre,
+					$student->vorname,
+					$student->nachname,
+					$student->titelpost
+				)
+			)
+		);
+
+		$mailcontent_data_arr = array(
+			'betreuer_voller_name' => $betreuer_fullname,
+			'student_voller_name' => $student_fullname,
+			'titel' => $titel,
+			'link' => CIS_ROOT."cis/private/lehre/abgabe_student_frameset.php"
+		);
+
+		// send mail with retrieved data
+		sendSanchoMail(
+			'ParbeitsbeurteilungInfoAnStudent',
+			$mailcontent_data_arr,
+			$student_mail,
+			'Projektarbeitsbeurteilung abgeschlossen',
+			'sancho_header_min_bw.jpg',
+			'sancho_footer_min_bw.jpg'
+		);
+
+		return success($student_mail);
 	}
 
 	/**
