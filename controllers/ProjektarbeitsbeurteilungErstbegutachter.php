@@ -342,7 +342,7 @@ class ProjektarbeitsbeurteilungErstbegutachter extends AbstractProjektarbeitsbeu
 						{
 							if ($isPrimaryBetreuer) // if primary Begutachter, set Note and send Studiengangmail
 							{
-								 // set Note and send Studiengangmail
+								 // set Note
 								if (isset($betreuernote))
 								{
 									// update note in Projektarbeit tbl (final Note)
@@ -363,12 +363,29 @@ class ProjektarbeitsbeurteilungErstbegutachter extends AbstractProjektarbeitsbeu
 									return;
 								}
 
+								$mailErrors = array();
+
 								// send info mail to Studiengang after Begutachter has finished assessment
-								$mailResult = $this->projektarbeitsbeurteilungmaillib->sendInfoMailToStudiengang($projektarbeit_id, $betreuer_person_id);
+								$mailResult = $this->projektarbeitsbeurteilungmaillib->sendInfoMailToStudiengang(
+									$projektarbeit_id,
+									$betreuer_person_id
+								);
 
 								if (isError($mailResult))
+									$mailErrors[] = getError($mailResult);
+
+								// send info mail to student after Begutachter has finished assessment
+								$mailResult = $this->projektarbeitsbeurteilungmaillib->sendInfoMailToStudent(
+									$projektarbeit_id,
+									$betreuer_person_id
+								);
+
+								if (isError($mailResult))
+									$mailErrors[] = getError($mailResult);
+
+								if (!isEmptyArray($mailErrors))
 								{
-									$this->outputJsonError(getError($finalNoteUpdateResult));
+									$this->outputJsonError(implode(', ', $mailErrors));
 									return;
 								}
 							}
