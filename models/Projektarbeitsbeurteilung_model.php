@@ -27,29 +27,47 @@ class Projektarbeitsbeurteilung_model extends DB_Model
 		$this->load->model('codex/Orgform_model', 'OrgformModel');
 
 		$projektarbeitsbeurteilungdata = array();
-		$params = array($projektarbeit_id, $projektbetreuer_person_id);
+		$params = array();
+		if (isset($betreuerart_kurzbz) && !is_array($betreuerart_kurzbz)) $betreuerart_kurzbz = array($betreuerart_kurzbz);
 
-		$qry = "SELECT tbl_projektarbeitsbeurteilung.bewertung AS projektarbeit_bewertung, parbeit.projekttyp_kurzbz AS parbeit_typ,
-			parbeit.titel AS projektarbeit_titel, parbeit.titel_english AS projektarbeit_titel_english,
-			studentpers.vorname AS vorname_student, studentpers.nachname AS nachname_student,
-			studentpers.titelpre AS titelpre_student, studentpers.titelpost AS titelpost_student,
-			tbl_student.matrikelnr AS personenkennzeichen_student, studentben.uid AS uid_student,
-			betreuer.betreuerart_kurzbz AS betreuerart, betreuer.note AS betreuernote,
-			betreuerpers.vorname AS vorname_betreuer, betreuerpers.nachname AS nachname_betreuer,
-			betreuerpers.titelpre AS titelpre_betreuer, betreuerpers.titelpost AS titelpost_betreuer,
-			tbl_projektarbeitsbeurteilung.abgeschicktamum, tbl_projektarbeitsbeurteilung.abgeschicktvon
-			FROM lehre.tbl_projektarbeit parbeit
-			JOIN public.tbl_benutzer studentben ON parbeit.student_uid = studentben.uid
-			JOIN public.tbl_person studentpers ON studentben.person_id = studentpers.person_id
-			JOIN public.tbl_student ON studentben.uid = tbl_student.student_uid
-			JOIN lehre.tbl_projektbetreuer betreuer ON parbeit.projektarbeit_id = betreuer.projektarbeit_id
-			JOIN public.tbl_person betreuerpers ON betreuer.person_id = betreuerpers.person_id
-			LEFT JOIN extension.tbl_projektarbeitsbeurteilung ON parbeit.projektarbeit_id = tbl_projektarbeitsbeurteilung.projektarbeit_id
-																AND betreuer.person_id = tbl_projektarbeitsbeurteilung.betreuer_person_id
-			WHERE parbeit.projektarbeit_id = ?
-			AND betreuer.person_id = ?
-			AND parbeit.projekttyp_kurzbz IN ('Bachelor', 'Diplom')
-			AND betreuer.betreuerart_kurzbz IN ('Begutachter', 'Erstbegutachter', 'Zweitbegutachter', 'Senatsvorsitz', 'Senatsmitglied')";
+		$qry = "SELECT
+					beurt.bewertung AS projektarbeit_bewertung, parbeit.projekttyp_kurzbz AS parbeit_typ,
+					parbeit.titel AS projektarbeit_titel, parbeit.titel_english AS projektarbeit_titel_english,
+					studentpers.vorname AS vorname_student, studentpers.nachname AS nachname_student,
+					studentpers.titelpre AS titelpre_student, studentpers.titelpost AS titelpost_student,
+					tbl_student.matrikelnr AS personenkennzeichen_student, studentben.uid AS uid_student,
+					betreuer.betreuerart_kurzbz AS betreuerart, betreuer.note AS betreuernote,
+					betreuerpers.vorname AS vorname_betreuer, betreuerpers.nachname AS nachname_betreuer,
+					betreuerpers.titelpre AS titelpre_betreuer, betreuerpers.titelpost AS titelpost_betreuer,
+					beurt.abgeschicktamum, beurt.abgeschicktvon
+				FROM
+					lehre.tbl_projektarbeit parbeit
+					JOIN public.tbl_benutzer studentben ON parbeit.student_uid = studentben.uid
+					JOIN public.tbl_person studentpers ON studentben.person_id = studentpers.person_id
+					JOIN public.tbl_student ON studentben.uid = tbl_student.student_uid
+					JOIN lehre.tbl_projektbetreuer betreuer ON parbeit.projektarbeit_id = betreuer.projektarbeit_id
+					JOIN public.tbl_person betreuerpers ON betreuer.person_id = betreuerpers.person_id
+					LEFT JOIN (
+						SELECT *
+						FROM
+							extension.tbl_projektarbeitsbeurteilung";
+
+		if (isset($betreuerart_kurzbz))
+		{
+			$qry .= " WHERE betreuerart_kurzbz IN ?";
+			$params[] = $betreuerart_kurzbz;
+		}
+
+		$qry .= "
+				) beurt ON parbeit.projektarbeit_id = beurt.projektarbeit_id AND betreuer.person_id = beurt.betreuer_person_id
+				WHERE
+					parbeit.projektarbeit_id = ?
+					AND betreuer.person_id = ?
+					AND parbeit.projekttyp_kurzbz IN ('Bachelor', 'Diplom')
+					AND betreuer.betreuerart_kurzbz IN ('Begutachter', 'Erstbegutachter', 'Zweitbegutachter', 'Senatsvorsitz', 'Senatsmitglied')";
+
+		$params[] = $projektarbeit_id;
+		$params[] = $projektbetreuer_person_id;
 
 		if (isset($student_uid))
 		{
@@ -59,13 +77,11 @@ class Projektarbeitsbeurteilung_model extends DB_Model
 
 		if (isset($betreuerart_kurzbz))
 		{
-			if (!is_array($betreuerart_kurzbz))
-				$betreuerart_kurzbz = array($betreuerart_kurzbz);
 			$qry .= " AND betreuer.betreuerart_kurzbz IN ?";
 			$params[] = $betreuerart_kurzbz;
 		}
 
-		$qry .= "ORDER BY CASE WHEN betreuer.betreuerart_kurzbz = 'Senatsvorsitz' THEN 1 /*Senatsvorsitz has priority*/
+		$qry .= " ORDER BY CASE WHEN betreuer.betreuerart_kurzbz = 'Senatsvorsitz' THEN 1 /*Senatsvorsitz has priority*/
 						WHEN betreuer.betreuerart_kurzbz = 'Begutachter' THEN 2
 						WHEN betreuer.betreuerart_kurzbz = 'Erstbegutachter' THEN 3
 						WHEN betreuer.betreuerart_kurzbz = 'Zweitbegutachter' THEN 4

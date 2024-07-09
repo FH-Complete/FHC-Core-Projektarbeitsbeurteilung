@@ -42,6 +42,8 @@ class ProjektarbeitsbeurteilungZweitbegutachter extends AbstractProjektarbeitsbe
 			$student_uid = isset($authObj->uid) ? $authObj->uid : $this->input->get('uid');
 			$projektarbeit_id = isset($authObj->projektarbeit_id) ? $authObj->projektarbeit_id : $this->input->get('projektarbeit_id');
 
+			$erstBegutachterIsZweitbegutachter = false;
+
 			if (!is_numeric($projektarbeit_id))
 				show_error('invalid Projektarbeitsbeurteilung');
 
@@ -69,6 +71,10 @@ class ProjektarbeitsbeurteilungZweitbegutachter extends AbstractProjektarbeitsbe
 					if (hasData($zweitbetreuerRes))
 					{
 						$zweitbetreuer = getData($zweitbetreuerRes)[0];
+
+						//special case: Betreuer is Zweitbegutachter and Erstbegutachter at same time
+						$erstBegutachterIsZweitbegutachter = $betreuer_person_id == $zweitbetreuer->person_id;
+
 						// set projektbetreuer_id to zweitbegutachter id to display correct zweitbegutachter form
 						$betreuer_person_id = $zweitbetreuer->person_id;
 					}
@@ -93,8 +99,8 @@ class ProjektarbeitsbeurteilungZweitbegutachter extends AbstractProjektarbeitsbe
 
 				$projektarbeitsbeurteilung = getData($projektarbeitsbeurteilungResult);
 
-				// read only access if Projektarbeit is already sent or viewed by Erstbegutachter
-				$readOnlyAccess = isset($projektarbeitsbeurteilung->abgeschicktamum) || $isErstbegutachter;
+				// read only access if Projektarbeit is already sent or viewed by Erstbegutachter (exception: Zweitbegutachter = Erstbegutachter)
+				$readOnlyAccess = isset($projektarbeitsbeurteilung->abgeschicktamum) || ($isErstbegutachter && !$erstBegutachterIsZweitbegutachter);
 
 				$data = array(
 					'projektarbeit_id' => $projektarbeit_id,
@@ -232,6 +238,7 @@ class ProjektarbeitsbeurteilungZweitbegutachter extends AbstractProjektarbeitsbe
 							$this->outputJsonError('Error when sending Mail to Erstbegutachter: '.getError($mailResult));
 						}
 
+						// send info mail to Studiengang
 						$mailResult = $this->projektarbeitsbeurteilungmaillib->sendInfoMailToStudiengang($projektarbeit_id, $betreuer_person_id);
 
 						if (isError($mailResult))
