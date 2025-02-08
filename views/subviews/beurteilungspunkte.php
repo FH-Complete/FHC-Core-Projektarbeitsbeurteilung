@@ -1,33 +1,24 @@
-<?php $punkteArr = array( // punkte => phrasename
-	'0' => 'nichtErfuellt',
-	'2.5' => 'unzureichendErfuellt',
-	'5' => 'mindestanforderungErfuellt',
-	'7.5' => 'inWeitenTeilenErfuellt',
-	'10' => 'vollstaendigErfuellt',
-);
-?>
 <td class="beurteilungpoints text-center" id="<?php echo $name ?>">
 	<?php
 		if ($readOnlyAccess):
-			if (isset($projektarbeit_bewertung->{'bewertung_'.$name}))
+			if (isset($projektarbeit_bewertung->{$name}))
 			{
-				$punktewert = number_format($projektarbeit_bewertung->{'bewertung_'.$name}, 1, '.', '');
-				echo "<span data-points='".$punktewert."'>";
-				echo $language === 'German' ? formatDecimalGerman($punktewert) : $punktewert;
-				echo "</span>";
+				echo "<span data-points='".$projektarbeit_bewertung->{$name}."' class='readOnlyPoints'>";
+				echo $projektarbeit_bewertung->{$name};
+				echo "</span>%";
 			}
 			else
 				echo '';
 		else: ?>
 		<span class="selectTooltip" tabindex="0" data-toggle="tooltip">
-			<select name="<?php echo 'bewertung_'.$name ?>">
-				<option value="null">--&nbsp;<?php echo $this->p->t('projektarbeitsbeurteilung', 'bitteBeurteilen'); ?>&nbsp;--</option>
-				<?php foreach ($punkteArr as $punktewert => $phrasenname):
-					$punktewertDisplay = $language === 'German' ? formatDecimalGerman($punktewert) : $punktewert;
-					$selected = isset($projektarbeit_bewertung->{'bewertung_'.$name}) && $punktewert == $projektarbeit_bewertung->{'bewertung_'.$name} ? " selected" : ""?>
-					<option value="<?php echo $punktewert ?>"<?php echo $selected ?>><?php echo $punktewertDisplay . ' ' . $this->p->t('projektarbeitsbeurteilung', $phrasenname) ?></option>
-				<?php endforeach; ?>
-			</select>
+			<div class="input-group">
+				<input
+					type="text"
+					name="<?php echo $name ?>"
+					class="form-control pointsInput"
+					value="<?php echo $projektarbeit_bewertung->{$name} ?? '' ?>"/>
+				<div class="input-group-addon">%</div>
+			</div>
 		</span>
 	<?php endif; ?>
 </td>

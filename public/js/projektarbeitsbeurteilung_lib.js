@@ -2,7 +2,7 @@ const CALLED_PATH = FHC_JS_DATA_STORAGE_OBJECT.called_path;
 
 // functionality for all types of Projektarbeitsbeurteilung
 var ProjektarbeitsbeurteilungLib = {
-	text: '',
+	//text: '',
 	// ajax calls
 	// -----------------------------------------------------------------------------------------------------------------
 	changeLanguage: function(language, successCallback)
