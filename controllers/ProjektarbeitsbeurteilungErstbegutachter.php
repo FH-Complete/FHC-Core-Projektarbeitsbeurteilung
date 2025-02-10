@@ -17,16 +17,12 @@ class ProjektarbeitsbeurteilungErstbegutachter extends AbstractProjektarbeitsbeu
 
 		// set point fields to be filled out for assessment
 		$this->pointFields = array(
-			//'bewertung_thema' => array('type' => 'points', 'phrase' => 'thema'),
-			'bewertung_problemstellung' => array('type' => 'points', 'phrase' => 'problemstellung'),
-			'bewertung_methode' => array('type' => 'points', 'phrase' => 'methode'),
+			'bewertung_problemstellung' => array('type' => 'points', 'phrase' => 'problemstellungZieldefinition'),
+			'bewertung_methode' => array('type' => 'points', 'phrase' => 'methodikLoesungsansatz'),
 			'bewertung_ereignissediskussion' => array('type' => 'points', 'phrase' => 'ereignisseDiskussion'),
-			//'bewertung_eigenstaendigkeit' => array('type' => 'points', 'phrase' => 'eigenstaendigkeit'),
-			'bewertung_struktur' => array('type' => 'points', 'phrase' => 'struktur'),
-			'bewertung_stil' => array('type' => 'points', 'phrase' => 'stil'),
-			//'bewertung_form' => array('type' => 'points', 'phrase' => 'form'),
-			//'bewertung_literatur' => array('type' => 'points', 'phrase' => 'literatur'),
-			'bewertung_zitierregeln' => array('type' => 'points', 'phrase' => 'zitierregeln')
+			'bewertung_struktur' => array('type' => 'points', 'phrase' => 'strukturAufbau'),
+			'bewertung_stil' => array('type' => 'points', 'phrase' => 'stilAusdruck'),
+			'bewertung_zitierregeln' => array('type' => 'points', 'phrase' => 'zitierregelnQuellenangaben')
 		);
 
 		// set all fields required for assessment
