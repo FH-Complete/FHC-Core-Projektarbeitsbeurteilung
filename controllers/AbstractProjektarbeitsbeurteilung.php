@@ -180,7 +180,7 @@ abstract class AbstractProjektarbeitsbeurteilung extends FHC_Controller
 			if (!isset($bewertung[$requiredField]) || (is_string($bewertung[$requiredField]) && trim($bewertung[$requiredField]) === ''))
 			{
 				// if only save and not send, null values are allowed. Begruedung is only necessary when grade is 5.
-				if ($saveAndSend == false || ($requiredField == 'begruendung' && $betreuernote != 5))
+				if (!$saveAndSend)
 					continue;
 
 				// get field name for error message (phrase)

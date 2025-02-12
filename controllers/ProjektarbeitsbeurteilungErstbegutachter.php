@@ -30,7 +30,7 @@ class ProjektarbeitsbeurteilungErstbegutachter extends AbstractProjektarbeitsbeu
 			$this->pointFields,
 			array(
 				'plagiatscheck_unauffaellig' => array('type' => 'bool', 'phrase' => 'plagiatscheck'),
-				'begruendung' => array('type' => 'text', 'phrase' => 'begruendungText'),
+				'begruendung' => array('type' => 'text', 'phrase' => 'begruendung'),
 				'gesamtpunkte' => array('type' => 'points', 'phrase' => 'gesamtpunkte'),
 				'betreuernote' => array('type' => 'grade', 'phrase' => 'betreuernote')
 			)

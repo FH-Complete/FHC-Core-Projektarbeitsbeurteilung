@@ -203,7 +203,7 @@
 			<div class="row">
 				<div class="col-lg-12">
 					<div class="form-group">
-						<?php echo $this->p->t('projektarbeitsbeurteilung', 'begruendungText') ?>:
+						<?php echo $this->p->t('projektarbeitsbeurteilung', 'begruendungVerpflichtend') ?>:
 						<?php $readonly = $readOnlyAccess ? ' readonly' : '' ?>
 						<textarea class="form-control" rows="5" name="begruendung"<?php echo $readonly ?>><?php echo isset($projektarbeit_bewertung->begruendung) ? $projektarbeit_bewertung->begruendung : '' ?></textarea>
 					</div>
