@@ -21,16 +21,7 @@
 			</tr>
 			<tr>
 				<td colspan="5">
-					<?php echo $this->p->t('projektarbeitsbeurteilung', 'notenschluesselHinweisGewichtungEinzeln', array($arbeittypName));?>
-<!--
-					<?php
-						if ($paarbeittyp == 'm') // weightening only if master
-							echo $this->p->t('projektarbeitsbeurteilung', 'notenschluesselHinweisGewichtung', array($arbeittypName)).'<br />';
-					?>
-					<?php echo $this->p->t('projektarbeitsbeurteilung', 'notenschluesselHinweis', array($arbeittypName));?>
-					<br />
-					<?php echo $this->p->t('projektarbeitsbeurteilung', 'notenschluesselHinweisNullPunkteEinKriterium', array($arbeittypName));?>
--->
+					<?php echo $this->p->t('projektarbeitsbeurteilung', 'notenschluesselHinweisGewichtungEinzeln');?>
 				</td>
 			</tr>
 		</table>

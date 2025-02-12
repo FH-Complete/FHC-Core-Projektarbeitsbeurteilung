@@ -106,7 +106,7 @@
 									<?php echo $this->p->t('projektarbeitsbeurteilung', 'maxPunkte') ?>
 								</th>
 								<th>
-									<?php echo $this->p->t('projektarbeitsbeurteilung', 'details') ?>
+									Details
 								</th>
 								<th class="text-center">
 									<b>

@@ -19,7 +19,7 @@ class ProjektarbeitsbeurteilungErstbegutachter extends AbstractProjektarbeitsbeu
 		$this->pointFields = array(
 			'bewertung_problemstellung' => array('type' => 'points', 'phrase' => 'problemstellungZieldefinition'),
 			'bewertung_methode' => array('type' => 'points', 'phrase' => 'methodikLoesungsansatz'),
-			'bewertung_ereignissediskussion' => array('type' => 'points', 'phrase' => 'ereignisseDiskussion'),
+			'bewertung_ergebnissediskussion' => array('type' => 'points', 'phrase' => 'ergebnisseDiskussion'),
 			'bewertung_struktur' => array('type' => 'points', 'phrase' => 'strukturAufbau'),
 			'bewertung_stil' => array('type' => 'points', 'phrase' => 'stilAusdruck'),
 			'bewertung_zitierregeln' => array('type' => 'points', 'phrase' => 'zitierregelnQuellenangaben')

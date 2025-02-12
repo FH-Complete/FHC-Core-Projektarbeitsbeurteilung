@@ -50,7 +50,7 @@ var Projektarbeitsbeurteilung = {
 	compoundCategories: {
 		'bewertung_problemstellung': 1,
 		'bewertung_methode': 2,
-		'bewertung_ereignissediskussion': 3,
+		'bewertung_ergebnissediskussion': 3,
 		'bewertung_struktur': 4,
 		'bewertung_stil': 5,
 		'bewertung_zitierregeln': 6
