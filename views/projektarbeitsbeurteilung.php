@@ -97,13 +97,16 @@
 					<table class="table-condensed table-bordered table-responsive" id="beurteilungtbl">
 						<thead>
 							<tr>
-								<th colspan="2">
+								<th>
 									<b>
 										<?php echo $this->p->t('projektarbeitsbeurteilung', 'kriterien') ?>
 									</b>
 								</th>
 								<th class="text-center">
 									<?php echo $this->p->t('projektarbeitsbeurteilung', 'maxPunkte') ?>
+								</th>
+								<th>
+									<?php echo $this->p->t('projektarbeitsbeurteilung', 'details') ?>
 								</th>
 								<th class="text-center">
 									<b>
@@ -121,11 +124,11 @@
 										&nbsp;<?php echo $counter.'. '.$this->p->t('projektarbeitsbeurteilung', $pointField['phrase']) ?>
 									</b>
 								</td>
-								<td>
-									<?php echo $this->p->t('projektarbeitsbeurteilung', $pointField['phrase'].'Text') ?>
-								</td>
 								<td id ="gewichtung_<?php echo $pointFieldName ?>" class="text-center">
 									&nbsp;
+								</td>
+								<td>
+									<?php echo $this->p->t('projektarbeitsbeurteilung', $pointField['phrase'].'Text') ?>
 								</td>
 								<?php
 									$this->load->view(
@@ -139,7 +142,7 @@
 						</tbody>
 						<tfoot>
 							<tr>
-								<td colspan="2" class="text-right">
+								<td colspan="3" class="text-right">
 									<b>
 										<?php
 											if ($paarbeittyp === 'm')
@@ -152,7 +155,7 @@
 										?>
 									</b>
 								</td>
-								<td class="text-center" colspan="2">
+								<td class="text-center">
 									<b>
 									<span id="gesamtpunkte">
 										<?php echo isset($projektarbeit_bewertung->gesamtpunkte) ? $projektarbeit_bewertung->gesamtpunkte : '' ?></span>/<span id="maxpunkte">100</span>
