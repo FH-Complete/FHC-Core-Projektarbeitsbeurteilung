@@ -106,7 +106,7 @@
 									<?php echo $this->p->t('projektarbeitsbeurteilung', 'maxPunkte') ?>
 								</th>
 								<th>
-									Details
+									<?php echo $this->p->t('projektarbeitsbeurteilung', 'details') ?>
 								</th>
 								<th class="text-center">
 									<b>
@@ -144,15 +144,7 @@
 							<tr>
 								<td colspan="3" class="text-right">
 									<b>
-										<?php
-											if ($paarbeittyp === 'm')
-											{
-												echo ucfirst($this->p->t('projektarbeitsbeurteilung', 'gewichtet')).'&nbsp;';
-												echo $this->p->t('projektarbeitsbeurteilung', 'gesamtpunkte');
-											}
-											else
-												echo ucfirst($this->p->t('projektarbeitsbeurteilung', 'gesamtpunkte'));
-										?>
+										<?php echo ucfirst($this->p->t('projektarbeitsbeurteilung', 'gesamtpunkte'));?>
 									</b>
 								</td>
 								<td class="text-center">
@@ -203,7 +195,7 @@
 			<div class="row">
 				<div class="col-lg-12">
 					<div class="form-group">
-						<?php echo $this->p->t('projektarbeitsbeurteilung', 'begruendungVerpflichtend') ?>:
+						<?php echo $this->p->t('projektarbeitsbeurteilung', 'gesamtkommentarVerpflichtend') ?>:
 						<?php $readonly = $readOnlyAccess ? ' readonly' : '' ?>
 						<textarea class="form-control" rows="5" name="begruendung"<?php echo $readonly ?>><?php echo isset($projektarbeit_bewertung->begruendung) ? $projektarbeit_bewertung->begruendung : '' ?></textarea>
 					</div>
