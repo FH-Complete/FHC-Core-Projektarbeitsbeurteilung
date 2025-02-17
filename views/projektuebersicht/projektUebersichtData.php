@@ -190,6 +190,7 @@ $filterWidgetArray = array(
 		}
 
 		/* Document download */
+		$downloadLinkBase = APP_ROOT.'/addons/fhtw/content/projektbeurteilung/projektbeurteilungDocumentExport.php?xml=projektarbeitsbeurteilung.xml.php';
 		$download = '';
 		if ($datasetRaw->{'Note'} !== null)
 		{
@@ -203,7 +204,7 @@ $filterWidgetArray = array(
 					'<a href="%s&xsl=%s&betreuerart_kurzbz=%s&projektarbeit_id=%s&person_id=%s"><i class="fa fa-file-pdf-o"></i> '
 					. 'Beurteilung'.
 					'</a>',
-					APP_ROOT.'/content/pdfExport.php?xml=projektarbeitsbeurteilung.xml.php',
+					$downloadLinkBase,
 					$xsl,
 					$datasetRaw->{'ErstBetreuerart'},
 					$datasetRaw->{'ProjectWorkID'},
@@ -229,7 +230,7 @@ $filterWidgetArray = array(
 					'<a href="%s&xsl=%s&betreuerart_kurzbz=%s&projektarbeit_id=%s&person_id=%s"><i class="fa fa-file-pdf-o"></i> '
 					. 'Gutachten' .
 					'</a>',
-					APP_ROOT.'/content/pdfExport.php?xml=projektarbeitsbeurteilung.xml.php',
+					$downloadLinkBase,
 					'ProjektBeurteilungMAZweit',
 					'Zweitbegutachter',
 					$datasetRaw->{'ProjectWorkID'},
@@ -270,7 +271,7 @@ $filterWidgetArray = array(
 					'<a href="%s&xsl=%s&betreuerart_kurzbz=%s&projektarbeit_id=%s&person_id=%s"><i class="fa fa-file-pdf-o"></i> '
 					. 'Gutachten' .
 					'</a>',
-					APP_ROOT.'/content/pdfExport.php?xml=projektarbeitsbeurteilung.xml.php',
+					$downloadLinkBase,
 					'ProjektBeurteilungMAZweit',
 					'Zweitbegutachter',
 					$datasetRaw->{'ProjectWorkID'},
