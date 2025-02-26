@@ -190,22 +190,18 @@ $filterWidgetArray = array(
 		}
 
 		/* Document download */
-		$downloadLinkBase = APP_ROOT.'/addons/fhtw/content/projektbeurteilung/projektbeurteilungDocumentExport.php?xml=projektarbeitsbeurteilung.xml.php';
+		$downloadLinkBase = APP_ROOT.'addons/fhtw/content/projektbeurteilung/projektbeurteilungDocumentExport.php';
 		$download = '';
 		if ($datasetRaw->{'Note'} !== null)
 		{
 			if ($datasetRaw->{'ErstAbgeschickt'} !== null)
 			{
-				// different Dokumentvorlage depending on type
-				$xsl = $datasetRaw->{'Typ'} === 'B' ? 'ProjektBeurteilungBA' : 'ProjektBeurteilungMAErst';
-
 				/* Bewertung document Download */
 				$download = sprintf(
-					'<a href="%s&xsl=%s&betreuerart_kurzbz=%s&projektarbeit_id=%s&person_id=%s"><i class="fa fa-file-pdf-o"></i> '
+					'<a href="%s?betreuerart_kurzbz=%s&projektarbeit_id=%s&person_id=%s"><i class="fa fa-file-pdf-o"></i> '
 					. 'Beurteilung'.
 					'</a>',
 					$downloadLinkBase,
-					$xsl,
 					$datasetRaw->{'ErstBetreuerart'},
 					$datasetRaw->{'ProjectWorkID'},
 					$datasetRaw->{'ErstPersonID'}
@@ -227,11 +223,10 @@ $filterWidgetArray = array(
 			if ($datasetRaw->{'ZweitAbgeschickt'} !== null)
 			{
 				$download .= sprintf(
-					'<a href="%s&xsl=%s&betreuerart_kurzbz=%s&projektarbeit_id=%s&person_id=%s"><i class="fa fa-file-pdf-o"></i> '
+					'<a href="%s?betreuerart_kurzbz=%s&projektarbeit_id=%s&person_id=%s"><i class="fa fa-file-pdf-o"></i> '
 					. 'Gutachten' .
 					'</a>',
 					$downloadLinkBase,
-					'ProjektBeurteilungMAZweit',
 					'Zweitbegutachter',
 					$datasetRaw->{'ProjectWorkID'},
 					$datasetRaw->{'ZweitPersonID'}
@@ -268,11 +263,10 @@ $filterWidgetArray = array(
 			if ($datasetRaw->{'ZweitAbgeschickt'} !== null)
 			{
 				$download .= sprintf(
-					'<a href="%s&xsl=%s&betreuerart_kurzbz=%s&projektarbeit_id=%s&person_id=%s"><i class="fa fa-file-pdf-o"></i> '
+					'<a href="%s?betreuerart_kurzbz=%s&projektarbeit_id=%s&person_id=%s"><i class="fa fa-file-pdf-o"></i> '
 					. 'Gutachten' .
 					'</a>',
 					$downloadLinkBase,
-					'ProjektBeurteilungMAZweit',
 					'Zweitbegutachter',
 					$datasetRaw->{'ProjectWorkID'},
 					$datasetRaw->{'ZweitPersonID'}

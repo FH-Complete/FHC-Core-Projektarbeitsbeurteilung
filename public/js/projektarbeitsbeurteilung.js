@@ -253,10 +253,13 @@ var Projektarbeitsbeurteilung = {
 						ctgNegative = true;
 					}
 
+					// check if valid points value
 					if (el)
 					{
 						Projektarbeitsbeurteilung._checkPoints(points, el.parent());
 					}
+
+					// correctly format points
 					points = Projektarbeitsbeurteilung._formatDecimal(points);
 
 					// weight each score
@@ -301,8 +304,8 @@ var Projektarbeitsbeurteilung = {
 			// show sum of points with correct language format
 			var language = $("#lang").val();
 
-			$("#gesamtpunkte").text(Projektarbeitsbeurteilung._formatDecimal(sumPoints.toString(), language));
-			$("#maxpunkte").text(Projektarbeitsbeurteilung._formatDecimal(sumMaxPoints.toString(), language));
+			$("#gesamtpunkte").text(Projektarbeitsbeurteilung._formatDecimal(sumPoints.toString(), language, 2));
+			$("#maxpunkte").text(Projektarbeitsbeurteilung._formatDecimal(sumMaxPoints.toString(), language, 2));
 
 			// if points filled out, calculate and display note
 			if (finished)
@@ -647,9 +650,9 @@ var Projektarbeitsbeurteilung = {
 	// helper functions
 	// -----------------------------------------------------------------------------------------------------------------
 	/**
-	 * Formats a numeric value as a float with two decimals, depending on language
+	 * Formats a numeric value as a float, depending on language
 	 */
-	_formatDecimal: function(sum, language = '')
+	_formatDecimal: function(sum, language = '', decimals = null)
 	{
 		var defaultReplacement = '.';
 		var replacementMapping =
@@ -662,10 +665,16 @@ var Projektarbeitsbeurteilung = {
 		// do not format if empty or not a string
 		if (typeof sum != 'string' || sum == '') return sum;
 
-		// replace "foreign" decimal points, get the number to 2 decimals, remove trailing zeros (second parseFloat), and convert to string again
-		var dec = parseFloat(parseFloat(sum.replace(toReplace, defaultReplacement).replace(replacement, defaultReplacement)).toFixed(2)).toString();
+		// replace "foreign" decimal points
+		var dec = sum.replace(toReplace, defaultReplacement).replace(replacement, defaultReplacement);
 
-		//
+		// get the number to required decimals (if given)
+		if (Number.isInteger(decimals)) dec = parseFloat(dec).toFixed(decimals);
+
+		// remove trailing zeros (second parseFloat), and convert to string again
+		dec = parseFloat(dec).toString();
+
+		// split by decimal point, replace the point with language-specific point
 		var decSplitted = dec.split('.');
 
 		if (decSplitted.length == 2)

@@ -201,9 +201,13 @@ abstract class AbstractProjektarbeitsbeurteilung extends FHC_Controller
 				case 'bool':
 					$valid = is_bool($bewertung[$requiredField]);
 					break;
+				case 'number':
+					$valid = is_numeric($bewertung[$requiredField]);
+					break;
 				case 'points':
 					$valid =
 						is_numeric($bewertung[$requiredField])
+						&& preg_match('/^[0-9]+[.]?[0-9]{0,2}$/', $bewertung[$requiredField]) === 1
 						&& self::CATEGORY_MIN_POINTS <= $bewertung[$requiredField]
 						&& self::CATEGORY_MAX_POINTS >= $bewertung[$requiredField];
 					break;
@@ -214,7 +218,7 @@ abstract class AbstractProjektarbeitsbeurteilung extends FHC_Controller
 
 			// return error if invalid
 			if (!$valid)
-				return error("$requiredField " . $this->p->t('ui', 'ungueltig'));
+				return error(ucfirst(str_replace('bewertung_', '', $requiredField)) . " " . $this->p->t('ui', 'ungueltig'));
 		}
 
 		return success('Bewertung check passed');
