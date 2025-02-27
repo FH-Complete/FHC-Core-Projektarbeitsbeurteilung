@@ -44,13 +44,16 @@
 		</b>
 	</td>
 	<td colspan="3">
-		<a
-			href="ProjektarbeitsbeurteilungErstbegutachter/downloadProjektarbeit?projektarbeit_id=<?php echo $projektarbeit_id ?>"
-			alt="<?php echo $this->p->t('projektarbeitsbeurteilung', 'parbeitDownload') ?>"
-			title="<?php echo $this->p->t('projektarbeitsbeurteilung', 'parbeitDownload') ?>"
-			target="_blank"
-		>
-			<i class="fa fa-file-pdf-o"></i>
-		</a>
+		<form id="parbeitDownload" method="post" action="ProjektarbeitsbeurteilungErstbegutachter/downloadProjektarbeit" target="_blank">
+			<input type="hidden" name="authtoken" value="<?php echo isset($authtoken) ? $authtoken : '' ?>">
+			<input type="hidden" name="projektarbeit_id" value="<?php echo isset($projektarbeit_id) ? $projektarbeit_id : '' ?>">
+			<button type="submit" class="btn btn-default projektarbeitsbeurteilungDownloadBtn">
+				<i
+					class="fa fa-file-pdf-o"
+					alt="<?php echo $this->p->t('projektarbeitsbeurteilung', 'parbeitDownload') ?>"
+					title="<?php echo $this->p->t('projektarbeitsbeurteilung', 'parbeitDownload') ?>"
+				></i>
+			</button>
+		</form>
 	</td>
 </tr>

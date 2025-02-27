@@ -103,7 +103,8 @@ class ProjektarbeitsbeurteilungZweitbegutachter extends AbstractProjektarbeitsbe
 					'authtoken' => isset($authObj->authtoken) ? $authObj->authtoken : null,
 					'projektarbeitsbeurteilung' => $projektarbeitsbeurteilung,
 					'language' => $language,
-					'readOnlyAccess' => $readOnlyAccess
+					'readOnlyAccess' => $readOnlyAccess,
+					'logoPath' => $this->logoPath
 				);
 
 				// load the view
@@ -181,6 +182,9 @@ class ProjektarbeitsbeurteilungZweitbegutachter extends AbstractProjektarbeitsbe
 					$this->outputJsonError(getError($checkRes));
 					return;
 				}
+
+				// set version
+				$bewertung['version'] = self::PROJEKTARBEITSBEURTEILUNG_VERSION; // set version
 
 				// set send date
 				$bewertung['beurteilungsdatum'] = $abgeschicktamum;

@@ -8,8 +8,6 @@ require_once('AbstractProjektarbeitsbeurteilung.php');
  */
 class ProjektarbeitsbeurteilungErstbegutachter extends AbstractProjektarbeitsbeurteilung
 {
-	const CATEGORY_MAX_POINTS = 10;
-
 	/**
 	 * Constructor
 	 */
@@ -17,25 +15,26 @@ class ProjektarbeitsbeurteilungErstbegutachter extends AbstractProjektarbeitsbeu
 	{
 		parent::__construct();
 
-		// Load models
-		$this->load->model('education/Paabgabe_model', 'PaabgabeModel');
+		// set point fields to be filled out for assessment
+		$this->pointFields = array(
+			'bewertung_problemstellung' => array('type' => 'points', 'phrase' => 'problemstellungZieldefinition'),
+			'bewertung_methode' => array('type' => 'points', 'phrase' => 'methodikLoesungsansatz'),
+			'bewertung_ergebnissediskussion' => array('type' => 'points', 'phrase' => 'ergebnisseDiskussion'),
+			'bewertung_struktur' => array('type' => 'points', 'phrase' => 'strukturAufbau'),
+			'bewertung_stil' => array('type' => 'points', 'phrase' => 'stilAusdruck'),
+			'bewertung_zitierregeln' => array('type' => 'points', 'phrase' => 'zitierregelnQuellenangaben')
+		);
 
-		// set fields required for assessment
-		$this->requiredFields = array(
-			'plagiatscheck_unauffaellig' => array('type' => 'bool', 'phrase' => 'plagiatscheck'),
-			'bewertung_thema' => array('type' => 'points', 'phrase' => 'thema'),
-			'bewertung_loesungsansatz' => array('type' => 'points', 'phrase' => 'loesungsansatz'),
-			'bewertung_methode' => array('type' => 'points', 'phrase' => 'methode'),
-			'bewertung_ereignissediskussion' => array('type' => 'points', 'phrase' => 'ereignisseDiskussion'),
-			'bewertung_eigenstaendigkeit' => array('type' => 'points', 'phrase' => 'eigenstaendigkeit'),
-			'bewertung_struktur' => array('type' => 'points', 'phrase' => 'struktur'),
-			'bewertung_stil' => array('type' => 'points', 'phrase' => 'stil'),
-			'bewertung_form' => array('type' => 'points', 'phrase' => 'form'),
-			'bewertung_literatur' => array('type' => 'points', 'phrase' => 'literatur'),
-			'bewertung_zitierregeln' => array('type' => 'points', 'phrase' => 'zitierregeln'),
-			'begruendung' => array('type' => 'text', 'phrase' => 'begruendungText'),
-			'betreuernote' => array('type' => 'grade', 'phrase' => 'betreuernote')
-		);;
+		// set all fields required for assessment
+		$this->requiredFields = array_merge(
+			$this->pointFields,
+			array(
+				'plagiatscheck_unauffaellig' => array('type' => 'bool', 'phrase' => 'plagiatscheck'),
+				'begruendung' => array('type' => 'text', 'phrase' => 'gesamtkommentar'),
+				'gesamtpunkte' => array('type' => 'number', 'phrase' => 'gesamtpunkte'),
+				'betreuernote' => array('type' => 'grade', 'phrase' => 'betreuernote')
+			)
+		);
 	}
 
 	// -----------------------------------------------------------------------------------------------------------------
@@ -176,11 +175,6 @@ class ProjektarbeitsbeurteilungErstbegutachter extends AbstractProjektarbeitsbeu
 				$readOnlyAccess = isset($projektarbeitsbeurteilung->abgeschicktamum)
 									|| $projektarbeitsbeurteilung->betreuerart === self::BETREUERART_SENATSMITGLIED;
 
-				// calculate the points reached and max points for displaying
-				$bewertung_punkte = $this->_calculateBewertungPunkte($projektarbeitsbeurteilung->projektarbeit_bewertung);
-				$projektarbeitsbeurteilung->bewertung_gesamtpunkte = $bewertung_punkte->gesamtpunkte;
-				$projektarbeitsbeurteilung->bewertung_maxpunkte = $bewertung_punkte->maxpunkte;
-
 				$data = array(
 					'projektarbeit_id' => $projektarbeit_id,
 					'betreuer_person_id' => $betreuer_person_id, // Betreuer viewing/grading the Projektarbeit
@@ -193,7 +187,9 @@ class ProjektarbeitsbeurteilungErstbegutachter extends AbstractProjektarbeitsbeu
 					'kommission_vorsitz' => $kommissionVorsitz, // if kommissionell, Kommissionsvorsitz
 					'kommission_betreuer' => $kommissionPruefer, // optional additional Kommissionspruefer
 					'isKommission' => $isKommission,
-					'readOnlyAccess' => $readOnlyAccess
+					'readOnlyAccess' => $readOnlyAccess,
+					'logoPath' => $this->logoPath,
+					'pointFields' => $this->pointFields
 				);
 
 				// load the view
@@ -279,7 +275,8 @@ class ProjektarbeitsbeurteilungErstbegutachter extends AbstractProjektarbeitsbeu
 				// get betreuernote to save
 				$betreuernote = isset($bewertung['betreuernote']) ? $bewertung['betreuernote'] : null;
 				unset($bewertung['betreuernote']); // Grade is saved in Projektbeurteiler tbl, not Projektarbeitsbeurteilung
-				$bewertung['beurteilungsdatum'] = $abgeschicktamum;
+				$bewertung['version'] = self::PROJEKTARBEITSBEURTEILUNG_VERSION; // set version
+				$bewertung['beurteilungsdatum'] = $abgeschicktamum; // set send date
 
 				// encode bewertung into json format
 				$bewertungJson = json_encode($bewertung);
@@ -350,7 +347,7 @@ class ProjektarbeitsbeurteilungErstbegutachter extends AbstractProjektarbeitsbeu
 						{
 							if ($isPrimaryBetreuer) // if primary Begutachter, set Note and send Studiengangmail
 							{
-								 // set Note and send Studiengangmail
+								 // set Note
 								if (isset($betreuernote))
 								{
 									// update note in Projektarbeit tbl (final Note)
@@ -371,12 +368,29 @@ class ProjektarbeitsbeurteilungErstbegutachter extends AbstractProjektarbeitsbeu
 									return;
 								}
 
+								$mailErrors = array();
+
 								// send info mail to Studiengang after Begutachter has finished assessment
-								$mailResult = $this->projektarbeitsbeurteilungmaillib->sendInfoMailToStudiengang($projektarbeit_id, $betreuer_person_id);
+								$mailResult = $this->projektarbeitsbeurteilungmaillib->sendInfoMailToStudiengang(
+									$projektarbeit_id,
+									$betreuer_person_id
+								);
 
 								if (isError($mailResult))
+									$mailErrors[] = getError($mailResult);
+
+								// send info mail to student after Begutachter has finished assessment
+								$mailResult = $this->projektarbeitsbeurteilungmaillib->sendInfoMailToStudent(
+									$projektarbeit_id,
+									$betreuer_person_id
+								);
+
+								if (isError($mailResult))
+									$mailErrors[] = getError($mailResult);
+
+								if (!isEmptyArray($mailErrors))
 								{
-									$this->outputJsonError(getError($finalNoteUpdateResult));
+									$this->outputJsonError(implode(', ', $mailErrors));
 									return;
 								}
 							}
@@ -431,48 +445,6 @@ class ProjektarbeitsbeurteilungErstbegutachter extends AbstractProjektarbeitsbeu
 	}
 
 	/**
-	 * Download Projektarbeit document.
-	 */
-	public function downloadProjektarbeit()
-	{
-		$authObj = $this->authenticate();
-
-		// if successfully authenticated
-		if (isset($authObj->person_id) && isset($authObj->username))
-		{
-			$projektarbeit_id = isset($authObj->projektarbeit_id) ? $authObj->projektarbeit_id : $this->input->get('projektarbeit_id');
-			$endabgabeRes = $this->PaabgabeModel->getEndabgabe($projektarbeit_id);
-
-			if (isError($endabgabeRes))
-				show_error(getError($endabgabeRes));
-
-			if (hasData($endabgabeRes))
-			{
-				$endabgabe = getData($endabgabeRes)[0];
-				$filepath = PAABGABE_PATH.$endabgabe->filename;
-
-				if (file_exists($filepath))
-				{
-					$this->output
-						->set_status_header(200)
-						->set_content_type('application/pdf', 'utf-8')
-						->set_header('Content-Disposition: attachment; filename="'.$endabgabe->filename.'"')
-						->set_output(file_get_contents($filepath))
-						->_display();
-				}
-				else
-				{
-					show_error("File does not exist.");
-				}
-			}
-		}
-		else
-		{
-			show_error("Invalid authentication.");
-		}
-	}
-
-	/**
 	 * Send info mail to commitee members when Erstbetreuer requests their consultation.
 	 */
 	public function sendInfoMailToKommission()
@@ -490,34 +462,5 @@ class ProjektarbeitsbeurteilungErstbegutachter extends AbstractProjektarbeitsbeu
 		$mailRes = $this->projektarbeitsbeurteilungmaillib->sendInfoMailToKommission($projektarbeit_id);
 
 		$this->outputJson($mailRes);
-	}
-
-	// -----------------------------------------------------------------------------------------------------------------
-	// Private methods
-
-	/**
-	 * Calculates scored Bewertungpunkte and maximum reachable points before passing to view.
-	 * @param object $bewertung contains bewertungdata including points
-	 * @return object containing gesamtpunkte (reached) and maxpunkte (max. reachable)
-	 */
-	private function _calculateBewertungPunkte($bewertung)
-	{
-		$punkte = new stdClass();
-		$punkte->gesamtpunkte = 0;
-		$punkte->maxpunkte = 0;
-
-		foreach ($this->requiredFields as $requiredField => $fieldData)
-		{
-			if (isset($fieldData['type']) && $fieldData['type'] == 'points')
-			{
-				if (isset($bewertung->{$requiredField}) && is_numeric($bewertung->{$requiredField}))
-				{
-					$punkte->gesamtpunkte += (float)$bewertung->{$requiredField};
-				}
-				$punkte->maxpunkte += self::CATEGORY_MAX_POINTS;
-			}
-		}
-
-		return $punkte;
 	}
 }
