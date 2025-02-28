@@ -53,7 +53,7 @@
 				?>
 			<div class="row">
 				<div class="col-lg-12">
-					<table class="table-condensed table-bordered table-responsive">
+					<table class="table-condensed table-bordered table-responsive" role="presentation">
 						<tr>
 							<td class="tableWidthThirty">
 								<b>
@@ -81,7 +81,14 @@
 								<?php if ($readOnlyAccess): ?>
 									<?php echo $plagiatscheck_unauffaellig ? ucfirst($this->p->t('ui', 'ja')) : ucfirst($this->p->t('ui', 'nein')) ?>
 								<?php else: ?>
-									<input type="checkbox" form="beurteilungform" name="plagiatscheck_unauffaellig" id="plagiatscheck_unauffaellig" value="true"<?php echo $plagiatscheck_unauffaellig === true ? ' checked="checked"' : ''?>>
+									<input
+										type="checkbox"
+										form="beurteilungform"
+										name="plagiatscheck_unauffaellig"
+										id="plagiatscheck_unauffaellig"
+										value="true"<?php echo $plagiatscheck_unauffaellig === true ? ' checked="checked"' : ''?>
+										aria-label="<?php echo $this->p->t('projektarbeitsbeurteilung', 'plagiatscheck') ?>"
+										>
 									&nbsp;<span class="text-warning noDisplay" id="plagiatscheckHinweisNegativ"><?php echo $this->p->t('projektarbeitsbeurteilung', 'plagiatscheckHinweisNegativeBeurteilung') ?></span>
 								<?php endif; ?>
 							</td>
@@ -195,9 +202,9 @@
 			<div class="row">
 				<div class="col-lg-12">
 					<div class="form-group">
-						<?php echo $this->p->t('projektarbeitsbeurteilung', 'gesamtkommentarVerpflichtend') ?>:
+						<label for="begruendung" class="fontWeightNormal"><?php echo $this->p->t('projektarbeitsbeurteilung', 'gesamtkommentarVerpflichtend') ?></label>:
 						<?php $readonly = $readOnlyAccess ? ' readonly' : '' ?>
-						<textarea class="form-control" rows="5" name="begruendung"<?php echo $readonly ?>><?php echo isset($projektarbeit_bewertung->begruendung) ? $projektarbeit_bewertung->begruendung : '' ?></textarea>
+						<textarea class="form-control" rows="5" name="begruendung" id="begruendung"<?php echo $readonly ?>><?php echo isset($projektarbeit_bewertung->begruendung) ? $projektarbeit_bewertung->begruendung : '' ?></textarea>
 					</div>
 				</div>
 			</div>

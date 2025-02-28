@@ -16,7 +16,8 @@
 					type="text"
 					name="<?php echo $name ?>"
 					class="form-control pointsInput"
-					value="<?php echo $projektarbeit_bewertung->{$name} ?? '' ?>"/>
+					value="<?php echo $projektarbeit_bewertung->{$name} ?? '' ?>"
+					aria-label="<?php echo $this->p->t('projektarbeitsbeurteilung', 'eingabefeld').' '.$name ?>"  />
 				<div class="input-group-addon">%</div>
 			</div>
 		</span>

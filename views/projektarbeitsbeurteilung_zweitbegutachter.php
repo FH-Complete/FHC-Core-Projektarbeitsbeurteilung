@@ -50,7 +50,7 @@
 			<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/hiddenfields.php'); ?>
 			<div class="row">
 				<div class="col-lg-12">
-					<table class="table-condensed table-bordered table-responsive">
+					<table class="table-condensed table-bordered table-responsive" role="presentation">
 						<tr>
 							<td>
 								<b>
@@ -70,7 +70,7 @@
 					<table class="table-condensed table-bordered table-responsive" id="beurteilungtbl">
 						<thead>
 							<tr>
-								<th class="tableWidthHalf">&nbsp;</th>
+								<th class="tableWidthHalf"><?php echo $this->p->t('projektarbeitsbeurteilung', 'kriterien') ?></th>
 								<th class="tableWidthHalf text-center"><?php echo $this->p->t('projektarbeitsbeurteilung', 'kurzeSchriftlicheBeurteilung') ?></th>
 							</tr>
 						</thead>
@@ -104,6 +104,7 @@
 										cols="5"
 										rows="16"
 										name="beurteilung_zweitbegutachter"
+										aria-label="<?php echo $this->p->t('projektarbeitsbeurteilung', 'textEingabefeldBewertung') ?>"
 										id="beurteilung_zweitbegutachter"<?php echo $readonly ?>><?php echo isset($projektarbeit_bewertung->beurteilung_zweitbegutachter) ? $projektarbeit_bewertung->beurteilung_zweitbegutachter : '' ?></textarea>
 								</td>
 							</tr>

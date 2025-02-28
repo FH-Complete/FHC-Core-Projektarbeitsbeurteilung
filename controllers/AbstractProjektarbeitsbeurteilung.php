@@ -176,15 +176,15 @@ abstract class AbstractProjektarbeitsbeurteilung extends FHC_Controller
 
 		foreach ($this->requiredFields as $requiredField => $fieldData)
 		{
+			// get field name for error message (phrase)
+			$fieldName = isset($fieldData['phrase']) ? $this->p->t('projektarbeitsbeurteilung', $fieldData['phrase']) : $requiredField;
+
 			// check if empty/null
 			if (!isset($bewertung[$requiredField]) || (is_string($bewertung[$requiredField]) && trim($bewertung[$requiredField]) === ''))
 			{
 				// if only save and not send, null values are allowed. Begruedung is only necessary when grade is 5.
 				if (!$saveAndSend)
 					continue;
-
-				// get field name for error message (phrase)
-				$fieldName = isset($fieldData['phrase']) ? $this->p->t('projektarbeitsbeurteilung', $fieldData['phrase']) : $requiredField;
 
 				return error(ucfirst($fieldName) . ' ' . $this->p->t('ui', 'fehlt'));
 			}
@@ -217,8 +217,7 @@ abstract class AbstractProjektarbeitsbeurteilung extends FHC_Controller
 			}
 
 			// return error if invalid
-			if (!$valid)
-				return error(ucfirst(str_replace('bewertung_', '', $requiredField)) . " " . $this->p->t('ui', 'ungueltig'));
+			if (!$valid) return error($fieldName . " " . $this->p->t('ui', 'ungueltig'));
 		}
 
 		return success('Bewertung check passed');

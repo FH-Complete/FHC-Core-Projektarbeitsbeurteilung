@@ -23,9 +23,6 @@ $("document").ready(function() {
 });
 
 var Projektarbeitsbeurteilung = {
-	languages: { // languages and corresponding replacement mappings
-		'German': {'.': ','}
-	},
 	gesamtpunkte: null, // total points
 	finalNote: null, // final grade to save
 	negativeNoteValue: 5, // grade value of negative grade
@@ -220,6 +217,15 @@ var Projektarbeitsbeurteilung = {
 	{
 		// display the Gewichtung
 		Projektarbeitsbeurteilung.fillGewichtung();
+
+		// get selected language
+		var language = ProjektarbeitsbeurteilungLib.getSelectedLanguage();
+		console.log(language);
+		console.log(ProjektarbeitsbeurteilungLib.languages[language]['langAttr']);
+
+		// set language attribute
+		$("html").attr("lang", ProjektarbeitsbeurteilungLib.languages[language]['langAttr']);
+
 		var pointsEl = $("#beurteilungtbl td.beurteilungpoints");
 
 		if (pointsEl.length)
@@ -302,8 +308,6 @@ var Projektarbeitsbeurteilung = {
 			)
 
 			// show sum of points with correct language format
-			var language = $("#lang").val();
-
 			$("#gesamtpunkte").text(Projektarbeitsbeurteilung._formatDecimal(sumPoints.toString(), language, 2));
 			$("#maxpunkte").text(Projektarbeitsbeurteilung._formatDecimal(sumMaxPoints.toString(), language, 2));
 
@@ -480,7 +484,7 @@ var Projektarbeitsbeurteilung = {
 	formatBewertungPoints: function()
 	{
 		var readOnly = false;
-		var language = $("#lang").val();
+		var language = ProjektarbeitsbeurteilungLib.getSelectedLanguage();
 		var elements = $("#beurteilungform input.pointsInput");
 
 		if (!elements.length)
@@ -656,8 +660,8 @@ var Projektarbeitsbeurteilung = {
 	{
 		var defaultReplacement = '.';
 		var replacementMapping =
-			typeof Projektarbeitsbeurteilung.languages[language] != "undefined"
-			? Projektarbeitsbeurteilung.languages[language]
+			typeof ProjektarbeitsbeurteilungLib.languages[language] != "undefined"
+			? ProjektarbeitsbeurteilungLib.languages[language]['replacementMapping']
 			: {',': defaultReplacement};
 		var toReplace = Object.keys(replacementMapping)[0];
 		var replacement = replacementMapping[toReplace];
