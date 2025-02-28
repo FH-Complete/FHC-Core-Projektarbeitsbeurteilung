@@ -36,85 +36,92 @@
 				$titel = isset($projektarbeitsbeurteilung->projektarbeit_titel) ? $projektarbeitsbeurteilung->projektarbeit_titel : $projektarbeitsbeurteilung->projektarbeit_titel_english;
 				$projektarbeit_bewertung = $projektarbeitsbeurteilung->projektarbeit_bewertung;
 				?>
-			<br />
-			<br />
-				<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/header.php', array()); ?>
-			<div class="row">
-				<div class="col-lg-12">
-					<h3 class="page-header">
-						<?php echo $this->p->t('projektarbeitsbeurteilung', 'beurteilung') ?>
-						<?php echo $arbeittypName . ($paarbeittyp === 'm' ? '&nbsp-&nbsp' . $this->p->t('projektarbeitsbeurteilung', 'zweitBegutachter') : '') ?>
-					</h3>
+			<header>
+				<br />
+				<br />
+					<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/header.php', array()); ?>
+				<div class="row">
+					<div class="col-lg-12">
+						<h3 class="page-header">
+							<?php echo $this->p->t('projektarbeitsbeurteilung', 'beurteilung') ?>
+							<?php echo $arbeittypName . ($paarbeittyp === 'm' ? '&nbsp-&nbsp' . $this->p->t('projektarbeitsbeurteilung', 'zweitBegutachter') : '') ?>
+						</h3>
+					</div>
 				</div>
-			</div>
-			<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/hiddenfields.php'); ?>
-			<div class="row">
-				<div class="col-lg-12">
-					<table class="table-condensed table-bordered table-responsive">
-						<tr>
-							<td>
-								<b>
-									<?php echo ucfirst($this->p->t('projektarbeitsbeurteilung', 'titelDerArbeit')) . ' ' . $arbeittypName ?>
-								</b>
-							</td>
-							<td colspan="3"><?php echo $titel ?></td>
-						</tr>
-						<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/stammdaten.php'); ?>
-					</table>
-				</div>
-			</div>
-			<br />
-			<form id="beurteilungform">
-			<div class="row">
-				<div class="col-lg-12">
-					<table class="table-condensed table-bordered table-responsive" id="beurteilungtbl">
-						<thead>
-							<tr>
-								<th class="tableWidthHalf">&nbsp;</th>
-								<th class="tableWidthHalf text-center"><?php echo $this->p->t('projektarbeitsbeurteilung', 'kurzeSchriftlicheBeurteilung') ?></th>
-							</tr>
-						</thead>
-						<tbody>
+				<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/hiddenfields.php'); ?>
+				<div class="row">
+					<div class="col-lg-12">
+						<table class="table-condensed table-bordered table-responsive" role="presentation">
 							<tr>
 								<td>
-									<b><?php echo $this->p->t('projektarbeitsbeurteilung', 'thema') ?></b><br />
-									<ul>
-										<li><?php echo $this->p->t('projektarbeitsbeurteilung', 'fragestellungRelevant') ?></li>
-									</ul><br />
-									<b><?php echo $this->p->t('projektarbeitsbeurteilung', 'inhaltMethode') ?></b><br />
-									<ul>
-										<li><?php echo $this->p->t('projektarbeitsbeurteilung', 'aufgabenstellungNachvollziehbar') ?></li>
-										<li><?php echo $this->p->t('projektarbeitsbeurteilung', 'methodischeVorgangsweiseAngemessen') ?></li>
-										<li><?php echo $this->p->t('projektarbeitsbeurteilung', 'mehrwertBerufspraxis') ?></li>
-									</ul><br />
-									<b><?php echo $this->p->t('projektarbeitsbeurteilung', 'eigenstaendigkeitErgebnis') ?></b><br />
-									<ul>
-										<li><?php echo $this->p->t('projektarbeitsbeurteilung', 'arbeitEigenstaendigVerfasst') ?></li>
-									</ul><br />
-									<b><?php echo $this->p->t('projektarbeitsbeurteilung', 'struktur') . ', ' . $this->p->t('projektarbeitsbeurteilung', 'form') ?></b><br />
-									<ul>
-										<li><?php echo $this->p->t('projektarbeitsbeurteilung', 'arbeitGutStrukturiert') ?></li>
-										<li><?php echo $this->p->t('projektarbeitsbeurteilung', 'gliederungInhaltlichVerstaendlich') ?></li>
-									</ul><br />
+									<b>
+										<?php echo ucfirst($this->p->t('projektarbeitsbeurteilung', 'titelDerArbeit')) . ' ' . $arbeittypName ?>
+									</b>
 								</td>
-								<td>
-									<?php $readonly = $readOnlyAccess ? ' readonly' : '' ?>
-									<textarea
-										class="form-control"
-										cols="5"
-										rows="16"
-										name="beurteilung_zweitbegutachter"
-										id="beurteilung_zweitbegutachter"<?php echo $readonly ?>><?php echo isset($projektarbeit_bewertung->beurteilung_zweitbegutachter) ? $projektarbeit_bewertung->beurteilung_zweitbegutachter : '' ?></textarea>
-								</td>
+								<td colspan="3"><?php echo $titel ?></td>
 							</tr>
-						</tbody>
-					</table>
+							<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/stammdaten.php'); ?>
+						</table>
+					</div>
 				</div>
-			</div>
+			</header>
 			<br />
-			</form>
+			<section>
+				<form id="beurteilungform">
+				<div class="row">
+					<div class="col-lg-12">
+						<table class="table-condensed table-bordered table-responsive" id="beurteilungtbl">
+							<thead>
+								<tr>
+									<th class="tableWidthHalf"><?php echo $this->p->t('projektarbeitsbeurteilung', 'kriterien') ?></th>
+									<th class="tableWidthHalf text-center"><?php echo $this->p->t('projektarbeitsbeurteilung', 'kurzeSchriftlicheBeurteilung') ?></th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>
+										<b><?php echo $this->p->t('projektarbeitsbeurteilung', 'thema') ?></b><br />
+										<ul>
+											<li><?php echo $this->p->t('projektarbeitsbeurteilung', 'fragestellungRelevant') ?></li>
+										</ul><br />
+										<b><?php echo $this->p->t('projektarbeitsbeurteilung', 'inhaltMethode') ?></b><br />
+										<ul>
+											<li><?php echo $this->p->t('projektarbeitsbeurteilung', 'aufgabenstellungNachvollziehbar') ?></li>
+											<li><?php echo $this->p->t('projektarbeitsbeurteilung', 'methodischeVorgangsweiseAngemessen') ?></li>
+											<li><?php echo $this->p->t('projektarbeitsbeurteilung', 'mehrwertBerufspraxis') ?></li>
+										</ul><br />
+										<b><?php echo $this->p->t('projektarbeitsbeurteilung', 'eigenstaendigkeitErgebnis') ?></b><br />
+										<ul>
+											<li><?php echo $this->p->t('projektarbeitsbeurteilung', 'arbeitEigenstaendigVerfasst') ?></li>
+										</ul><br />
+										<b><?php echo $this->p->t('projektarbeitsbeurteilung', 'struktur') . ', ' . $this->p->t('projektarbeitsbeurteilung', 'form') ?></b><br />
+										<ul>
+											<li><?php echo $this->p->t('projektarbeitsbeurteilung', 'arbeitGutStrukturiert') ?></li>
+											<li><?php echo $this->p->t('projektarbeitsbeurteilung', 'gliederungInhaltlichVerstaendlich') ?></li>
+										</ul><br />
+									</td>
+									<td>
+										<?php $readonly = $readOnlyAccess ? ' readonly' : '' ?>
+										<textarea
+											class="form-control"
+											cols="5"
+											rows="16"
+											name="beurteilung_zweitbegutachter"
+											aria-label="<?php echo $this->p->t('projektarbeitsbeurteilung', 'textEingabefeldBewertung') ?>"
+											id="beurteilung_zweitbegutachter"<?php echo $readonly ?>><?php echo isset($projektarbeit_bewertung->beurteilung_zweitbegutachter) ? $projektarbeit_bewertung->beurteilung_zweitbegutachter : '' ?></textarea>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<br />
+				</form>
+			</section>
+			<footer>
 				<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/footer.php', array('sent' => $sent)); ?>
-			<br />
+				<br />
+			</footer>
 			<?php endif; ?>
 		</div>
 	</div>

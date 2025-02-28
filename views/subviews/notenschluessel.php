@@ -1,7 +1,7 @@
 <div class="row">
 	<div class="col-lg-12">
 		<?php echo ucfirst($this->p->t('lehre', 'notenschluessel')) ?>:
-		<table class="table-condensed table-bordered table-responsive">
+		<table class="table-condensed table-bordered table-responsive" role="presentation">
 			<tr>
 				<td>
 					<50%&nbsp;<b><?php echo $this->p->t('lehre', 'nichtGenuegend') ?></b>

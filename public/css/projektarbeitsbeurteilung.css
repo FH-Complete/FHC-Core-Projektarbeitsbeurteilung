@@ -57,3 +57,7 @@ table {
 .noDisplay {
 	display: none;
 }
+
+label.fontWeightNormal {
+	font-weight: normal;
+}
