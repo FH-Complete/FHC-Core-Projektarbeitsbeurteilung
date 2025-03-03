@@ -658,6 +658,10 @@ var Projektarbeitsbeurteilung = {
 	 */
 	_formatDecimal: function(sum, language = '', decimals = null)
 	{
+		// do not format if not a numeric string
+		let pattern = /^[0-9]+[.,]?[0-9]*$/;
+		if (typeof sum != 'string' || !pattern.test(sum)) return sum;
+
 		var defaultReplacement = '.';
 		var replacementMapping =
 			typeof ProjektarbeitsbeurteilungLib.languages[language] != "undefined"
@@ -665,9 +669,6 @@ var Projektarbeitsbeurteilung = {
 			: {',': defaultReplacement};
 		var toReplace = Object.keys(replacementMapping)[0];
 		var replacement = replacementMapping[toReplace];
-
-		// do not format if empty or not a string
-		if (typeof sum != 'string' || sum == '') return sum;
 
 		// replace "foreign" decimal points
 		var dec = sum.replace(toReplace, defaultReplacement).replace(replacement, defaultReplacement);
@@ -696,12 +697,12 @@ var Projektarbeitsbeurteilung = {
 		var pattern = /^[0-9]*[.,]?[0-9]{0,2}$/;
 		if (pattern.test(pts) && parseFloat(Projektarbeitsbeurteilung._formatDecimal(pts)) <= 100)
 		{
-			el.removeClass(errorClass);
+			if (el) el.removeClass(errorClass);
 			return true;
 		}
 		else
 		{
-			el.addClass(errorClass);
+			if (el) el.addClass(errorClass);
 			return false;
 		}
 	},
