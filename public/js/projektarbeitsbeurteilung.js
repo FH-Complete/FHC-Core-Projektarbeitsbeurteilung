@@ -220,8 +220,6 @@ var Projektarbeitsbeurteilung = {
 
 		// get selected language
 		var language = ProjektarbeitsbeurteilungLib.getSelectedLanguage();
-		console.log(language);
-		console.log(ProjektarbeitsbeurteilungLib.languages[language]['langAttr']);
 
 		// set language attribute
 		$("html").attr("lang", ProjektarbeitsbeurteilungLib.languages[language]['langAttr']);
