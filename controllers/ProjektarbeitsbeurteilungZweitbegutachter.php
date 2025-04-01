@@ -183,6 +183,9 @@ class ProjektarbeitsbeurteilungZweitbegutachter extends AbstractProjektarbeitsbe
 					return;
 				}
 
+				// set version
+				$bewertung['version'] = self::PROJEKTARBEITSBEURTEILUNG_VERSION; // set version
+
 				// set send date
 				$bewertung['beurteilungsdatum'] = $abgeschicktamum;
 

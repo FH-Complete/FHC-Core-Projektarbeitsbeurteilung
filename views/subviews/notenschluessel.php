@@ -1,7 +1,7 @@
 <div class="row">
 	<div class="col-lg-12">
 		<?php echo ucfirst($this->p->t('lehre', 'notenschluessel')) ?>:
-		<table class="table-condensed table-bordered table-responsive">
+		<table class="table-condensed table-bordered table-responsive" role="presentation">
 			<tr>
 				<td>
 					<50%&nbsp;<b><?php echo $this->p->t('lehre', 'nichtGenuegend') ?></b>
@@ -21,13 +21,7 @@
 			</tr>
 			<tr>
 				<td colspan="5">
-					<?php
-						if ($paarbeittyp == 'm') // weightening only if master
-							echo $this->p->t('projektarbeitsbeurteilung', 'notenschluesselHinweisGewichtung', array($arbeittypName)).'<br />';
-					?>
-					<?php echo $this->p->t('projektarbeitsbeurteilung', 'notenschluesselHinweis', array($arbeittypName));?>
-					<br />
-					<?php echo $this->p->t('projektarbeitsbeurteilung', 'notenschluesselHinweisNullPunkteEinKriterium', array($arbeittypName));?>
+					<?php echo $this->p->t('projektarbeitsbeurteilung', 'notenschluesselHinweisGewichtungEinzeln');?>
 				</td>
 			</tr>
 		</table>

@@ -15,22 +15,25 @@ class ProjektarbeitsbeurteilungErstbegutachter extends AbstractProjektarbeitsbeu
 	{
 		parent::__construct();
 
-		// set fields required for assessment
-		$this->requiredFields = array(
-			'plagiatscheck_unauffaellig' => array('type' => 'bool', 'phrase' => 'plagiatscheck'),
-			'bewertung_thema' => array('type' => 'points', 'phrase' => 'thema'),
-			'bewertung_loesungsansatz' => array('type' => 'points', 'phrase' => 'loesungsansatz'),
-			'bewertung_methode' => array('type' => 'points', 'phrase' => 'methode'),
-			'bewertung_ereignissediskussion' => array('type' => 'points', 'phrase' => 'ereignisseDiskussion'),
-			'bewertung_eigenstaendigkeit' => array('type' => 'points', 'phrase' => 'eigenstaendigkeit'),
-			'bewertung_struktur' => array('type' => 'points', 'phrase' => 'struktur'),
-			'bewertung_stil' => array('type' => 'points', 'phrase' => 'stil'),
-			'bewertung_form' => array('type' => 'points', 'phrase' => 'form'),
-			'bewertung_literatur' => array('type' => 'points', 'phrase' => 'literatur'),
-			'bewertung_zitierregeln' => array('type' => 'points', 'phrase' => 'zitierregeln'),
-			'begruendung' => array('type' => 'text', 'phrase' => 'begruendungText'),
-			'gesamtpunkte' => array('type' => 'points', 'phrase' => 'gesamtpunkte'),
-			'betreuernote' => array('type' => 'grade', 'phrase' => 'betreuernote')
+		// set point fields to be filled out for assessment
+		$this->pointFields = array(
+			'bewertung_problemstellung' => array('type' => 'points', 'phrase' => 'problemstellungZieldefinition'),
+			'bewertung_methode' => array('type' => 'points', 'phrase' => 'methodikLoesungsansatz'),
+			'bewertung_ergebnissediskussion' => array('type' => 'points', 'phrase' => 'ergebnisseDiskussion'),
+			'bewertung_struktur' => array('type' => 'points', 'phrase' => 'strukturAufbau'),
+			'bewertung_stil' => array('type' => 'points', 'phrase' => 'stilAusdruck'),
+			'bewertung_zitierregeln' => array('type' => 'points', 'phrase' => 'zitierregelnQuellenangaben')
+		);
+
+		// set all fields required for assessment
+		$this->requiredFields = array_merge(
+			$this->pointFields,
+			array(
+				'plagiatscheck_unauffaellig' => array('type' => 'bool', 'phrase' => 'plagiatscheck'),
+				'begruendung' => array('type' => 'text', 'phrase' => 'gesamtkommentar'),
+				'gesamtpunkte' => array('type' => 'number', 'phrase' => 'gesamtpunkte'),
+				'betreuernote' => array('type' => 'grade', 'phrase' => 'betreuernote')
+			)
 		);
 	}
 
@@ -185,7 +188,8 @@ class ProjektarbeitsbeurteilungErstbegutachter extends AbstractProjektarbeitsbeu
 					'kommission_betreuer' => $kommissionPruefer, // optional additional Kommissionspruefer
 					'isKommission' => $isKommission,
 					'readOnlyAccess' => $readOnlyAccess,
-					'logoPath' => $this->logoPath
+					'logoPath' => $this->logoPath,
+					'pointFields' => $this->pointFields
 				);
 
 				// load the view
@@ -271,7 +275,8 @@ class ProjektarbeitsbeurteilungErstbegutachter extends AbstractProjektarbeitsbeu
 				// get betreuernote to save
 				$betreuernote = isset($bewertung['betreuernote']) ? $bewertung['betreuernote'] : null;
 				unset($bewertung['betreuernote']); // Grade is saved in Projektbeurteiler tbl, not Projektarbeitsbeurteilung
-				$bewertung['beurteilungsdatum'] = $abgeschicktamum;
+				$bewertung['version'] = self::PROJEKTARBEITSBEURTEILUNG_VERSION; // set version
+				$bewertung['beurteilungsdatum'] = $abgeschicktamum; // set send date
 
 				// encode bewertung into json format
 				$bewertungJson = json_encode($bewertung);

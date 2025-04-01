@@ -14,7 +14,7 @@ $orgform_bezeichnung = '';
 ?>
 <div class="row">
 	<div class="col-lg-6 form-inline">
-		<label><?php echo ucfirst($this->p->t('projektarbeitsbeurteilung', 'sprache')); ?>&nbsp;</label>
+		<label for="lang"><?php echo ucfirst($this->p->t('projektarbeitsbeurteilung', 'sprache')); ?>&nbsp;</label>
 		<select class="form-control" id="lang">
 			<?php
 				foreach($languages as $lang => $langName):
@@ -25,13 +25,13 @@ $orgform_bezeichnung = '';
 		</select>
 	</div>
 	<div class="col-lg-6 text-right">
-		<img src="<?php echo base_url() ?>/<?php echo $logoPath ?>" title="Logo" alt="Logo" id="headerlogo">
+		<img src="<?php echo base_url() ?>/<?php echo $logoPath ?>" alt="<?php echo $this->p->t('projektarbeitsbeurteilung', 'universitaetLogo'); ?>" id="headerlogo">
 	</div>
 </div>
 <br />
 <div class="row">
 	<div class="col-lg-12">
-		<table class="table-condensed table-bordered table-responsive">
+		<table class="table-condensed table-bordered table-responsive" role="presentation">
 			<tr>
 				<td><b><?php echo ucfirst($this->p->t('projektarbeitsbeurteilung', 'studiengang')) ?></b></td>
 				<td><?php echo $studiengang ?></td>

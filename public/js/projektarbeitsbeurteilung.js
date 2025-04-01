@@ -3,11 +3,16 @@ $("document").ready(function() {
 	// temporarily save current form bewertung data
 	Projektarbeitsbeurteilung.storeBewertungFormData();
 
+	// set the compound categories being used for calculation
+	Projektarbeitsbeurteilung.setUsedCompoundCategoriesWeight();
+
 	// refresh plagiatscheck after page load
 	Projektarbeitsbeurteilung.refreshPlagiatscheck();
 
 	// refresh grade and points after page load
 	Projektarbeitsbeurteilung.refreshBewertungPointsAndNote();
+
+	Projektarbeitsbeurteilung.formatBewertungPoints();
 
 	// set JS events
 	Projektarbeitsbeurteilung.setEvents();
@@ -21,8 +26,8 @@ var Projektarbeitsbeurteilung = {
 	gesamtpunkte: null, // total points
 	finalNote: null, // final grade to save
 	negativeNoteValue: 5, // grade value of negative grade
-	categoryMaxPoints: 10, // max reachable points of every category
 	bewertungData: null,
+	categoryMaxPoints: 100, // max reachable points of every category
 	notenphrasen: { // notenwert: phrasenname
 		1: 'sehrGut',
 		2: 'gut',
@@ -37,30 +42,36 @@ var Projektarbeitsbeurteilung = {
 		4: [50, 63],
 		5: [0, 50]
 	},
+	useScaling: false, // when more crtieria in one compound categories: wether to use scaling to ensure consistent max points
 	// each compound category consists of multiple criteria. if points of any compound category are below 50%, assessment is negative
 	compoundCategories: {
-		'thema': 1,
-		'loesungsansatz': 1,
-		'methode': 1,
-		'ereignissediskussion': 1,
-		'eigenstaendigkeit': 1,
-		'struktur': 2,
-		'stil': 2,
-		'form': 2,
-		'literatur': 2,
-		'zitierregeln': 2
+		'bewertung_problemstellung': 1,
+		'bewertung_methode': 2,
+		'bewertung_ergebnissediskussion': 3,
+		'bewertung_struktur': 4,
+		'bewertung_stil': 5,
+		'bewertung_zitierregeln': 6
 	},
 	// points from each compound category can be weighted differently (in percent)
 	compoundCategoriesWeight: {
 		'bachelor': {
-			1: 50,
-			2: 50
+			1: 5,
+			2: 40,
+			3: 40,
+			4: 5,
+			5: 5,
+			6: 5
 		},
 		'master': {
-			1: 70,
-			2: 30
+			1: 5,
+			2: 40,
+			3: 40,
+			4: 5,
+			5: 5,
+			6: 5
 		}
 	},
+	usedCompoundCategoriesWeight: {},
 	setEvents: function()
 	{
 		// set event for language change dropdown
@@ -92,6 +103,7 @@ var Projektarbeitsbeurteilung = {
 				// recalculate grade and points
 				Projektarbeitsbeurteilung.refreshPlagiatscheck();
 				Projektarbeitsbeurteilung.refreshBewertungPointsAndNote();
+				Projektarbeitsbeurteilung.formatBewertungPoints();
 				// remove temporarily saved data
 				localStorage.removeItem("erstbegutachterFormData");
 			}
@@ -114,9 +126,9 @@ var Projektarbeitsbeurteilung = {
 		Projektarbeitsbeurteilung.setTitleEditEvent($("#titleField").text());
 
 		// refresh grade and points after changing Bewertung
-		if ($("#beurteilungtbl select").length)
+		if ($("#beurteilungtbl input.pointsInput").length)
 		{
-			$("#beurteilungtbl select").change(
+			$("#beurteilungtbl input.pointsInput").on('input',
 				function()
 				{
 					Projektarbeitsbeurteilung.storeBewertungFormData();
@@ -168,18 +180,18 @@ var Projektarbeitsbeurteilung = {
 		{
 			var plagiatscheck_unauffaellig = $("#plagiatscheck_unauffaellig");
 
-			// grey out all point dropdowns, no input should be possible
-			if ($("#beurteilungtbl select").length)
+			// grey out all point inputs, no input should be possible
+			if ($("#beurteilungtbl input.pointsInput").length)
 			{
-				var inputDropdowns = $("#beurteilungtbl select");
+				var inputs = $("#beurteilungtbl input.pointsInput");
 				// span for selects for displaying tooltip
 				var tooltipElements = $("#beurteilungtbl .selectTooltip");
 
 				// if plagiatcheck checkbox is ticked
 				if (plagiatscheck_unauffaellig.prop('checked') === true)
 				{
-					// enable input dropdowns and remove tooltip
-					inputDropdowns.prop("disabled", null);
+					// enable input inputs and remove tooltip
+					inputs.prop("disabled", null);
 
 					tooltipElements.attr("data-original-title", "");
 					$("#plagiatscheckHinweisNegativ").hide();
@@ -187,10 +199,10 @@ var Projektarbeitsbeurteilung = {
 					// set the values in html form
 					Projektarbeitsbeurteilung.fillBewertungFormWithData();
 				}
-				else // if not ticked, disable input dropdowns and add tooltip
+				else // if not ticked, disable input inputs and add tooltip
 				{
-					inputDropdowns.prop("disabled", true);
-					inputDropdowns.val(0); // all criteria 0, grade negative if plagiatscheck false
+					inputs.prop("disabled", true);
+					inputs.val("0"); // all criteria 0, grade negative if plagiatscheck false
 
 					// changing of bootstrap tooltip only works with attr function and setting data-original-title
 					var title = FHC_PhrasesLib.t("projektarbeitsbeurteilung", "plagiatscheckNichtGesetzt");
@@ -203,6 +215,17 @@ var Projektarbeitsbeurteilung = {
 	// recalculate points and resulting grade value
 	refreshBewertungPointsAndNote: function()
 	{
+		// display the Gewichtung
+		Projektarbeitsbeurteilung.fillGewichtung();
+
+		// get selected language
+		var language = ProjektarbeitsbeurteilungLib.getSelectedLanguage();
+		console.log(language);
+		console.log(ProjektarbeitsbeurteilungLib.languages[language]['langAttr']);
+
+		// set language attribute
+		$("html").attr("lang", ProjektarbeitsbeurteilungLib.languages[language]['langAttr']);
+
 		var pointsEl = $("#beurteilungtbl td.beurteilungpoints");
 
 		if (pointsEl.length)
@@ -218,14 +241,17 @@ var Projektarbeitsbeurteilung = {
 				function()
 				{
 					// get points from dropdown if form not sent or data attribute if sent
-					var points = $(this).find('select').val() || $(this).find('span').attr("data-points");
+					var el = $(this).find('input.pointsInput');
+					var points = el.val() || $(this).find('span').attr("data-points");
+
+
 					var categoryName = $(this).attr("id");
 					var compoundCategoryNumber = Projektarbeitsbeurteilung.compoundCategories[categoryName];
 
 					// null if score not entered => not finished, do not display grade yet
-					if (points == 'null')
+					if (typeof points == 'undefined')
 					{
-						points = 0;
+						points = "0";
 						finished = false;
 					}
 					else if(parseFloat(points) == 0) // if only one category has 0 points => final grade is negative
@@ -233,15 +259,24 @@ var Projektarbeitsbeurteilung = {
 						ctgNegative = true;
 					}
 
+					// check if valid points value
+					if (el)
+					{
+						Projektarbeitsbeurteilung._checkPoints(points, el.parent());
+					}
+
+					// correctly format points
+					points = Projektarbeitsbeurteilung._formatDecimal(points);
+
 					// weight each score
 					// weight factor, multiplied by number of compound categories to scale up to 100 to have 100 points in total
-					var compoundCategoriesWeights = $("#paarbeittyp").val() === 'm'
-						? Projektarbeitsbeurteilung.compoundCategoriesWeight['master']
-						: Projektarbeitsbeurteilung.compoundCategoriesWeight['bachelor'];
-					var categoryWeight = compoundCategoriesWeights[compoundCategoryNumber] / 100;
+					var categoryWeight = Projektarbeitsbeurteilung.usedCompoundCategoriesWeight[compoundCategoryNumber] / 100;
 					var numCategoriesInCompoundCat = Projektarbeitsbeurteilung._getNumberCategoriesInCompoundCategory(compoundCategoryNumber);
 					// scale up so total points stay the same.
-					var scalingFactor = Object.keys(Projektarbeitsbeurteilung.compoundCategories).length / numCategoriesInCompoundCat;
+					var scalingFactor =
+						this.useScaling
+						? Object.keys(Projektarbeitsbeurteilung.compoundCategories).length / numCategoriesInCompoundCat
+						: 1;
 
 					// get max points for each category
 					var maxPoints = Projektarbeitsbeurteilung.categoryMaxPoints * categoryWeight * scalingFactor;
@@ -273,16 +308,8 @@ var Projektarbeitsbeurteilung = {
 			)
 
 			// show sum of points with correct language format
-			var sumPointsDisplay = sumPoints;
-			var maxPointsDisplay = sumMaxPoints;
-			if ($("#language").val() === 'German')
-			{
-				sumPointsDisplay = Projektarbeitsbeurteilung._formatDecimalGerman(sumPoints);
-				maxPointsDisplay = Projektarbeitsbeurteilung._formatDecimalGerman(sumMaxPoints);
-			}
-
-			$("#gesamtpunkte").text(sumPointsDisplay);
-			$("#maxpunkte").text(maxPointsDisplay);
+			$("#gesamtpunkte").text(Projektarbeitsbeurteilung._formatDecimal(sumPoints.toString(), language, 2));
+			$("#maxpunkte").text(Projektarbeitsbeurteilung._formatDecimal(sumMaxPoints.toString(), language, 2));
 
 			// if points filled out, calculate and display note
 			if (finished)
@@ -366,6 +393,20 @@ var Projektarbeitsbeurteilung = {
 			}
 		);
 	},
+	setUsedCompoundCategoriesWeight: function()
+	{
+		Projektarbeitsbeurteilung.usedCompoundCategoriesWeight = $("#paarbeittyp").val() === 'm'
+			? Projektarbeitsbeurteilung.compoundCategoriesWeight['master']
+			: Projektarbeitsbeurteilung.compoundCategoriesWeight['bachelor'];
+	},
+	fillGewichtung: function()
+	{
+		for (compoundCategoryName in Projektarbeitsbeurteilung.compoundCategories)
+		{
+			var compoundCategoryNumber = Projektarbeitsbeurteilung.compoundCategories[compoundCategoryName];
+			$("#gewichtung_"+compoundCategoryName).text(Projektarbeitsbeurteilung.usedCompoundCategoriesWeight[compoundCategoryNumber]);
+		}
+	},
 	// save final grade in property and print it
 	setFinalNote: function(finalNote) {
 		if (jQuery.isNumeric(finalNote))
@@ -387,7 +428,7 @@ var Projektarbeitsbeurteilung = {
 		Projektarbeitsbeurteilung.refreshBewertungPointsAndNote();
 
 		// get form data into object
-		var bewertung = Projektarbeitsbeurteilung.getBewertungFormData();
+		var bewertung = Projektarbeitsbeurteilung.prepareBewertungPoints(Projektarbeitsbeurteilung.getBewertungFormData());
 
 		// get params needed for save from hidden fields
 		var projektarbeit_id = $("#projektarbeit_id").val();
@@ -400,11 +441,20 @@ var Projektarbeitsbeurteilung = {
 	getBewertungFormData: function()
 	{
 		var bewertungData = {};
+		var inputCategories = $("#beurteilungform input.pointsInput");
 
-		for (var category in Projektarbeitsbeurteilung.compoundCategories)
-		{
-			bewertungData['bewertung_'+category] = $("#beurteilungform select[name=bewertung_"+category+"]").val();
-		}
+		// get the points from form
+		inputCategories.each(function(key, value) {
+			//var obj = $.extend(true, [], value);obj.value;
+			bewertungData[$(value).prop('name')] = value.value;
+		});
+
+		//~ for (var category in Projektarbeitsbeurteilung.compoundCategories)
+		//~ {
+			//~ var points = $("#beurteilungform input.pointsInput[name="+category+"]");
+			//~ bewertungData[category] = $("#beurteilungform input.pointsInput[name="+category+"]").val();
+			//~ bewertungData[category] = points.val().replace(",", ".");
+		//~ }
 
 		bewertungData['begruendung'] = $("#beurteilungform textarea[name=begruendung]").val();
 
@@ -422,6 +472,35 @@ var Projektarbeitsbeurteilung = {
 
 		return bewertungData;
 	},
+	prepareBewertungPoints: function(bewertungData) // prepare Bewertugn points, i.e. put them in the format they need to be saved
+	{
+		for (var compoundCategoryName in Projektarbeitsbeurteilung.compoundCategories)
+		{
+			bewertungData[compoundCategoryName] = Projektarbeitsbeurteilung._formatDecimal(bewertungData[compoundCategoryName]);
+		}
+
+		return bewertungData;
+	},
+	formatBewertungPoints: function()
+	{
+		var readOnly = false;
+		var language = ProjektarbeitsbeurteilungLib.getSelectedLanguage();
+		var elements = $("#beurteilungform input.pointsInput");
+
+		if (!elements.length)
+		{
+			elements = $("#beurteilungform span.readOnlyPoints");
+			readOnly = true;
+		}
+		elements.each(
+			function() {
+				if (readOnly)
+					$(this).text(Projektarbeitsbeurteilung._formatDecimal($(this).text(), language));
+				else
+					$(this).val(Projektarbeitsbeurteilung._formatDecimal($(this).val(), language));
+			}
+		);
+	},
 	storeBewertungFormData: function() // storing current (but maybe not saved) Bewertung data in JS
 	{
 		Projektarbeitsbeurteilung.bewertungData = Projektarbeitsbeurteilung.getBewertungFormData();
@@ -434,7 +513,7 @@ var Projektarbeitsbeurteilung = {
 	fillBewertungFormWithData: function()
 	{
 		// prefill with default null values
-		$("#beurteilungtbl select").val("null");
+		$("#beurteilungtbl input").val("");
 
 		// fill the form with tempoararily saved data
 		if (Projektarbeitsbeurteilung.bewertungData != null)
@@ -445,7 +524,7 @@ var Projektarbeitsbeurteilung = {
 			// set points
 			for (var name in Projektarbeitsbeurteilung.bewertungData)
 			{
-				$("#beurteilungform select[name=" + name + "]").val(Projektarbeitsbeurteilung.bewertungData[name]);
+				$("#beurteilungform input[name=" + name + "]").val(Projektarbeitsbeurteilung.bewertungData[name]);
 			}
 		}
 	},
@@ -495,6 +574,9 @@ var Projektarbeitsbeurteilung = {
 									// set events
 									Projektarbeitsbeurteilung.setEvents();
 
+									// format points display
+									Projektarbeitsbeurteilung.formatBewertungPoints();
+
 									FHC_AjaxClient._hideVeil();
 
 									FHC_DialogLib.alertSuccess(FHC_PhrasesLib.t("projektarbeitsbeurteilung", "beurteilungGespeichertGesendet"));
@@ -502,7 +584,11 @@ var Projektarbeitsbeurteilung = {
 							})
 						}
 						else
+						{
 							FHC_DialogLib.alertSuccess(FHC_PhrasesLib.t("projektarbeitsbeurteilung", "beurteilungGespeichert"));
+							Projektarbeitsbeurteilung.formatBewertungPoints();
+						}
+
 					}
 					else if(FHC_AjaxClient.isError(data))
 					{
@@ -568,28 +654,57 @@ var Projektarbeitsbeurteilung = {
 	// helper functions
 	// -----------------------------------------------------------------------------------------------------------------
 	/**
-	 * Formats a numeric value as a float with coma and two decimals
+	 * Formats a numeric value as a float, depending on language
 	 */
-	_formatDecimalGerman: function(sum)
+	_formatDecimal: function(sum, language = '', decimals = null)
 	{
-		var dec = null;
+		// do not format if not a numeric string
+		let pattern = /^[0-9]+[.,]?[0-9]*$/;
+		if (typeof sum != 'string' || !pattern.test(sum)) return sum;
 
-		if(sum === null)
-			dec = parseFloat(0).toFixed(2).replace(".", ",");
-		else if(sum === '')
+		var defaultReplacement = '.';
+		var replacementMapping =
+			typeof ProjektarbeitsbeurteilungLib.languages[language] != "undefined"
+			? ProjektarbeitsbeurteilungLib.languages[language]['replacementMapping']
+			: {',': defaultReplacement};
+		var toReplace = Object.keys(replacementMapping)[0];
+		var replacement = replacementMapping[toReplace];
+
+		// replace "foreign" decimal points
+		var dec = sum.replace(toReplace, defaultReplacement).replace(replacement, defaultReplacement);
+
+		// get the number to required decimals (if given)
+		if (Number.isInteger(decimals)) dec = parseFloat(dec).toFixed(decimals);
+
+		// remove trailing zeros (second parseFloat), and convert to string again
+		dec = parseFloat(dec).toString();
+
+		// split by decimal point, replace the point with language-specific point
+		var decSplitted = dec.split('.');
+
+		if (decSplitted.length == 2)
 		{
-			dec = ''
+			var dec1 = decSplitted[0];
+			var dec2 = replacement + decSplitted[1];
+			dec = dec1 + dec2;
+		}
+
+		return dec;
+	},
+	_checkPoints: function(pts, el)
+	{
+		var errorClass = 'has-error';
+		var pattern = /^[0-9]*[.,]?[0-9]{0,2}$/;
+		if (pattern.test(pts) && parseFloat(Projektarbeitsbeurteilung._formatDecimal(pts)) <= 100)
+		{
+			if (el) el.removeClass(errorClass);
+			return true;
 		}
 		else
 		{
-			dec = parseFloat(sum).toFixed(1);
-
-			dec = dec.split('.');
-			var dec1 = dec[0];
-			var dec2 = dec[1] === '0' ? '' : ',' + dec[1];
-			dec = dec1 + dec2;
+			if (el) el.addClass(errorClass);
+			return false;
 		}
-		return dec;
 	},
 	_getNumberCategoriesInCompoundCategory: function(compoundCategoryNumber)
 	{

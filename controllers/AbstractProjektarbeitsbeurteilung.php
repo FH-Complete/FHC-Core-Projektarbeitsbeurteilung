@@ -6,6 +6,9 @@ if (! defined('BASEPATH')) exit('No direct script access allowed');
  */
 abstract class AbstractProjektarbeitsbeurteilung extends FHC_Controller
 {
+	// version of Projektarbeitsbeurteilung, normally semester from which the current way of assessment is valid
+	const PROJEKTARBEITSBEURTEILUNG_VERSION = 'SS2025';
+
 	// Projektarbeit types
 	const BETREUERART_BACHELOR_BEGUTACHTER = 'Begutachter';
 	const BETREUERART_ERSTBEGUTACHTER = 'Erstbegutachter';
@@ -13,6 +16,9 @@ abstract class AbstractProjektarbeitsbeurteilung extends FHC_Controller
 	const BETREUERART_SENATSVORSITZ = 'Senatsvorsitz';
 	const BETREUERART_SENATSMITGLIED = 'Senatsmitglied';
 	const EXTERNER_BEURTEILER_NAME = 'externerBeurteiler';
+
+	const CATEGORY_MIN_POINTS = 0;
+	const CATEGORY_MAX_POINTS = 100;
 
 	// fields required to be filled out by Betreuer
 	protected $requiredFields = array();
@@ -147,8 +153,8 @@ abstract class AbstractProjektarbeitsbeurteilung extends FHC_Controller
 		{
 			if ($item === 'null')
 				$data[$idx] = null;
-			elseif (is_numeric($item))
-				$data[$idx] = (float) $item;
+			elseif (is_float($item))
+				$data[$idx] = number_format((float)$item, 2, '.', '');
 			elseif ($item === 'true')
 				$data[$idx] = true;
 			elseif ($item === 'false')
@@ -170,15 +176,15 @@ abstract class AbstractProjektarbeitsbeurteilung extends FHC_Controller
 
 		foreach ($this->requiredFields as $requiredField => $fieldData)
 		{
+			// get field name for error message (phrase)
+			$fieldName = isset($fieldData['phrase']) ? $this->p->t('projektarbeitsbeurteilung', $fieldData['phrase']) : $requiredField;
+
 			// check if empty/null
 			if (!isset($bewertung[$requiredField]) || (is_string($bewertung[$requiredField]) && trim($bewertung[$requiredField]) === ''))
 			{
 				// if only save and not send, null values are allowed. Begruedung is only necessary when grade is 5.
-				if ($saveAndSend == false || ($requiredField == 'begruendung' && $betreuernote != 5))
+				if (!$saveAndSend)
 					continue;
-
-				// get field name for error message (phrase)
-				$fieldName = isset($fieldData['phrase']) ? $this->p->t('projektarbeitsbeurteilung', $fieldData['phrase']) : $requiredField;
 
 				return error(ucfirst($fieldName) . ' ' . $this->p->t('ui', 'fehlt'));
 			}
@@ -195,8 +201,15 @@ abstract class AbstractProjektarbeitsbeurteilung extends FHC_Controller
 				case 'bool':
 					$valid = is_bool($bewertung[$requiredField]);
 					break;
-				case 'points':
+				case 'number':
 					$valid = is_numeric($bewertung[$requiredField]);
+					break;
+				case 'points':
+					$valid =
+						is_numeric($bewertung[$requiredField])
+						&& preg_match('/^[0-9]+[.]?[0-9]{0,2}$/', $bewertung[$requiredField]) === 1
+						&& self::CATEGORY_MIN_POINTS <= $bewertung[$requiredField]
+						&& self::CATEGORY_MAX_POINTS >= $bewertung[$requiredField];
 					break;
 				case 'grade':
 					$valid = in_array($bewertung[$requiredField], array('1', '2', '3', '4', '5'));
@@ -204,8 +217,7 @@ abstract class AbstractProjektarbeitsbeurteilung extends FHC_Controller
 			}
 
 			// return error if invalid
-			if (!$valid)
-				return error("$requiredField" . $this->p->t('ui', 'ungueltig'));
+			if (!$valid) return error($fieldName . " " . $this->p->t('ui', 'ungueltig'));
 		}
 
 		return success('Bewertung check passed');

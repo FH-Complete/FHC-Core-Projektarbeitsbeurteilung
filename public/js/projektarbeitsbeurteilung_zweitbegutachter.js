@@ -1,11 +1,25 @@
 $("document").ready(function() {
 
+	// set language attribute
+	Projektarbeitsbeurteilung.setLanguageAttr();
+
 	// set JS events
 	Projektarbeitsbeurteilung.setEvents();
 
 });
 
 var Projektarbeitsbeurteilung = {
+	setLanguageAttr: function()
+	{
+		if ($("#lang").length)
+		{
+			// get selected language
+			var language = $("#lang").val();
+
+			// set language attribute
+			$("html").attr("lang", ProjektarbeitsbeurteilungLib.languages[language]['langAttr']);
+		}
+	},
 	setEvents: function()
 	{
 		// set event for language change dropdown
