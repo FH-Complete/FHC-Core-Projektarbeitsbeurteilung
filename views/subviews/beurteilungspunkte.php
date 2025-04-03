@@ -10,7 +10,7 @@
 			else
 				echo '';
 		else: ?>
-		<span class="selectTooltip" tabindex="0" data-toggle="tooltip">
+		<span class="selectTooltip" data-toggle="tooltip">
 			<div class="input-group">
 				<input
 					type="text"
