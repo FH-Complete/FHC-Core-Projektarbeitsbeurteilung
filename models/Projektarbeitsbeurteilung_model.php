@@ -287,4 +287,122 @@ class Projektarbeitsbeurteilung_model extends DB_Model
 			return $this->insert($projektarbeitsbeurteilungToSave);
 		}
 	}
+
+	/**
+	 * Prüft ob Projektarbeit aktuell ist und demnach online bewertet wird.
+	 * @param $projektarbeit_id
+	 * @return boolean
+	 */
+	public function projektarbeitIsCurrent($projektarbeit_id) {
+		$version = $this->getVersion($projektarbeit_id);
+		// paarbeit sollte nur ab einem Studiensemester online bewertet werden
+		return $version === null ? false : $version->isCurrent;
+	}
+	
+	/**
+	 * Holt sich Version der Projektarbeit.
+	 * Liefert auch mit, ob die Version die aktuellste ist.
+	 * z.B.: Masterarbeiten waren ab der Änderung zur Gewichtung der Punkte aktuell,
+	 * Bachelorarbeiten waren ab dem Umstieg auf das Online Beurteilungsformular aktuell.
+	 * @param $projektarbeit_id
+	 * @return objekt mit Versionsinfo, null im Fehlerfall
+	 */
+	private function getVersion($projektarbeit_id) {
+		$_versions_query = array(
+			'Diplom' => array(
+				'SS2025',
+				'SS2023',
+				'SS2022'
+			),
+			'Others' => array(
+				'SS2025',
+				'SS2022',
+			)
+		);
+
+		$_versions_check = array(
+			'Diplom' => array(
+				'SS2025' => 3,
+				'SS2023' => 2,
+				'SS2022' => 1
+			),
+			'Others' => array(
+				'SS2025' => 2,
+				'SS2022' => 1
+			)
+		);
+
+		// paarbeit sollte nur ab einem Studiensemester online bewertet werden
+		$qry="
+			SELECT
+				CASE
+					WHEN semesters_diplom.studiensemester_kurzbz IS NOT NULL
+					THEN semesters_diplom.studiensemester_kurzbz
+					ELSE semesters.studiensemester_kurzbz 
+				END AS version_studiensemester_kurzbz,
+				pa.projekttyp_kurzbz
+			FROM
+				lehre.tbl_projektarbeit pa
+				JOIN lehre.tbl_lehreinheit USING(lehreinheit_id)
+				JOIN public.tbl_studiensemester sem USING(studiensemester_kurzbz)
+				LEFT JOIN (
+					SELECT
+						start, studiensemester_kurzbz
+					FROM
+						public.tbl_studiensemester
+					WHERE
+						studiensemester_kurzbz IN ?
+				) semesters ON sem.start >= semesters.start AND pa.projekttyp_kurzbz <> 'Diplom'
+				LEFT JOIN (
+					SELECT
+						start, studiensemester_kurzbz
+					FROM
+						public.tbl_studiensemester
+					WHERE
+						studiensemester_kurzbz IN ?
+				) semesters_diplom ON sem.start >= semesters_diplom.start AND pa.projekttyp_kurzbz = 'Diplom'
+			WHERE
+				projektarbeit_id = ?
+			ORDER BY
+				semesters.start DESC, semesters_diplom.start DESC
+			LIMIT 1";
+
+		$result = $this->execReadOnlyQuery($qry, array($_versions_query['Others'], $_versions_query['Diplom'], $projektarbeit_id));
+
+		if(hasData($result)) {
+			$data =	getData($result);
+			if(count($data) > 0) {
+				$row = $data[0];
+
+				// known project types
+				if (isset($_versions_check[$row->projekttyp_kurzbz][$row->version_studiensemester_kurzbz]))
+				{
+					$row->versionNumber = $_versions_check[$row->projekttyp_kurzbz][$row->version_studiensemester_kurzbz];
+					$row->isCurrent =
+						$_versions_check[$row->projekttyp_kurzbz][$row->version_studiensemester_kurzbz]
+						== max($_versions_check[$row->projekttyp_kurzbz]);
+
+				}
+				elseif (isset($_versions_check['Others'][$row->version_studiensemester_kurzbz]))
+				{
+					$row->versionNumber = $_versions_check['Others'][$row->version_studiensemester_kurzbz];
+					$row->isCurrent =
+						$_versions_check['Others'][$row->version_studiensemester_kurzbz]
+						== max($_versions_check['Others']);
+				}
+				else
+				{
+					$row->isCurrent = false;
+					$row->versionNumber = 0;
+				}
+				return $row;
+
+			} else {
+				return null;
+			}
+		} else {
+			return null;
+		}
+	}
+
 }

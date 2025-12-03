@@ -27,3 +27,19 @@ Events::on('projektbeurteilung_download_link', function ($projektarbeit_id, $bet
 
 	$downloadLinkFunc($downloadLink);
 });
+
+Events::on('projektbeurteilung_formular_link', function($betreuerart_kurzbz, $APP_ROOT, $returnFunc) {
+	$oldLink = 'https://moodle.technikum-wien.at/mod/page/view.php?id=1005052';
+	
+	$newPath = $betreuerart_kurzbz == 'Zweitbegutachter' ? 'ProjektarbeitsbeurteilungZweitbegutachter' : 'ProjektarbeitsbeurteilungErstbegutachter';
+	$newLink = $APP_ROOT.'index.ci.php/extensions/FHC-Core-Projektarbeitsbeurteilung/'.$newPath;
+	
+	$returnFunc($oldLink, $newLink);
+});
+
+Events::on('projektarbeit_is_current', function($projektarbeit_id, $returnFunc) {
+	$ci =& get_instance();
+
+	$ci->load->model('extensions/FHC-Core-Projektarbeitsbeurteilung/Projektarbeitsbeurteilung_model', 'ProjektarbeitsbeurteilungModel');
+	$returnFunc($ci->ProjektarbeitsbeurteilungModel->projektarbeitIsCurrent($projektarbeit_id));
+});
