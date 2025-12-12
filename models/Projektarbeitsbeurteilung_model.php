@@ -404,5 +404,23 @@ class Projektarbeitsbeurteilung_model extends DB_Model
 			return null;
 		}
 	}
+	
+	public function getBeurteilungAbgeschicktErstbetreuer($projektarbeit_id, $bperson_id) {
+		$qry = "SELECT abgeschicktvon AS babgeschickt
+			FROM extension.tbl_projektarbeitsbeurteilung 
+			WHERE projektarbeit_id = ? AND betreuer_person_id = ?
+		";
+		
+		return $this->execReadOnlyQuery($qry, [$projektarbeit_id, $bperson_id]);
+	}
+
+	public function getBeurteilungAbgeschicktZweitbetreuer($projektarbeit_id) {
+		$qry = "SELECT abgeschicktvon AS zweitbetreuer_abgeschickt
+			FROM extension.tbl_projektarbeitsbeurteilung 
+			WHERE projektarbeit_id = ? AND betreuerart_kurzbz IN ('Zweitbetreuer', 'Zweitbegutachter') LIMIT 1
+		";
+
+		return $this->execReadOnlyQuery($qry, [$projektarbeit_id]);
+	}
 
 }
