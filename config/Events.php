@@ -4,6 +4,26 @@ if (! defined('BASEPATH')) exit('No direct script access allowed');
 use CI3_Events as Events;
 use FHCAPI_Controller as FHCAPI_Controller;
 
+Events::on('projektbeurteilung_check_available', function($projektarbeit_id, $bperson_id, $downloadFunc) {
+	$ci =& get_instance();
+
+	$ci->load->model('extensions/FHC-Core-Projektarbeitsbeurteilung/Projektarbeitsbeurteilung_model', 'ProjektarbeitsbeurteilungModel');
+
+	$result = $ci->ProjektarbeitsbeurteilungModel->getBeurteilungAbgeschicktErstbetreuer($projektarbeit_id, $bperson_id);
+	$dataErst = null;
+	if(hasData($result)) {
+		$result->retval[0];
+	}
+	
+	$result = $ci->ProjektarbeitsbeurteilungModel->getBeurteilungAbgeschicktErstbetreuer($projektarbeit_id, $bperson_id);
+	$dataZweit = null;
+	if(hasData($result)) {
+		$dataZweit = $result->retval[0];
+	}
+
+	$downloadFunc($dataErst, $dataZweit);
+});
+
 Events::on('projektbeurteilung_download_link', function ($projektarbeit_id, $betreuerart_kurzbz, $person_id, $downloadLinkFunc) {
 
 	$ci =& get_instance();
