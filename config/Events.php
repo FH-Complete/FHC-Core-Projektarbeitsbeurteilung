@@ -27,3 +27,38 @@ Events::on('projektbeurteilung_download_link', function ($projektarbeit_id, $bet
 
 	$downloadLinkFunc($downloadLink);
 });
+
+// checks if there is a projektarbeitsbeurteilung for a projektarbeit, deletes the Beurteilung if authorized
+Events::on('projektarbeitsbeurteilung_delete', function ($projektarbeit_id, $checkDeleteFunc) {
+
+	$ci =& get_instance();
+
+	$ci->load->model('extensions/FHC-Core-Projektarbeitsbeurteilung/Projektarbeitsbeurteilung_model', 'ProjektarbeitsbeurteilungModel');
+	$ci->load->library('PermissionLib');
+
+
+	$ci->ProjektarbeitsbeurteilungModel->addSelect('projektarbeitsbeurteilung_id');
+	$result = $ci->ProjektarbeitsbeurteilungModel->loadWhere(['projektarbeit_id' => $projektarbeit_id]);
+
+	if (isError($result))
+	{
+		$ci->addError(getError($result), FHCAPI_Controller::ERROR_TYPE_GENERAL);
+		return;
+	}
+
+	$isBerechtigt = $ci->permissionlib->isBerechtigt('paarbeit/beurteilung_loeschen', 'suid');
+
+	// successfull if no Projektarbeitsbeurteilung or authorized for deletion
+	$checkDeleteFunc(!hasData($result) || $isBerechtigt);
+
+	if (hasData($result) && $isBerechtigt)
+	{
+		foreach (getData($result) as $beurteilung)
+		{
+			// delete the Projektarbeitsbeurteilung
+			$projektarbeitsbeurteilung_id = $beurteilung->projektarbeitsbeurteilung_id;
+			$result = $ci->ProjektarbeitsbeurteilungModel->delete($projektarbeitsbeurteilung_id);
+			if (isError($result)) $ci->addError(getError($result), FHCAPI_Controller::ERROR_TYPE_GENERAL);
+		}
+	}
+});
