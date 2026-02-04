@@ -4,6 +4,26 @@ if (! defined('BASEPATH')) exit('No direct script access allowed');
 use CI3_Events as Events;
 use FHCAPI_Controller as FHCAPI_Controller;
 
+Events::on('projektbeurteilung_check_available', function($projektarbeit_id, $bperson_id, $downloadFunc) {
+	$ci =& get_instance();
+
+	$ci->load->model('extensions/FHC-Core-Projektarbeitsbeurteilung/Projektarbeitsbeurteilung_model', 'ProjektarbeitsbeurteilungModel');
+
+	$result = $ci->ProjektarbeitsbeurteilungModel->getBeurteilungAbgeschicktErstbetreuer($projektarbeit_id, $bperson_id);
+	$dataErst = null;
+	if(hasData($result)) {
+		$result->retval[0];
+	}
+	
+	$result = $ci->ProjektarbeitsbeurteilungModel->getBeurteilungAbgeschicktErstbetreuer($projektarbeit_id, $bperson_id);
+	$dataZweit = null;
+	if(hasData($result)) {
+		$dataZweit = $result->retval[0];
+	}
+
+	$downloadFunc($dataErst, $dataZweit);
+});
+
 Events::on('projektbeurteilung_download_link', function ($projektarbeit_id, $betreuerart_kurzbz, $person_id, $downloadLinkFunc) {
 
 	$ci =& get_instance();
@@ -62,3 +82,22 @@ Events::on('projektarbeitsbeurteilung_delete', function ($projektarbeit_id, $che
 		}
 	}
 });
+
+Events::on('projektbeurteilung_formular_link', function($betreuerart_kurzbz, $APP_ROOT, $projektarbeit_id, $student_uid, $returnFunc) {
+	$ci =& get_instance();
+	$oldLink = $ci->config->item('old_abgabe_beurteilung_link');
+
+
+	$newPath = $betreuerart_kurzbz == 'Zweitbegutachter' ? 'ProjektarbeitsbeurteilungZweitbegutachter' : 'ProjektarbeitsbeurteilungErstbegutachter';
+	$newLink = $APP_ROOT.'index.ci.php/extensions/FHC-Core-Projektarbeitsbeurteilung/'.$newPath."?projektarbeit_id=".$projektarbeit_id."&uid=".$student_uid;
+	
+	$returnFunc($oldLink, $newLink);
+});
+
+Events::on('projektarbeit_is_current', function($projektarbeit_id, $returnFunc) {
+	$ci =& get_instance();
+
+	$ci->load->model('extensions/FHC-Core-Projektarbeitsbeurteilung/Projektarbeitsbeurteilung_model', 'ProjektarbeitsbeurteilungModel');
+	$returnFunc($ci->ProjektarbeitsbeurteilungModel->projektarbeitIsCurrent($projektarbeit_id));
+});
+
