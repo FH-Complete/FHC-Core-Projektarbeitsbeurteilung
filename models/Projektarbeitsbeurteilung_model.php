@@ -343,7 +343,7 @@ class Projektarbeitsbeurteilung_model extends DB_Model
 				pa.projekttyp_kurzbz
 			FROM
 				lehre.tbl_projektarbeit pa
-				JOIN lehre.tbl_lehreinheit USING(lehreinheit_id)
+				JOIN lehre.tbl_lehrveranstaltung USING(lehrveranstaltung_id)
 				JOIN public.tbl_studiensemester sem USING(studiensemester_kurzbz)
 				LEFT JOIN (
 					SELECT
