@@ -33,7 +33,6 @@ $query = '
 		FROM lehre.tbl_projektarbeit parbeit
 		JOIN lehre.tbl_projektbetreuer pbetreuer ON parbeit.projektarbeit_id = pbetreuer.projektarbeit_id
 		JOIN lehre.tbl_projekttyp USING (projekttyp_kurzbz)
-		JOIN lehre.tbl_lehreinheit USING (lehreinheit_id)
 		JOIN public.tbl_student student ON parbeit.student_uid = student.student_uid
 		JOIN public.tbl_benutzer stubenutzer ON student.student_uid = stubenutzer.uid
 		JOIN public.tbl_person stuperson ON stubenutzer.person_id = stuperson.person_id
@@ -92,7 +91,7 @@ $query = '
 				GROUP BY arbeit.projektarbeit_id
 			)
 		) Kommission ON parbeit.projektarbeit_id = Kommission.ProjektID
-		WHERE studiensemester_kurzbz = '. $STUDIENSEMESTER .' AND oe_kurzbz IN ('. $oeKurz .')
+		WHERE parbeit.studiensemester_kurzbz = '. $STUDIENSEMESTER .' AND oe_kurzbz IN ('. $oeKurz .')
 		ORDER BY parbeit.projektarbeit_id DESC;';
 
 $filterWidgetArray = array(
