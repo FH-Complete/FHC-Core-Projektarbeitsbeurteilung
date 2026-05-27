@@ -12,7 +12,7 @@ Events::on('projektbeurteilung_check_available', function($projektarbeit_id, $bp
 	$result = $ci->ProjektarbeitsbeurteilungModel->getBeurteilungAbgeschicktErstbetreuer($projektarbeit_id, $bperson_id);
 	$dataErst = null;
 	if(hasData($result)) {
-		$result->retval[0];
+		$dataErst = $result->retval[0];
 	}
 	
 	$result = $ci->ProjektarbeitsbeurteilungModel->getBeurteilungAbgeschicktErstbetreuer($projektarbeit_id, $bperson_id);
