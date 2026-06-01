@@ -15,7 +15,7 @@ Events::on('projektbeurteilung_check_available', function($projektarbeit_id, $bp
 		$dataErst = $result->retval[0];
 	}
 	
-	$result = $ci->ProjektarbeitsbeurteilungModel->getBeurteilungAbgeschicktErstbetreuer($projektarbeit_id, $bperson_id);
+	$result = $ci->ProjektarbeitsbeurteilungModel->getBeurteilungAbgeschicktZweitbetreuer($projektarbeit_id);
 	$dataZweit = null;
 	if(hasData($result)) {
 		$dataZweit = $result->retval[0];
@@ -41,7 +41,7 @@ Events::on('projektbeurteilung_download_link', function ($projektarbeit_id, $bet
 	);
 
 	$downloadLink = hasData($result)
-		? APP_ROOT.'addons/fhtw/content/projektbeurteilung/projektbeurteilungDocumentExport.php'.
+		? APP_ROOT.'cis/private/lehre/projektbeurteilungDocumentExport.php'.
 			'?projektarbeit_id='.$projektarbeit_id.'&betreuerart_kurzbz='.$betreuerart_kurzbz.'&person_id='.$person_id
 		: '';
 
