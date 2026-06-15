@@ -46,6 +46,17 @@
 							<?php echo $this->p->t('projektarbeitsbeurteilung', 'beurteilung') ?>
 							<?php echo $arbeittypName . ($paarbeittyp === 'm' ? '&nbsp-&nbsp' . $this->p->t('projektarbeitsbeurteilung', 'zweitBegutachter') : '') ?>
 						</h3>
+
+						<?php if (!$sent && !$readOnlyAccess): ?>
+							<div class="alert alert-warning">
+								<strong><i class="fa fa-info-circle"></i> Status:</strong> <?php echo $this->p->t('projektarbeitsbeurteilung', 'statusZwischengespeichert') ?>
+							</div>
+						<?php elseif ($sent): ?>
+							<div class="alert alert-success">
+								<strong><i class="fa fa-check-circle"></i> Status:</strong> <?php echo $this->p->t('projektarbeitsbeurteilung', 'statusAbgeschickt') ?> <?php echo date_format(date_create($projektarbeitsbeurteilung->abgeschicktamum), 'd.m.Y') ?>
+							</div>
+						<?php endif; ?>
+						
 					</div>
 				</div>
 				<?php $this->load->view('extensions/FHC-Core-Projektarbeitsbeurteilung/subviews/hiddenfields.php'); ?>
