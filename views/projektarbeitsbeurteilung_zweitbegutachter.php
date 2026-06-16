@@ -29,6 +29,7 @@
 			<?php if (!isset($projektarbeitsbeurteilung)):
 					echo "Keine Projektarbeit eingetragen.";
 			else:
+				$saved = isset($projektarbeitsbeurteilung->projektarbeit_bewertung) && isset($projektarbeitsbeurteilung->projektarbeit_bewertung->beurteilungsdatum);
 				$sent = isset($projektarbeitsbeurteilung->abgeschicktamum);
 				$paarbeittyp = $projektarbeitsbeurteilung->parbeit_typ === 'Bachelor' ? 'b' : 'm';
 				$arbeittypName = $paarbeittyp === 'b' ? $this->p->t('projektarbeitsbeurteilung', 'arbeitBachelor') : $this->p->t('abschlusspruefung', 'arbeitMaster');
@@ -47,15 +48,17 @@
 							<?php echo $arbeittypName . ($paarbeittyp === 'm' ? '&nbsp-&nbsp' . $this->p->t('projektarbeitsbeurteilung', 'zweitBegutachter') : '') ?>
 						</h3>
 
-						<?php if (!$sent && !$readOnlyAccess): ?>
-							<div class="alert alert-warning">
-								<strong><i class="fa fa-info-circle"></i> Status:</strong> <?php echo $this->p->t('projektarbeitsbeurteilung', 'statusZwischengespeichert') ?>
-							</div>
-						<?php elseif ($sent): ?>
-							<div class="alert alert-success">
-								<strong><i class="fa fa-check-circle"></i> Status:</strong> <?php echo $this->p->t('projektarbeitsbeurteilung', 'statusAbgeschickt') ?> <?php echo date_format(date_create($projektarbeitsbeurteilung->abgeschicktamum), 'd.m.Y') ?>
-							</div>
-						<?php endif; ?>
+						<div id="statusAlertContainer">
+							<?php if ($saved && !$sent && !$readOnlyAccess): ?>
+								<div class="alert alert-warning">
+									<strong><i class="fa fa-info-circle"></i> Status:</strong> <?php echo $this->p->t('projektarbeitsbeurteilung', 'statusZwischengespeichert') ?>
+								</div>
+							<?php elseif ($sent): ?>
+								<div class="alert alert-success">
+									<strong><i class="fa fa-check-circle"></i> Status:</strong> <?php echo $this->p->t('projektarbeitsbeurteilung', 'statusAbgeschickt') ?> <?php echo date_format(date_create($projektarbeitsbeurteilung->abgeschicktamum), 'd.m.Y') ?>
+								</div>
+							<?php endif; ?>
+						</div>
 						
 					</div>
 				</div>
