@@ -131,7 +131,21 @@ var Projektarbeitsbeurteilung = {
 							})
 						}
 						else
+						{
 							FHC_DialogLib.alertSuccess(FHC_PhrasesLib.t("projektarbeitsbeurteilung", "beurteilungGespeichert"));
+
+							// check if the altert container is empty -> show that the beurteilung is just saved & not sent
+							if ($("#statusAlertContainer").children().length === 0) {
+								var alertHtml =
+									'<div class="alert alert-warning">' +
+									'<strong><i class="fa fa-info-circle"></i> Status:</strong> ' +
+									FHC_PhrasesLib.t("projektarbeitsbeurteilung", "statusZwischengespeichert") +
+									'</div>';
+
+								$("#statusAlertContainer").html(alertHtml);
+							}
+						}
+							
 					}
 					else if(FHC_AjaxClient.isError(data))
 					{
