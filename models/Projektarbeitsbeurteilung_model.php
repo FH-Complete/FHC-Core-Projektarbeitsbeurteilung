@@ -408,7 +408,7 @@ class Projektarbeitsbeurteilung_model extends DB_Model
 	public function getBeurteilungAbgeschicktErstbetreuer($projektarbeit_id, $bperson_id) {
 		$qry = "SELECT abgeschicktvon AS babgeschickt
 			FROM extension.tbl_projektarbeitsbeurteilung 
-			WHERE projektarbeit_id = ? AND betreuer_person_id = ?
+			WHERE projektarbeit_id = ? AND betreuer_person_id = ? AND abgeschicktamum IS NOT NULL
 		";
 		
 		return $this->execReadOnlyQuery($qry, [$projektarbeit_id, $bperson_id]);
@@ -417,7 +417,9 @@ class Projektarbeitsbeurteilung_model extends DB_Model
 	public function getBeurteilungAbgeschicktZweitbetreuer($projektarbeit_id) {
 		$qry = "SELECT abgeschicktvon AS zweitbetreuer_abgeschickt
 			FROM extension.tbl_projektarbeitsbeurteilung 
-			WHERE projektarbeit_id = ? AND betreuerart_kurzbz IN ('Zweitbetreuer', 'Zweitbegutachter') LIMIT 1
+			WHERE projektarbeit_id = ? AND betreuerart_kurzbz IN ('Zweitbetreuer', 'Zweitbegutachter')
+			 AND abgeschicktamum IS NOT NULL
+			 LIMIT 1
 		";
 
 		return $this->execReadOnlyQuery($qry, [$projektarbeit_id]);

@@ -23,7 +23,7 @@
 		?>
 		<div class="col-xs-6 text-right">
 			<p>
-				<button id="saveSendBeurteilungBtn" class="btn btn-default"<?php echo $disabled ?><?php echo $quickinfo ?>>
+				<button id="saveSendBeurteilungBtn" class="btn btn-success"<?php echo $disabled ?><?php echo $quickinfo ?>>
 					<?php echo $this->p->t('ui', 'speichernAbsenden') ?>
 				</button>
 			</p>
