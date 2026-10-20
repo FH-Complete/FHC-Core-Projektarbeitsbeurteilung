@@ -20,6 +20,9 @@ class ProjektarbeitsbeurteilungMailLib
 		$this->_ci->load->library('DmsLib');
 
 		$this->_ci->load->helper('hlp_sancho_helper');
+
+		// core config with the Abgabetool links
+		$this->_ci->load->config('abgabe');
 	}
 
 	/**
@@ -222,7 +225,7 @@ class ProjektarbeitsbeurteilungMailLib
 			'betreuer_voller_name' => $betreuer_fullname,
 			'student_voller_name' => $student_fullname,
 			'titel' => $titel,
-			'link' => CIS_ROOT."cis/private/lehre/abgabe_student_frameset.php"
+			'link' => CIS_ROOT.$this->_ci->config->item('URL_STUDENTS')
 		);
 
 		// send mail with retrieved data

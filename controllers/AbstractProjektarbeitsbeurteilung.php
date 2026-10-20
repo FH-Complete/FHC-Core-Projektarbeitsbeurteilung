@@ -47,6 +47,7 @@ abstract class AbstractProjektarbeitsbeurteilung extends FHC_Controller
 
 		// load config
 		$this->config->load('extensions/FHC-Core-Projektarbeitsbeurteilung/config');
+		$this->config->load('abgabe');
 
 		// set logo path
 		$this->logoPath = $this->config->item('projektarbeitsbeurteilung_logo_path');

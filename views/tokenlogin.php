@@ -57,7 +57,7 @@ $this->load->view(
 			<div class="row">
 				<div class="col-lg-12">
 					<span>
-						<a href="<?php echo base_url() . 'cis/private/lehre/abgabe_lektor.php' ?>">
+						<a href="<?php echo base_url() . $this->config->item('URL_MITARBEITER') ?>">
 							<i class="fa fa-external-link"></i>
 							<?php echo $this->p->t('projektarbeitsbeurteilung', 'zurProjektarbeitsUebersicht') ?>
 						</a>
